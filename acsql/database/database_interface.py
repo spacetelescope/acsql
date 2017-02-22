@@ -72,6 +72,8 @@ def loadConnection(connection_string):
     base = declarative_base(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+
     return session, base, engine
+
 
 session, base, engine = loadConnection(SETTINGS['connection_string'])

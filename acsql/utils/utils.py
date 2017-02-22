@@ -38,6 +38,8 @@ def get_settings():
 
     with open(os.path.join(__config__, 'config.yaml'), 'r') as f:
         settings = yaml.load(f)
+
     return settings
 
-SETTINGS = get_settings
+
+SETTINGS = get_settings()
