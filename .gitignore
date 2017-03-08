@@ -90,3 +90,4 @@ ENV/
 
 # Repository specific
 *config.yaml
+*.fits

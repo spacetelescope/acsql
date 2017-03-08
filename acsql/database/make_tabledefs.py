@@ -1,28 +1,39 @@
+#! /usr/bin/env/ python
+
+"""
+"""
+
 import glob
 import os
 from stak import Hselect
 import numpy as np
 
 
-def make_tabledefs(file_folder):
+def make_tabledefs(detector, file_folder):
     """
     Function to auto-produce the table_definition files
     for acsql project.  Uses stak.Hselect.
 
-    :param file_folder: string
-        folder/s where files live
-    :return:
+    Parameters
+    ----------
+    detector : str
+        The detector (e.g. 'wfc').
+    file_folder: str
+        The directory to which the table definition file will be
+        written.
     """
-    file_types = {'jif': [0], 'jit': [0], 'flt': [0, 1, 2, 3], 'flc': [0,1,2,3],
-                  'drz': [0], 'drc': [0], 'spt': [0], 'raw': [0], 'trl': [0]}
+    file_types = {'jif': [0,1,2,3], 'jit': [0,1,2,3], 'flt': [0,1,2,3],
+                  'flc': [0,1,2,3], 'drz': [0,1,2,3], 'drc': [0,1,2,3],
+                  'raw': [0,1,2,3], 'crj': [0,1,2,3], 'crc': [0,1,2,3],
+                  'spt': [0,1], 'asn': [0,1]}
     for ftype in file_types:
         # Get filelist
-        file_paths = os.path.join(file_folder, "*{}.fits".format(ftype))
+        file_paths = os.path.join(file_folder, 'test_files/',
+                                  '*{}.fits'.format(ftype))
         all_files = glob.glob(file_paths)
-        print file_paths
 
         for ext in file_types[ftype]:
-            file_name = "acs_{}_{}.txt".format(ftype, ext)
+            file_name = "{}_{}_{}.txt".format(detector, ftype, ext)
             # Run hselect to gather datatypes for all keywords
             hsel = Hselect(all_files, '*', extension=(ext,))
 
@@ -38,10 +49,10 @@ def make_tabledefs(file_folder):
                     elif col.dtype in [np.float64]:
                         ptype = "Float"
                     else:
-                        print "Couldn't find type match: {}:{}".format(
-                            col.name, col.dtype)
+                        print("Couldn't find type match: {}:{}".format(
+                            col.name, col.dtype))
 
                     f.write("{},  {}\n".format(col.name, ptype))
 
-if __name__=="__main__":
-    make_tabledefs("/user/bourque/acsql/*")
+if __name__ == "__main__":
+    make_tabledefs('wfc', 'table_definitions/')
