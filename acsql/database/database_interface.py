@@ -40,11 +40,13 @@ Dependencies
 
 import os
 
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import create_engine
 from sqlalchemy import Date
 from sqlalchemy import DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Index
 from sqlalchemy import Enum
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
@@ -74,7 +76,7 @@ def define_columns(data_dict, class_name):
     """
 
     with open(os.path.join(os.path.split(__file__)[0], 'table_definitions',
-                           class_name + '.txt'), 'r') as f:
+                           class_name.lower() + '.txt'), 'r') as f:
         data = f.readlines()
     keywords = [item.strip().split(', ') for item in data]
     for keyword in keywords:
@@ -92,9 +94,14 @@ def define_columns(data_dict, class_name):
             data_dict[keyword[0].lower()] = Column(Time())
         elif keyword[1] == 'DateTime':
             data_dict[keyword[0].lower()] = Column(DateTime)
+        elif keyword[1] == 'Bool':
+            data_dict[keyword[0].lower()] = Column(Boolean)
         else:
             raise ValueError('unrecognized header keyword type: {}:{}'.format(
                 keyword[0], keyword[1]))
+
+        if 'aperture' in data_dict:
+            data_dict['aperture'] = Column(String(100), index=True)
 
     return data_dict
 
@@ -267,110 +274,110 @@ WFC_asn_0 = orm_factory('WFC_asn_0')
 WFC_asn_1 = orm_factory('WFC_asn_1')
 
 
-# HRC tables
-HRC_raw_0 = orm_factory('HRC_raw_0')
-HRC_raw_1 = orm_factory('HRC_raw_1')
-HRC_raw_2 = orm_factory('HRC_raw_2')
-HRC_raw_3 = orm_factory('HRC_raw_3')
+# # HRC tables
+# HRC_raw_0 = orm_factory('HRC_raw_0')
+# HRC_raw_1 = orm_factory('HRC_raw_1')
+# HRC_raw_2 = orm_factory('HRC_raw_2')
+# HRC_raw_3 = orm_factory('HRC_raw_3')
 
-HRC_flt_0 = orm_factory('HRC_flt_0')
-HRC_flt_1 = orm_factory('HRC_flt_1')
-HRC_flt_2 = orm_factory('HRC_flt_2')
-HRC_flt_3 = orm_factory('HRC_flt_3')
+# HRC_flt_0 = orm_factory('HRC_flt_0')
+# HRC_flt_1 = orm_factory('HRC_flt_1')
+# HRC_flt_2 = orm_factory('HRC_flt_2')
+# HRC_flt_3 = orm_factory('HRC_flt_3')
 
-HRC_flc_0 = orm_factory('HRC_flc_0')
-HRC_flc_1 = orm_factory('HRC_flc_1')
-HRC_flc_2 = orm_factory('HRC_flc_2')
-HRC_flc_3 = orm_factory('HRC_flc_3')
+# HRC_flc_0 = orm_factory('HRC_flc_0')
+# HRC_flc_1 = orm_factory('HRC_flc_1')
+# HRC_flc_2 = orm_factory('HRC_flc_2')
+# HRC_flc_3 = orm_factory('HRC_flc_3')
 
-HRC_spt_0 = orm_factory('HRC_spt_0')
-HRC_spt_1 = orm_factory('HRC_spt_1')
+# HRC_spt_0 = orm_factory('HRC_spt_0')
+# HRC_spt_1 = orm_factory('HRC_spt_1')
 
-HRC_drz_0 = orm_factory('HRC_drz_0')
-HRC_drz_1 = orm_factory('HRC_drz_1')
-HRC_drz_2 = orm_factory('HRC_drz_2')
-HRC_drz_3 = orm_factory('HRC_drz_3')
+# HRC_drz_0 = orm_factory('HRC_drz_0')
+# HRC_drz_1 = orm_factory('HRC_drz_1')
+# HRC_drz_2 = orm_factory('HRC_drz_2')
+# HRC_drz_3 = orm_factory('HRC_drz_3')
 
-HRC_drc_0 = orm_factory('HRC_drc_0')
-HRC_drc_1 = orm_factory('HRC_drc_1')
-HRC_drc_2 = orm_factory('HRC_drc_2')
-HRC_drc_3 = orm_factory('HRC_drc_3')
+# HRC_drc_0 = orm_factory('HRC_drc_0')
+# HRC_drc_1 = orm_factory('HRC_drc_1')
+# HRC_drc_2 = orm_factory('HRC_drc_2')
+# HRC_drc_3 = orm_factory('HRC_drc_3')
 
-HRC_crj_0 = orm_factory('HRC_crj_0')
-HRC_crj_1 = orm_factory('HRC_crj_1')
-HRC_crj_2 = orm_factory('HRC_crj_2')
-HRC_crj_3 = orm_factory('HRC_crj_3')
+# HRC_crj_0 = orm_factory('HRC_crj_0')
+# HRC_crj_1 = orm_factory('HRC_crj_1')
+# HRC_crj_2 = orm_factory('HRC_crj_2')
+# HRC_crj_3 = orm_factory('HRC_crj_3')
 
-HRC_crc_0 = orm_factory('HRC_crc_0')
-HRC_crc_1 = orm_factory('HRC_crc_1')
-HRC_crc_2 = orm_factory('HRC_crc_2')
-HRC_crc_3 = orm_factory('HRC_crc_3')
+# HRC_crc_0 = orm_factory('HRC_crc_0')
+# HRC_crc_1 = orm_factory('HRC_crc_1')
+# HRC_crc_2 = orm_factory('HRC_crc_2')
+# HRC_crc_3 = orm_factory('HRC_crc_3')
 
-HRC_jif_0 = orm_factory('HRC_jif_0')
-HRC_jif_1 = orm_factory('HRC_jif_1')
-HRC_jif_2 = orm_factory('HRC_jif_2')
-HRC_jif_3 = orm_factory('HRC_jif_3')
+# HRC_jif_0 = orm_factory('HRC_jif_0')
+# HRC_jif_1 = orm_factory('HRC_jif_1')
+# HRC_jif_2 = orm_factory('HRC_jif_2')
+# HRC_jif_3 = orm_factory('HRC_jif_3')
 
-HRC_jit_0 = orm_factory('HRC_jit_0')
-HRC_jit_1 = orm_factory('HRC_jit_1')
-HRC_jit_2 = orm_factory('HRC_jit_2')
-HRC_jit_3 = orm_factory('HRC_jit_3')
+# HRC_jit_0 = orm_factory('HRC_jit_0')
+# HRC_jit_1 = orm_factory('HRC_jit_1')
+# HRC_jit_2 = orm_factory('HRC_jit_2')
+# HRC_jit_3 = orm_factory('HRC_jit_3')
 
-HRC_asn_0 = orm_factory('HRC_asn_0')
-HRC_asn_1 = orm_factory('HRC_asn_1')
+# HRC_asn_0 = orm_factory('HRC_asn_0')
+# HRC_asn_1 = orm_factory('HRC_asn_1')
 
 
-# SBC tables
-SBC_raw_0 = orm_factory('SBC_raw_0')
-SBC_raw_1 = orm_factory('SBC_raw_1')
-SBC_raw_2 = orm_factory('SBC_raw_2')
-SBC_raw_3 = orm_factory('SBC_raw_3')
+# # SBC tables
+# SBC_raw_0 = orm_factory('SBC_raw_0')
+# SBC_raw_1 = orm_factory('SBC_raw_1')
+# SBC_raw_2 = orm_factory('SBC_raw_2')
+# SBC_raw_3 = orm_factory('SBC_raw_3')
 
-SBC_flt_0 = orm_factory('SBC_flt_0')
-SBC_flt_1 = orm_factory('SBC_flt_1')
-SBC_flt_2 = orm_factory('SBC_flt_2')
-SBC_flt_3 = orm_factory('SBC_flt_3')
+# SBC_flt_0 = orm_factory('SBC_flt_0')
+# SBC_flt_1 = orm_factory('SBC_flt_1')
+# SBC_flt_2 = orm_factory('SBC_flt_2')
+# SBC_flt_3 = orm_factory('SBC_flt_3')
 
-SBC_flc_0 = orm_factory('SBC_flc_0')
-SBC_flc_1 = orm_factory('SBC_flc_1')
-SBC_flc_2 = orm_factory('SBC_flc_2')
-SBC_flc_3 = orm_factory('SBC_flc_3')
+# SBC_flc_0 = orm_factory('SBC_flc_0')
+# SBC_flc_1 = orm_factory('SBC_flc_1')
+# SBC_flc_2 = orm_factory('SBC_flc_2')
+# SBC_flc_3 = orm_factory('SBC_flc_3')
 
-SBC_spt_0 = orm_factory('SBC_spt_0')
-SBC_spt_1 = orm_factory('SBC_spt_1')
+# SBC_spt_0 = orm_factory('SBC_spt_0')
+# SBC_spt_1 = orm_factory('SBC_spt_1')
 
-SBC_drz_0 = orm_factory('SBC_drz_0')
-SBC_drz_1 = orm_factory('SBC_drz_1')
-SBC_drz_2 = orm_factory('SBC_drz_2')
-SBC_drz_3 = orm_factory('SBC_drz_3')
+# SBC_drz_0 = orm_factory('SBC_drz_0')
+# SBC_drz_1 = orm_factory('SBC_drz_1')
+# SBC_drz_2 = orm_factory('SBC_drz_2')
+# SBC_drz_3 = orm_factory('SBC_drz_3')
 
-SBC_drc_0 = orm_factory('SBC_drc_0')
-SBC_drc_1 = orm_factory('SBC_drc_1')
-SBC_drc_2 = orm_factory('SBC_drc_2')
-SBC_drc_3 = orm_factory('SBC_drc_3')
+# SBC_drc_0 = orm_factory('SBC_drc_0')
+# SBC_drc_1 = orm_factory('SBC_drc_1')
+# SBC_drc_2 = orm_factory('SBC_drc_2')
+# SBC_drc_3 = orm_factory('SBC_drc_3')
 
-SBC_crj_0 = orm_factory('SBC_crj_0')
-SBC_crj_1 = orm_factory('SBC_crj_1')
-SBC_crj_2 = orm_factory('SBC_crj_2')
-SBC_crj_3 = orm_factory('SBC_crj_3')
+# SBC_crj_0 = orm_factory('SBC_crj_0')
+# SBC_crj_1 = orm_factory('SBC_crj_1')
+# SBC_crj_2 = orm_factory('SBC_crj_2')
+# SBC_crj_3 = orm_factory('SBC_crj_3')
 
-SBC_crc_0 = orm_factory('SBC_crc_0')
-SBC_crc_1 = orm_factory('SBC_crc_1')
-SBC_crc_2 = orm_factory('SBC_crc_2')
-SBC_crc_3 = orm_factory('SBC_crc_3')
+# SBC_crc_0 = orm_factory('SBC_crc_0')
+# SBC_crc_1 = orm_factory('SBC_crc_1')
+# SBC_crc_2 = orm_factory('SBC_crc_2')
+# SBC_crc_3 = orm_factory('SBC_crc_3')
 
-SBC_jif_0 = orm_factory('SBC_jif_0')
-SBC_jif_1 = orm_factory('SBC_jif_1')
-SBC_jif_2 = orm_factory('SBC_jif_2')
-SBC_jif_3 = orm_factory('SBC_jif_3')
+# SBC_jif_0 = orm_factory('SBC_jif_0')
+# SBC_jif_1 = orm_factory('SBC_jif_1')
+# SBC_jif_2 = orm_factory('SBC_jif_2')
+# SBC_jif_3 = orm_factory('SBC_jif_3')
 
-SBC_jit_0 = orm_factory('SBC_jit_0')
-SBC_jit_1 = orm_factory('SBC_jit_1')
-SBC_jit_2 = orm_factory('SBC_jit_2')
-SBC_jit_3 = orm_factory('SBC_jit_3')
+# SBC_jit_0 = orm_factory('SBC_jit_0')
+# SBC_jit_1 = orm_factory('SBC_jit_1')
+# SBC_jit_2 = orm_factory('SBC_jit_2')
+# SBC_jit_3 = orm_factory('SBC_jit_3')
 
-SBC_asn_0 = orm_factory('SBC_asn_0')
-SBC_asn_1 = orm_factory('SBC_asn_1')
+# SBC_asn_0 = orm_factory('SBC_asn_0')
+# SBC_asn_1 = orm_factory('SBC_asn_1')
 
 
 if __name__ == '__main__':
