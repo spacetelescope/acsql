@@ -40,10 +40,11 @@ def make_tabledefs(detector, file_folder):
         The directory to which the table definition file will be
         written.
     """
-    file_types = {'jif': [0,1,2,3], 'jit': [0,1,2,3], 'flt': [0,1,2,3],
-                  'flc': [0,1,2,3], 'drz': [0,1,2,3], 'drc': [0,1,2,3],
-                  'raw': [0,1,2,3], 'crj': [0,1,2,3], 'crc': [0,1,2,3],
-                  'spt': [0,1]}
+    file_types = {'jif': [0,1,2,3,4,5,6], 'jit': [0,1,2,3,4,5,6],
+                  'flt': [0,1,2,3,4,5,6], 'flc': [0,1,2,3,4,5,6],
+                  'drz': [0,1,2,3], 'drc': [0,1,2,3],
+                  'raw': [0,1,2,3,4,5,6], 'crj': [0,1,2,3,4,5,6],
+                  'crc': [0,1,2,3,4,5,6], 'spt': [0,1]}
     for ftype in file_types:
         # Get filelist
         file_paths = os.path.join(file_folder, 'test_files/',
@@ -72,7 +73,7 @@ def make_tabledefs(detector, file_folder):
                         print("Couldn't find type match: {}:{}".format(
                             col.name, col.dtype))
 
-                    f.write("{},  {}\n".format(col.name, ptype))
+                    f.write("{}, {}\n".format(col.name, ptype))
 
 
 if __name__ == "__main__":
