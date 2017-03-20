@@ -20,6 +20,7 @@ from astropy.io import fits
 from acsql.database.database_interface import Master
 from acsql.database.database_interface import session
 from acsql.utils.utils import SETTINGS
+from acsql.utils.utils import setup_logging
 
 
 def get_files_to_ingest():
@@ -49,9 +50,10 @@ def ingest():
 
     files_to_ingest = get_files_to_ingest()
 
-    print(len(files_to_ingest))
-
 
 if __name__ == '__main__':
+
+    module = os.path.basename(__file__).strip('.py')
+    setup_logging(module)
 
     ingest()
