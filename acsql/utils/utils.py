@@ -1,5 +1,6 @@
-"""This module contains a function that reads in the acsql config file
-and returns its settings.
+"""This module contains several functions that are useful to various
+modules within the acsql package.  See individual function docstrings
+for further information.
 
 Authors
 -------
@@ -12,6 +13,7 @@ Use
     various acsql modules and scripts, as such:
 
     from acsql.utils.utils import SETTINGS
+    from acsql.utils.utils import setup_logging
 
 Dependencies
 ------------
@@ -20,8 +22,17 @@ Dependencies
     (1) sqlalchemy
 """
 
+import datetime
+import getpass
+import logging
 import os
+import socket
+import sys
 import yaml
+
+import astropy
+import numpy
+import sqlalchemy
 
 __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
@@ -43,3 +54,40 @@ def get_settings():
 
 
 SETTINGS = get_settings()
+
+
+def setup_logging(module):
+    """Configures a log file that logs the execution of the given
+    module.  Log files are written to the log_dir that is set in the
+    config.yaml configuration file.  The filename of the log file is
+    <module>_<timestamp>.log.
+
+    Parameters
+    ----------
+    module : str
+        The name of the module to log.
+    """
+
+    SETTINGS = get_settings()
+
+    # Configure logging
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
+    filename = '{0}_{1}.log'.format(module, timestamp)
+    logfile = os.path.join(SETTINGS['log_dir'], filename)
+    logging.basicConfig(
+        filename=logfile,
+        format='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%m/%d/%Y %H:%M:%S',
+        level=logging.INFO)
+
+    # Log environment information
+    logging.info('User: {0}'.format(getpass.getuser()))
+    logging.info('System: {0}'.format(socket.gethostname()))
+    logging.info('Python Version: {0}'.format(sys.version.replace('\n', '')))
+    logging.info('Python Path: {0}'.format(sys.executable))
+    logging.info('Numpy Version: {0}'.format(numpy.__version__))
+    logging.info('Numpy Path: {0}'.format(numpy.__path__[0]))
+    logging.info('Astropy Version: {0}'.format(astropy.__version__))
+    logging.info('Astropy Path: {0}'.format(astropy.__path__[0]))
+    logging.info('SQLAlchemy Version: {0}'.format(sqlalchemy.__version__))
+    logging.info('SQLAlchemy Path: {0}'.format(sqlalchemy.__path__[0]))
