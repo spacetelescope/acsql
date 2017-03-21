@@ -38,8 +38,9 @@ def get_rootnames_to_ingest():
     """
 
     # Query the database to determine which rootnames already exist
-    results = session.query(Master.rootname).all()
-    db_rootnames = set([item for item in results])
+    # results = session.query(Master.rootname).all()
+    # db_rootnames = set([item for item in results])
+    db_rootnames = set()
 
     # Gather list of rootnames that exist in the filesystem
     fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j*', '*'))
@@ -55,7 +56,46 @@ def get_rootnames_to_ingest():
     return rootnames_to_ingest
 
 
-def make_jpeg(filename, filetype):
+def make_file_dict(filename):
+    """Create a dictionary that holds information that is useful for
+    the ingestion process.  This dictionary can then be passed around
+    the various functions of the module.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file.
+
+    Returns
+    -------
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
+    """
+
+    file_dict = {}
+
+    # Filename related keywords
+    file_dict['filename'] = os.path.abspath(filename)
+    file_dict['basename'] = os.path.basename(filename)
+    file_dict['rootname'] = file_dict['basename'].split('_')[0][:-1]
+    file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
+
+    # Data kewords
+    with fits.open(filename, mode='readonly') as hdulist:
+        file_dict['hdulist'] = hdulist
+
+    # JPEG related kewords
+    if file_dict['fits_type'] in ['raw', 'flt']:
+        file_dict['jpg_filename'] = file_dict['basename'].replace('.fits', '.jpg')
+        file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['jpg_filename'])
+    else:
+        file_dict['jpg_filename'] = None
+        file_dict['jpg_dst'] = None
+
+    return file_dict
+
+def make_jpeg(file_dict):
     """Creates a JPEG for the given file.
 
     Parameters
@@ -66,13 +106,12 @@ def make_jpeg(filename, filetype):
         The filetype.  Can be either 'raw' or 'flt'
     """
 
-    logging.info('\tCreated JPEG')
+    logging.info('\tCreating JPEG')
 
-    hdulist = fits.open(filename, mode='readonly')
-    data = hdulist[1].data
+    data = file_dict['hdulist'][1].data
 
     # If the image is full-frame, add on the other extension
-    if len(hdulist) > 4:
+    if len(hdulist) > 4 and hdulist[0].header['detector'] == 'wfc':
         data2 = hdulist[4].data
         height = data.shape[0] + data2.shape[0]
         width = data.shape[1]
@@ -109,16 +148,20 @@ def ingest():
     """The main function of the ingest module."""
 
     rootnames_to_ingest = get_rootnames_to_ingest()
-    for rootname_path in rootnames_to_ingest:
+    for rootname_path in rootnames_to_ingest[0:1]:
         file_paths = glob.glob(os.path.join(rootname_path, '*'))
         for filename in file_paths:
+
+            # Make dictionary that holds all the information you would ever
+            # want about the file
+            file_dict = make_file_dict(filename)
 
             # Update the database
 
             # Make JPEGs and Thumbnails
             filetype = os.path.basename(filename).split('_')[-1].split('.')[0]
             if filetype in ['raw', 'flt']:
-                make_jpeg(filename, filetype)
+                make_jpeg(file_dict)
 
 
 if __name__ == '__main__':
