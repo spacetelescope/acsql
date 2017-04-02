@@ -43,7 +43,7 @@ def get_rootnames_to_ingest():
     db_rootnames = set()
 
     # Gather list of rootnames that exist in the filesystem
-    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j*', '*'))
+    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'jb*', '*'))
     fsys_rootnames = set([os.path.basename(item) for item in fsys_paths])
 
     # Determine new rootnames to ingest
@@ -112,10 +112,8 @@ def make_jpeg(file_dict):
     hdulist = fits.open(file_dict['filename'], mode='readonly')
     data = hdulist[1].data
 
-    print(file_dict['filename'], hdulist[0].header['detector'])
-
     # If the image is full-frame, add on the other extension
-    if len(hdulist) > 4 and hdulist[0].header['detector'] == 'wfc':
+    if len(hdulist) > 4 and hdulist[0].header['detector'] == 'WFC':
         data2 = hdulist[4].data
         height = data.shape[0] + data2.shape[0]
         width = data.shape[1]
