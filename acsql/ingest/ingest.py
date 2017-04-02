@@ -81,12 +81,12 @@ def make_file_dict(filename):
     file_dict['rootname'] = file_dict['basename'].split('_')[0][:-1]
     file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
 
-    # Data kewords
-    with fits.open(filename, mode='readonly') as hdulist:
-        file_dict['hdulist'] = hdulist
+    # Metadata kewords
+    if file_dict['filetype'] in ['raw', 'flt', 'flc', 'drz']:
+        file_dict['detector'] = fits.getval(file_dict['filename'], 'detector', 0)
 
     # JPEG related kewords
-    if file_dict['fits_type'] in ['raw', 'flt']:
+    if file_dict['filetype'] in ['raw', 'flt', 'flc']:
         file_dict['jpg_filename'] = file_dict['basename'].replace('.fits', '.jpg')
         file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['jpg_filename'])
     else:
@@ -94,6 +94,7 @@ def make_file_dict(filename):
         file_dict['jpg_dst'] = None
 
     return file_dict
+
 
 def make_jpeg(file_dict):
     """Creates a JPEG for the given file.
@@ -103,12 +104,15 @@ def make_jpeg(file_dict):
     filename : str
         The path to the file.
     filetype : str
-        The filetype.  Can be either 'raw' or 'flt'
+        The filetype.  Can be either 'raw', 'flt', or 'flc'
     """
 
     logging.info('\tCreating JPEG')
 
-    data = file_dict['hdulist'][1].data
+    hdulist = fits.open(file_dict['filename'], mode='readonly')
+    data = hdulist[1].data
+
+    print(file_dict['filename'], hdulist[0].header['detector'])
 
     # If the image is full-frame, add on the other extension
     if len(hdulist) > 4 and hdulist[0].header['detector'] == 'wfc':
@@ -138,17 +142,20 @@ def make_jpeg(file_dict):
     data = np.uint8(data)
 
     # Write the image to a JPEG
-    jpeg_filename = os.path.basename(filename).replace('.fits', '.jpg')
+    jpeg_filename = os.path.basename(file_dict['filename']).replace('.fits', '.jpg')
     jpeg_filename = os.path.join(SETTINGS['jpeg_dir'], jpeg_filename)
     image = Image.fromarray(data)
     image.save(jpeg_filename)
+
+    # Close the hdulist
+    hdulist.close()
 
 
 def ingest():
     """The main function of the ingest module."""
 
     rootnames_to_ingest = get_rootnames_to_ingest()
-    for rootname_path in rootnames_to_ingest[0:1]:
+    for rootname_path in rootnames_to_ingest:
         file_paths = glob.glob(os.path.join(rootname_path, '*'))
         for filename in file_paths:
 
@@ -159,8 +166,7 @@ def ingest():
             # Update the database
 
             # Make JPEGs and Thumbnails
-            filetype = os.path.basename(filename).split('_')[-1].split('.')[0]
-            if filetype in ['raw', 'flt']:
+            if file_dict['filetype'] in ['raw', 'flt', 'flc']:
                 make_jpeg(file_dict)
 
 
