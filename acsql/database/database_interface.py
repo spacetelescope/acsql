@@ -386,10 +386,9 @@ if __name__ == '__main__':
     prompt = ('About to reset all table(s) for database instance {}. Do you '
         'wish to proceed? (y/n)\n'.format(SETTINGS['connection_string']))
 
-    response = raw_input(prompt)
+    response = input(prompt)
 
     if response.lower() == 'y':
-        print('Resetting table(s)'.format(args.reset_table))
-
+        print('Resetting table(s)')
         base.metadata.drop_all()
         base.metadata.create_all()
