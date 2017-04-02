@@ -15,15 +15,14 @@ import copy
 import glob
 import logging
 import os
+import shutil
 
 from astropy.io import fits
 import numpy as np
 from PIL import Image
 
-from acsql.database.database_interface import Master
-from acsql.database.database_interface import session
-from acsql.utils.utils import SETTINGS
-from acsql.utils.utils import setup_logging
+from acsql.database.database_interface import Master, session
+from acsql.utils.utils import SETTINGS, setup_logging
 
 
 def get_rootnames_to_ingest():
@@ -43,7 +42,7 @@ def get_rootnames_to_ingest():
     db_rootnames = set()
 
     # Gather list of rootnames that exist in the filesystem
-    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'jb*', '*'))
+    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j9*', '*'))
     fsys_rootnames = set([os.path.basename(item) for item in fsys_paths])
 
     # Determine new rootnames to ingest
@@ -89,9 +88,13 @@ def make_file_dict(filename):
     if file_dict['filetype'] in ['raw', 'flt', 'flc']:
         file_dict['jpg_filename'] = file_dict['basename'].replace('.fits', '.jpg')
         file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['jpg_filename'])
+        file_dict['thumbnail_filename'] = file_dict['basename'].replace('.fits', '.thumb')
+        file_dict['thumbnail_dst'] = os.path.join(SETTINGS['thumbnail_dir'], file_dict['thumbnail_filename'])
     else:
         file_dict['jpg_filename'] = None
         file_dict['jpg_dst'] = None
+        file_dict['thumbnail_filename'] = None
+        file_dict['thumbnail_dst'] = None
 
     return file_dict
 
@@ -101,10 +104,9 @@ def make_jpeg(file_dict):
 
     Parameters
     ----------
-    filename : str
-        The path to the file.
-    filetype : str
-        The filetype.  Can be either 'raw', 'flt', or 'flc'
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
     """
 
     logging.info('\tCreating JPEG')
@@ -112,7 +114,7 @@ def make_jpeg(file_dict):
     hdulist = fits.open(file_dict['filename'], mode='readonly')
     data = hdulist[1].data
 
-    # If the image is full-frame, add on the other extension
+    # If the image is full-frame WFC, add on the other extension
     if len(hdulist) > 4 and hdulist[0].header['detector'] == 'WFC':
         data2 = hdulist[4].data
         height = data.shape[0] + data2.shape[0]
@@ -140,13 +142,30 @@ def make_jpeg(file_dict):
     data = np.uint8(data)
 
     # Write the image to a JPEG
-    jpeg_filename = os.path.basename(file_dict['filename']).replace('.fits', '.jpg')
-    jpeg_filename = os.path.join(SETTINGS['jpeg_dir'], jpeg_filename)
     image = Image.fromarray(data)
-    image.save(jpeg_filename)
+    image.save(file_dict['jpg_dst'])
 
     # Close the hdulist
     hdulist.close()
+
+
+def make_thumbnail(file_dict):
+    """Creates a 128 x 128 pixel 'thumnail' JPEG for the given file.
+
+    Parameters
+    ----------
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
+    """
+
+    logging.info('\tCreating Thumbnail')
+
+    shutil.copyfile(file_dict['jpg_dst'], file_dict['thumbnail_dst'])
+
+    image = Image.open(file_dict['thumbnail_dst'])
+    image.thumbnail((128, 128), Image.ANTIALIAS)
+    image.save(file_dict['thumbnail_dst'], 'JPEG')
 
 
 def ingest():
@@ -161,11 +180,15 @@ def ingest():
             # want about the file
             file_dict = make_file_dict(filename)
 
+            logging.info('Ingesting {}'.format(file_dict['filename']))
+
             # Update the database
 
             # Make JPEGs and Thumbnails
             if file_dict['filetype'] in ['raw', 'flt', 'flc']:
                 make_jpeg(file_dict)
+            if file_dict['filetype'] == 'flt':
+                make_thumbnail(file_dict)
 
 
 if __name__ == '__main__':
