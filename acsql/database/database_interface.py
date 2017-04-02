@@ -159,7 +159,7 @@ def orm_factory(class_name):
     data_dict['rootname'] = Column(String(8), ForeignKey('master.rootname'),
                                    primary_key=True, index=True,
                                    nullable=False)
-    data_dict['basename'] = Column(String(100), unique=True, nullable=False)
+    data_dict['basename'] = Column(String(20), nullable=True)
     data_dict = define_columns(data_dict, class_name)
 
     return type(class_name.upper(), (base,), data_dict)
