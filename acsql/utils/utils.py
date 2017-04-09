@@ -15,6 +15,11 @@ Use
     from acsql.utils.utils import SETTINGS
     from acsql.utils.utils import setup_logging
 
+    There also exists static importable data:
+
+    from acsql.utils.utils import FILE_EXTS
+    from acsql.utils.utils import TABLE_DEFS
+
 Dependencies
 ------------
     External library dependencies include:
@@ -24,6 +29,7 @@ Dependencies
 
 import datetime
 import getpass
+import glob
 import logging
 import os
 import socket
@@ -49,6 +55,7 @@ FILE_EXTS = {'jif': [0, 1, 2, 3, 4, 5, 6],
              'crc': [0, 1, 2, 3, 4, 5, 6],
              'spt': [0, 1],
              'asn': [0, 1]}
+
 
 def get_settings():
     """Returns the settings that are located in the acsql config file.
@@ -103,3 +110,37 @@ def setup_logging(module):
     logging.info('Astropy Path: {0}'.format(astropy.__path__[0]))
     logging.info('SQLAlchemy Version: {0}'.format(sqlalchemy.__version__))
     logging.info('SQLAlchemy Path: {0}'.format(sqlalchemy.__path__[0]))
+
+
+def get_table_defs():
+    """Return a dictionary containing the columns for each database
+    table, as taken from the table_definition text files.
+
+    Returns
+    -------
+    table_defs : dict
+        A dictionary whose keys are detector/file_type/extension
+        configurations (e.g. 'wfc_flt_0') and whose values are lists
+        of column names for the corresponding table.
+    """
+
+    # Get table definition files
+    table_def_directory = os.path.realpath(os.path.join(os.getcwd(),
+                                           os.path.dirname(__file__)))
+    table_def_directory = table_def_directory.replace('utils', 'database/table_definitions/')
+    table_def_files = glob.glob(os.path.join(table_def_directory, '*'))
+
+    table_defs = {}
+
+    for table_def_file in table_def_files:
+
+        configuration = os.path.basename(table_def_file).split('.txt')[0]
+        with open(table_def_file, 'r') as f:
+            contents = f.readlines()
+        contents = [item.strip() for item in contents]
+        columns = [item.split(',')[0] for item in contents]
+        table_defs[configuration] = columns
+
+    return table_defs
+
+TABLE_DEFS = get_table_defs()
