@@ -21,10 +21,10 @@ from astropy.io import fits
 import numpy as np
 from sqlalchemy import Table
 from datetime import date
-#from PIL import Image
+from PIL import Image
 
 from acsql.database.database_interface import Master, session, base
-from acsql.utils.utils import SETTINGS, setup_logging
+from acsql.utils.utils import FILE_EXTS, SETTINGS, setup_logging
 
 
 def get_rootnames_to_ingest():
@@ -170,86 +170,74 @@ def make_thumbnail(file_dict):
     image.save(file_dict['thumbnail_dst'], 'JPEG')
 
 
+def update_header_table(file_dict, ext):
+    """
+    """
+
+    header = file_dict['hdulist'][ext].header
+
+    exclude_list = ['HISTORY', 'COMMENT','ROOTNAME', '']
+    input_dict = {'rootname': file_dict['rootname']}
+                  #'basename': file_dict['basename']}
+
+    for key, value in header.items():
+        if key.strip() in exclude_list or value == "":
+            continue
+        input_dict[key.lower()] = value
+
+    # Update the database
+    table_name = "{}_{}_{}".format(aperture.lower(),filetype.lower(),
+                                 str(extension))
+    current_tab = Table(table_name, base.metadata, autoload=True)
+    insert_obj = current_tab.insert()
+    insert_obj.execute(input_dict)
+    logging.info('\t\tUpdated {} table.'.format(table_name))
+
+
+def update_master_table(rootname_path):
+    """
+    """
+
+    logging info('\tIngesting {}'.format(rootname_path))
+
+    # Insert a record in the master table
+    master_tab = Table('master', base.metadata, autoload=True)
+    insert_obj = master_tab.insert()
+    input_dict = {'rootname': rootname_path.split("/")[-2][:-1],
+                  'path': rootname_path,
+                  'first_ingest_date': date.today().isoformat(),
+                  'last_ingest_date': date.today().isoformat(),
+                  'detector': 'WFC'}
+    insert_obj.execute(input_dict)
+    logging.info('\t\tUpdated master table.')
+
+
 def ingest():
     """The main function of the ingest module."""
-    # should we move this to bottom?
-    print("flag 1")
 
     rootnames_to_ingest = get_rootnames_to_ingest()
-    #rootnames_to_ingest = ['/user/ogaz/acsql/test_files/jczgu1k0q/',
+    # rootnames_to_ingest = ['/user/ogaz/acsql/test_files/jczgu1k0q/',
     #                       '/user/ogaz/acsql/test_files/jczgu1kcq/']
 
-    for rootname_path in rootnames_to_ingest:
-        #'''
-        master_tab = Table('master', base.metadata, autoload=True)
-        insert_obj = master_tab.insert()
-        input_dict = {'rootname': rootname_path.split("/")[-2][:-1],
-                      'path': rootname_path,
-                      'first_ingest_date': date.today().isoformat(),
-                      'last_ingest_date': date.today().isoformat(),
-                      'detector': 'WFC'}
-        insert_obj.execute(input_dict)
-        #'''
+    for rootname_path in rootnames_to_ingest[0:1]:
 
-
-    rootnames_to_ingest = get_rootnames_to_ingest()
-
-    for rootname_path in rootnames_to_ingest:
+        update_master(rootname_path)
         file_paths = glob.glob(os.path.join(rootname_path, '*'))
 
         for filename in file_paths:
-            print(filename)
 
             # Make dictionary that holds all the information you would ever
             # want about the file
             file_dict = make_file_dict(filename)
 
-            logging.info('Ingesting {}'.format(file_dict['filename']))
+            for ext in FILE_EXTS[file_dict['filetype']]:
+                update_header_table(file_dict, ext)
 
-            # Pull out complete header info from header by extension
-            # This should be imported, not called directly below.... fix it
-            # later
-            file_exts = {'jif': [0, 1, 2, 3, 4, 5, 6],
-                          'jit': [0, 1, 2, 3, 4, 5, 6],
-                          'flt': [0, 1, 2, 3, 4, 5, 6],
-                          'flc': [0, 1, 2, 3, 4, 5, 6],
-                          'drz': [0, 1, 2, 3], 'drc': [0, 1, 2, 3],
-                          'raw': [0, 1, 2, 3, 4, 5, 6],
-                          'crj': [0, 1, 2, 3, 4, 5, 6],
-                          'crc': [0, 1, 2, 3, 4, 5, 6], 'spt': [0, 1]}
-
-            for ext in file_exts[file_dict['filetype']]:
-                header = file_dict['hdulist'][ext].header
-
-                # could break the following section into a separate function
-                nope_list = ['HISTORY', 'COMMENT', '','ROOTNAME']
-                input_dict = {'rootname': file_dict['rootname']}
-                              #'basename': file_dict['basename']}
-
-                for key, value in header.items():
-                    if key.strip() in nope_list or value == "":
-                        continue
-                    input_dict[key.lower()] = value
-
-                # Update the database
-                table_name = table_name_return('wfc', file_dict['filetype'],
-                                               ext)
-                print("ingesting into {}".format(table_name))
-                current_tab = Table(table_name, base.metadata, autoload=True)
-                insert_obj = current_tab.insert()
-                insert_obj.execute(input_dict)
-
-            # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
-            if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-                make_jpeg(file_dict)
-            if file_dict['filetype'] == 'flt':
-                make_thumbnail(file_dict)
-
-
-def table_name_return(aperture, filetype, extension):
-    """compose and return table name string"""
-    return "{}_{}_{}".format(aperture.lower(),filetype.lower(),
-                                 str(extension))
+            # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
+            # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+            #     make_jpeg(file_dict)
+            # if file_dict['filetype'] == 'flt':
+            #     make_thumbnail(file_dict)
 
 
 if __name__ == '__main__':

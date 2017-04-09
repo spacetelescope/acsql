@@ -37,6 +37,18 @@ import sqlalchemy
 __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
 
+# Define possible file type/extension combinations
+FILE_EXTS = {'jif': [0, 1, 2, 3, 4, 5, 6],
+             'jit': [0, 1, 2, 3, 4, 5, 6],
+             'flt': [0, 1, 2, 3, 4, 5, 6],
+             'flc': [0, 1, 2, 3, 4, 5, 6],
+             'drz': [0, 1, 2, 3],
+             'drc': [0, 1, 2, 3],
+             'raw': [0, 1, 2, 3, 4, 5, 6],
+             'crj': [0, 1, 2, 3, 4, 5, 6],
+             'crc': [0, 1, 2, 3, 4, 5, 6],
+             'spt': [0, 1],
+             'asn': [0, 1]}
 
 def get_settings():
     """Returns the settings that are located in the acsql config file.
