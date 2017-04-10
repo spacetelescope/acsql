@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """Ingests new data into the ascql database.
 
 Authors
@@ -24,37 +22,7 @@ from datetime import date
 from PIL import Image
 
 from acsql.database.database_interface import Master, session, base
-from acsql.utils.utils import FILE_EXTS, SETTINGS, setup_logging, TABLE_DEFS
-
-
-def get_rootnames_to_ingest():
-    """Return a list of paths to rootnames in the filesystem that need
-    to be ingested (i.e. do not already exist in the acsql database).
-
-    Returns
-    -------
-    rootnames_to_ingest : list
-        A list of full paths to rootnames that exist in the filesystem
-        but not in the acsql database.
-    """
-
-    # Query the database to determine which rootnames already exist
-    # results = session.query(Master.rootname).all()
-    # db_rootnames = set([item for item in results])
-    db_rootnames = set()
-
-    # Gather list of rootnames that exist in the filesystem
-    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j9c*', '*'))
-    fsys_rootnames = set([os.path.basename(item) for item in fsys_paths])
-
-    # Determine new rootnames to ingest
-    new_rootnames = fsys_rootnames - db_rootnames
-
-    # Re-retreive the full paths
-    rootnames_to_ingest = [item for item in fsys_paths if
-                           os.path.basename(item) in new_rootnames]
-
-    return rootnames_to_ingest
+from acsql.utils.utils import FILE_EXTS, SETTINGS, TABLE_DEFS
 
 
 def make_file_dict(filename):
@@ -217,42 +185,34 @@ def update_master_table(rootname_path):
     logging.info('\t\tUpdated master table.')
 
 
-def ingest(filetype='all'):
+def ingest(rootname_path, filetype='all'):
     """The main function of the ingest module."""
 
-    rootnames_to_ingest = get_rootnames_to_ingest()
-    # rootnames_to_ingest = ['/user/ogaz/acsql/test_files/jczgu1k0q/',
-    #                       '/user/ogaz/acsql/test_files/jczgu1kcq/']
+    update_master_table(rootname_path)
 
-    for rootname_path in rootnames_to_ingest[0:1]:
+    if filetype == 'all':
+        search = '*.fits'
+    else:
+        search = '*{}.fits'.format(filetype)
+    file_paths = glob.glob(os.path.join(rootname_path, search))
 
-        update_master_table(rootname_path)
+    for filename in file_paths:
+        if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
 
-        if filetype == 'all':
-            search = '*.fits'
-        else:
-            search = '*{}.fits'.format(filetype)
-        file_paths = glob.glob(os.path.join(rootname_path, search))
+            # Make dictionary that holds all the information you would ever
+            # want about the file
+            file_dict = make_file_dict(filename)
 
-        for filename in file_paths:
-            if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
+            for ext in FILE_EXTS[file_dict['filetype']]:
+                update_header_table(file_dict, ext, 'wfc')
 
-                # Make dictionary that holds all the information you would ever
-                # want about the file
-                file_dict = make_file_dict(filename)
-
-                for ext in FILE_EXTS[file_dict['filetype']]:
-                    update_header_table(file_dict, ext, 'wfc')
-
-                # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
-                # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-                #     make_jpeg(file_dict)
-                # if file_dict['filetype'] == 'flt':
-                #     make_thumbnail(file_dict)
+            # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
+            # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+            #     make_jpeg(file_dict)
+            # if file_dict['filetype'] == 'flt':
+            #     make_thumbnail(file_dict)
 
 
 if __name__ == '__main__':
 
-    module = os.path.basename(__file__).strip('.py')
-    setup_logging(module)
     ingest()
