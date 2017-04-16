@@ -23,6 +23,7 @@ import shutil
 from astropy.io import fits
 import numpy as np
 from sqlalchemy import Table
+from sqlalchemy.exc import IntegrityError
 from datetime import date
 from PIL import Image
 
@@ -193,26 +194,30 @@ def update_master_table(rootname_path):
 def ingest(rootname_path, filetype='all'):
     """The main function of the ingest module."""
 
-    update_master_table(rootname_path)
+    try:
+        update_master_table(rootname_path)
 
-    if filetype == 'all':
-        search = '*.fits'
-    else:
-        search = '*{}.fits'.format(filetype)
-    file_paths = glob.glob(os.path.join(rootname_path, search))
+        if filetype == 'all':
+            search = '*.fits'
+        else:
+            search = '*{}.fits'.format(filetype)
+        file_paths = glob.glob(os.path.join(rootname_path, search))
 
-    for filename in file_paths:
-        if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
+        for filename in file_paths:
+            if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
 
-            # Make dictionary that holds all the information you would ever
-            # want about the file
-            file_dict = make_file_dict(filename)
+                # Make dictionary that holds all the information you would ever
+                # want about the file
+                file_dict = make_file_dict(filename)
 
-            for ext in FILE_EXTS[file_dict['filetype']]:
-                update_header_table(file_dict, ext, 'wfc')
+                for ext in FILE_EXTS[file_dict['filetype']]:
+                    update_header_table(file_dict, ext, 'wfc')
 
-            # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
-            # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-            #     make_jpeg(file_dict)
-            # if file_dict['filetype'] == 'flt':
-            #     make_thumbnail(file_dict)
+                # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
+                # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+                #     make_jpeg(file_dict)
+                # if file_dict['filetype'] == 'flt':
+                #     make_thumbnail(file_dict)
+
+    except IntegrityError as e:
+        logging.warning('Unable to ingest {}: {}'.format(rootname_path, e))
