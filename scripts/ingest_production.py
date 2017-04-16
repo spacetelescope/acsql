@@ -6,6 +6,7 @@
 import argparse
 import glob
 import logging
+import multiprocessing
 import os
 
 from acsql.ingest.ingest import ingest
@@ -60,14 +61,19 @@ def ingest_production(filetype, ingest_filelist):
     """
 
     if ingest_filelist:
-        rootnames_to_ingest = ingest_filelist
+        with open(ingest_filelist) as f:
+            rootnames = f.readlines()
+        rootnames = [rootname.strip().lower() for rootname in rootnames]
+        rootnames = [os.path.join(SETTINGS['filesystem'], rootname[0:4], rootname) for rootname in rootnames]
     else:
-        rootnames_to_ingest = get_rootnames_to_ingest()
-    # rootnames_to_ingest = ['/user/ogaz/acsql/test_files/jczgu1k0q/',
-    #                       '/user/ogaz/acsql/test_files/jczgu1kcq/']
+        rootnames = get_rootnames_to_ingest()
 
-    for rootname in rootnames_to_ingest[0:1]:
-        ingest(rootname, filetype)
+    pool = multiprocessing.Pool(processes=SETTINGS['ncores'])
+    filetypes = [filetype for item in rootnames]
+    mp_args = [(rootname, filetype) for rootname, filetype in zip(rootnames, filetypes)]
+    pool.starmap(ingest, mp_args)
+
+    logging.info('Process Complete.')
 
 
 def parse_args():
@@ -138,7 +144,7 @@ def test_args(args):
 
     # Ensure that the ingest_filelist exists
     if args.ingest_filelist:
-        assert os.path.exists(ingest_filelist),\
+        assert os.path.exists(args.ingest_filelist),\
             '{} does not exist.'.format(args.ingest_filelist)
 
 
