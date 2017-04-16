@@ -9,6 +9,8 @@ import logging
 import multiprocessing
 import os
 
+from astropy.io import fits
+
 from acsql.ingest.ingest import ingest
 from acsql.utils.utils import FILE_EXTS, SETTINGS, setup_logging
 
@@ -68,12 +70,45 @@ def ingest_production(filetype, ingest_filelist):
     else:
         rootnames = get_rootnames_to_ingest()
 
+    # rootnames = only_wfc_full_frame(rootnames)
+
     pool = multiprocessing.Pool(processes=SETTINGS['ncores'])
     filetypes = [filetype for item in rootnames]
     mp_args = [(rootname, filetype) for rootname, filetype in zip(rootnames, filetypes)]
     pool.starmap(ingest, mp_args)
 
     logging.info('Process Complete.')
+
+
+def only_wfc_full_frame(rootnames):
+    """
+    """
+
+    new_rootname_list = []
+
+    for i, rootname in enumerate(rootnames):
+
+        print('Processing rootname {} of {}: {}'.format(i, len(rootnames), rootname))
+
+        new_rootname_list.append(rootname)
+
+        if rootname[-1].isnumeric():
+            folder_list = glob.glob(os.path.join(rootname[:-9], '*'))
+            for folder in folder_list:
+                if not folder[-1].isnumeric() and folder.split('/')[-1] not in new_rootname_list:
+                    raw_file = glob.glob(os.path.join(folder, '*raw.fits'))[0]
+                    aperture = fits.getheader(raw_file, 0)['APERTURE']
+                    if aperture == 'WFC':
+                        new_rootname_list.append(folder.split('/')[-1])
+
+    print(new_rootname_list)
+    print(len(new_rootname_list))
+    print(len(list(set(new_rootname_list))))
+    new_rootname_list = list(set(new_rootname_list))
+
+    with open('dataset_full_frame_wfc.txt', 'w') as f:
+        for rootname in new_rootname_list:
+            f.write(rootname + '\n')
 
 
 def parse_args():
