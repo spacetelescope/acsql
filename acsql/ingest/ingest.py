@@ -6,7 +6,12 @@ Authors
 
 Use
 ---
+    This module is intended to be imported from and used by the
+    ``ingest_production`` script as such:
+    ::
 
+        from acsql.ingest.ingest import ingest
+        ingest(rootname)
 """
 
 import copy
@@ -21,7 +26,7 @@ from sqlalchemy import Table
 from datetime import date
 from PIL import Image
 
-from acsql.database.database_interface import Master, session, base
+from acsql.database.database_interface import base
 from acsql.utils.utils import FILE_EXTS, SETTINGS, TABLE_DEFS
 
 
@@ -148,7 +153,7 @@ def update_header_table(file_dict, ext, detector):
 
     header = fits.getheader(file_dict['filename'], ext)
 
-    exclude_list = ['HISTORY', 'COMMENT','ROOTNAME', '']
+    exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', '']
     input_dict = {'rootname': file_dict['rootname']}
                   #'basename': file_dict['basename']}
 
@@ -211,8 +216,3 @@ def ingest(rootname_path, filetype='all'):
             #     make_jpeg(file_dict)
             # if file_dict['filetype'] == 'flt':
             #     make_thumbnail(file_dict)
-
-
-if __name__ == '__main__':
-
-    ingest()
