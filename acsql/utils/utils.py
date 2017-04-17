@@ -12,6 +12,7 @@ Use
     The functions within this module are intened to be imported by
     various acsql modules and scripts, as such:
 
+    from acsql.utils.utils import insert_or_update
     from acsql.utils.utils import SETTINGS
     from acsql.utils.utils import setup_logging
 
@@ -39,6 +40,9 @@ import yaml
 import astropy
 import numpy
 import sqlalchemy
+from sqlalchemy import Table
+
+from acsql.database import database_interface
 
 __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
@@ -144,3 +148,28 @@ def get_table_defs():
     return table_defs
 
 TABLE_DEFS = get_table_defs()
+
+
+def insert_or_update(table, data_dict):
+    """
+    """
+
+    table_obj = getattr(database_interface, table)
+    session = getattr(database_interface, 'session')
+    base = getattr(database_interface, 'base')
+
+    # Check to see if a record exists for the rootname
+    query = session.query(table_obj)\
+        .filter(getattr(table_obj, 'rootname') == data_dict['rootname'])
+    query_count = query.count()
+
+    # If there are no results, then perform an insert
+    if not query_count:
+        tab = Table(table.lower(), base.metadata, autoload=True)
+        insert_obj = tab.insert()
+        insert_obj.execute(data_dict)
+
+    else:
+        query.update(data_dict)
+
+    session.commit()

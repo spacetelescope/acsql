@@ -33,7 +33,10 @@ from datetime import date
 from PIL import Image
 
 from acsql.database.database_interface import base
-from acsql.utils.utils import FILE_EXTS, SETTINGS, TABLE_DEFS
+from acsql.utils.utils import insert_or_update
+from acsql.utils.utils import FILE_EXTS
+from acsql.utils.utils import SETTINGS
+from acsql.utils.utils import TABLE_DEFS
 
 
 def make_file_dict(filename):
@@ -167,9 +170,9 @@ def update_header_table(file_dict, ext, detector):
         The detector (e.g. ``wfc``).
     """
 
-    table_name = "{}_{}_{}".format(detector,
-                                   file_dict['filetype'].lower(),
-                                   str(ext))
+    table = "{}_{}_{}".format(detector.upper(),
+                              file_dict['filetype'].lower(),
+                              str(ext))
 
     header = fits.getheader(file_dict['filename'], ext)
 
@@ -180,15 +183,12 @@ def update_header_table(file_dict, ext, detector):
         key = key.strip()
         if key in exclude_list or value == "":
             continue
-        elif key not in TABLE_DEFS[table_name]:
-            logging.warning('{} not in {}'.format(key, table_name))
+        elif key not in TABLE_DEFS[table.lower()]:
+            logging.warning('{} not in {}'.format(key, table))
         input_dict[key.lower()] = value
 
-    # if you need insert do this
-    current_tab = Table(table_name, base.metadata, autoload=True)
-    insert_obj = current_tab.insert()
-    insert_obj.execute(input_dict)
-    logging.info('\t\tUpdated {} table.'.format(table_name))
+    insert_or_update(table, input_dict)
+    logging.info('\t\tUpdated {} table.'.format(table))
 
 
 def update_master_table(rootname_path):
@@ -204,14 +204,12 @@ def update_master_table(rootname_path):
     logging.info('\tIngesting {}'.format(rootname_path))
 
     # Insert a record in the master table
-    master_tab = Table('master', base.metadata, autoload=True)
-    insert_obj = master_tab.insert()
     input_dict = {'rootname': rootname_path.split('/')[-1][:-1],
                   'path': rootname_path,
                   'first_ingest_date': date.today().isoformat(),
                   'last_ingest_date': date.today().isoformat(),
                   'detector': 'WFC'}
-    insert_obj.execute(input_dict)
+    insert_or_update('Master', input_dict)
     logging.info('\t\tUpdated master table.')
 
 
