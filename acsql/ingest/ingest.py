@@ -1,8 +1,13 @@
-"""Ingests new data into the ascql database.
+"""Ingests a given rootname (and its associated files) into the
+``ascql`` database.  The tables that are updated are the ``master``
+table, the ``datasets`` table, and any appropriate header tables
+(e.g. ``wfc_raw_0``) based on the available filetypes and header
+extensions.
 
 Authors
 -------
     Matthew Bourque, 2017
+    Sara Ogaz, 2017
 
 Use
 ---
@@ -126,7 +131,7 @@ def make_jpeg(file_dict):
 
 
 def make_thumbnail(file_dict):
-    """Creates a 128 x 128 pixel 'thumnail' JPEG for the given file.
+    """Creates a 128 x 128 pixel 'thumbnail' JPEG for the given file.
 
     Parameters
     ----------
@@ -145,7 +150,21 @@ def make_thumbnail(file_dict):
 
 
 def update_header_table(file_dict, ext, detector):
-    """
+    """Insert/update an entry for the file in the appropriate header
+    table (e.g. `wfc_raw_0`).
+
+    The header table that get updated depend on the detector, filetype,
+    and extension.
+
+    Parameters
+    ----------
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
+    ext : int
+        The header extension.
+    detector : str
+        The detector (e.g. ``wfc``).
     """
 
     table_name = "{}_{}_{}".format(detector,
@@ -156,7 +175,6 @@ def update_header_table(file_dict, ext, detector):
 
     exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', '']
     input_dict = {'rootname': file_dict['rootname']}
-                  #'basename': file_dict['basename']}
 
     for key, value in header.items():
         key = key.strip()
@@ -174,7 +192,13 @@ def update_header_table(file_dict, ext, detector):
 
 
 def update_master_table(rootname_path):
-    """
+    """Insert/update an entry in the ``master`` table for the given
+    rootname.
+
+    Parameters
+    ----------
+    rootname_path : str
+        The path to the rootname directory in the MAST cache.
     """
 
     logging.info('\tIngesting {}'.format(rootname_path))
@@ -192,7 +216,18 @@ def update_master_table(rootname_path):
 
 
 def ingest(rootname_path, filetype='all'):
-    """The main function of the ingest module."""
+    """The main function of the ingest module.  Ingest a given rootname
+    (and its associated files) into the various tables of the ``acsql``
+    database.
+
+    If for some reason the file is unable to be ingested, a warning is
+    logged.
+
+    Parameters
+    ----------
+    rootname_path : str
+        The path to the rootname directory in the MAST cache.
+    """
 
     try:
         update_master_table(rootname_path)
