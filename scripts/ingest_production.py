@@ -81,17 +81,30 @@ def ingest_production(filetype, ingest_filelist):
 
 
 def only_wfc_full_frame(rootnames):
-    """
+    """Returns only full-frame WFC rootnames.  This list is also
+    written out to a file so that this function can be bypassed if
+    reprocessing.
+
+    Parameters
+    ----------
+    rootnames : list
+        A list of rootnames that are being ingested.
+
+    Returns
+    -------
+    new_rootname_list : list
+        A list of full-frame WFC rootnames
     """
 
     new_rootname_list = []
 
     for i, rootname in enumerate(rootnames):
-
-        print('Processing rootname {} of {}: {}'.format(i, len(rootnames), rootname))
-
+        print('Processing rootname {} of {}: {}'.format(i, len(rootnames),
+                                                        rootname))
         new_rootname_list.append(rootname)
 
+        # For association rootnames, look for members within the IPPP/ parent
+        # directory tree
         if rootname[-1].isnumeric():
             folder_list = glob.glob(os.path.join(rootname[:-9], '*'))
             for folder in folder_list:
@@ -101,14 +114,15 @@ def only_wfc_full_frame(rootnames):
                     if aperture == 'WFC':
                         new_rootname_list.append(folder.split('/')[-1])
 
-    print(new_rootname_list)
-    print(len(new_rootname_list))
-    print(len(list(set(new_rootname_list))))
+    # Take a set as to avoid redundant rootnames
     new_rootname_list = list(set(new_rootname_list))
 
+    # Save rootnames out to a file
     with open('dataset_full_frame_wfc.txt', 'w') as f:
         for rootname in new_rootname_list:
             f.write(rootname + '\n')
+
+    return new_rootname_list
 
 
 def parse_args():
@@ -136,17 +150,17 @@ def parse_args():
     # Add arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-f --filetype',
-        dest='filetype',
-        action='store',
-        required=False,
-        default='all',
-        help=filetype_help)
+                        dest='filetype',
+                        action='store',
+                        required=False,
+                        default='all',
+                        help=filetype_help)
     parser.add_argument('-i --ingest_filelist',
-        dest='ingest_filelist',
-        action='store',
-        required=False,
-        default=None,
-        help=ingest_filelist_help)
+                        dest='ingest_filelist',
+                        action='store',
+                        required=False,
+                        default=None,
+                        help=ingest_filelist_help)
 
     # Parse args
     args = parser.parse_args()
