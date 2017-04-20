@@ -224,6 +224,7 @@ def update_header_table(file_dict, ext, detector):
             continue
         elif key not in TABLE_DEFS[table.lower()]:
             logging.warning('{} not in {}'.format(key, table))
+            continue
         input_dict[key.lower()] = value
 
     insert_or_update(table, input_dict)
