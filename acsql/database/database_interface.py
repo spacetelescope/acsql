@@ -187,17 +187,17 @@ class Datasets(base):
     __tablename__ = 'datasets'
     rootname = Column(String(8), ForeignKey('master.rootname'),
                       primary_key=True, index=True, nullable=False)
-    raw = Column(String(8), nullable=True)
-    flt = Column(String(8), nullable=True)
-    flc = Column(String(8), nullable=True)
-    spt = Column(String(8), nullable=True)
-    drz = Column(String(8), nullable=True)
-    drc = Column(String(8), nullable=True)
-    crj = Column(String(8), nullable=True)
-    crc = Column(String(8), nullable=True)
-    jif = Column(String(8), nullable=True)
-    jit = Column(String(8), nullable=True)
-    asn = Column(String(8), nullable=True)
+    raw = Column(String(18), nullable=True)
+    flt = Column(String(18), nullable=True)
+    flc = Column(String(18), nullable=True)
+    spt = Column(String(18), nullable=True)
+    drz = Column(String(18), nullable=True)
+    drc = Column(String(18), nullable=True)
+    crj = Column(String(18), nullable=True)
+    crc = Column(String(18), nullable=True)
+    jif = Column(String(18), nullable=True)
+    jit = Column(String(18), nullable=True)
+    asn = Column(String(18), nullable=True)
 
 
 # WFC tables
