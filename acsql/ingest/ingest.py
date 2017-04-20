@@ -33,6 +33,8 @@ from datetime import date
 from PIL import Image
 
 from acsql.database.database_interface import base
+from acsql.database.database_interface import Datasets
+from acsql.database.database_interface import session
 from acsql.utils.utils import insert_or_update
 from acsql.utils.utils import FILE_EXTS
 from acsql.utils.utils import SETTINGS
@@ -152,9 +154,46 @@ def make_thumbnail(file_dict):
     image.save(file_dict['thumbnail_dst'], 'JPEG')
 
 
+def update_datasets_table(file_dict):
+    """Insert/update an entry for the file in the ``datasets`` table.
+
+    Parameters
+    ----------
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
+    """
+
+    # Check to see if a record exists for the rootname
+    query = session.query(Datasets)\
+        .filter(Datasets.rootname == file_dict['rootname'])
+    query_count = query.count()
+
+    # If there are no results, then perform an insert
+    if not query_count:
+
+        data_dict = {}
+        data_dict['rootname'] = file_dict['rootname']
+        data_dict[file_dict['filetype']] = file_dict['basename']
+
+        tab = Table('datasets', base.metadata, autoload=True)
+        insert_obj = tab.insert()
+        insert_obj.execute(data_dict)
+
+    # If there are results, add the filename to the existing entry
+    else:
+        data_dict = query.one().__dict__
+        del data_dict['_sa_instance_state']
+        data_dict[file_dict['filetype']] = file_dict['basename']
+        query.update(data_dict)
+
+    session.commit()
+    logging.info('\t\tUpdated datasets table.')
+
+
 def update_header_table(file_dict, ext, detector):
     """Insert/update an entry for the file in the appropriate header
-    table (e.g. `wfc_raw_0`).
+    table (e.g. ``wfc_raw_0``).
 
     The header table that get updated depend on the detector, filetype,
     and extension.
@@ -245,6 +284,8 @@ def ingest(rootname_path, filetype='all'):
 
                 for ext in FILE_EXTS[file_dict['filetype']]:
                     update_header_table(file_dict, ext, 'wfc')
+
+                update_datasets_table(file_dict)
 
                 # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
                 # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
