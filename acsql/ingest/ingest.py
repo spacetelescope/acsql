@@ -215,8 +215,9 @@ def update_header_table(file_dict, ext, detector):
 
     header = fits.getheader(file_dict['filename'], ext)
 
-    exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', '']
-    input_dict = {'rootname': file_dict['rootname']}
+    exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', 'FILENAME', '']
+    input_dict = {'rootname': file_dict['rootname'],
+                  'filename': file_dict['basename']}
 
     for key, value in header.items():
         key = key.strip()
@@ -288,7 +289,7 @@ def ingest(rootname_path, filetype='all'):
 
                 update_datasets_table(file_dict)
 
-                # # Make JPEGs and Thumbnails  # Make JPEGs and Thumbnails
+                # # Make JPEGs and Thumbnails
                 # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
                 #     make_jpeg(file_dict)
                 # if file_dict['filetype'] == 'flt':
