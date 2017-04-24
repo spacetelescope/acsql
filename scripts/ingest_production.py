@@ -1,6 +1,39 @@
 #! /usr/bin/env python
 
-"""
+"""Performs ingestion of HST/ACS data into the ``acsql`` database and
+filesystem.
+
+This script is a wapper around ``acsql.ingest.ingest.py`` to ingest
+multiple rootnames into the system.  The user may supply a list of
+individual rootnames to ingest, or (by default) ingest whichever
+rootnames exist in the MAST cache but yet to exist in the ``acsql``
+database.
+
+See ``acsql.ingest.ingest.py`` module docstrings for further
+information on the ingestion process.
+
+Authors
+-------
+    Matthew Bourque
+
+Use
+---
+    This script is inteneded to be executed from the command line as
+    such:
+    ::
+
+        python ingest_production.py [-i|--ingest_filelist]
+            ['-f|--filetype']
+
+    Parameters:
+    (Optional) [-i|--ingest_filelist] - A text file containing
+        individual rootnames to be ingested.  If not supplied, this
+        module will determine which rootnames are to be ingested by
+        comparing the MAST cache against what already exists in the
+        ``acsql`` database.
+    (Optional) [-f|--filetype] - The type of file to ingest.  May be
+        an indivual filetype (e.g. ``flt``) or ``all`` to ingest all
+        filetypes.  ``all`` is the default value.
 """
 
 import argparse
