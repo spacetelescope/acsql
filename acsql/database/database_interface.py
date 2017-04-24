@@ -50,12 +50,13 @@ from sqlalchemy import Index
 from sqlalchemy import Enum
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy import Integer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
 from sqlalchemy import Time
 
-from acsql.utils.utils import SETTINGS
+from acsql.utils.utils import SETTINGS, FILE_EXTS
 
 
 def define_columns(data_dict, class_name):
@@ -159,7 +160,7 @@ def orm_factory(class_name):
     data_dict['rootname'] = Column(String(8), ForeignKey('master.rootname'),
                                    primary_key=True, index=True,
                                    nullable=False)
-    data_dict['basename'] = Column(String(20), nullable=True)
+    data_dict['filename'] = Column(String(18), nullable=False, unique=True)
     data_dict = define_columns(data_dict, class_name)
 
     return type(class_name.upper(), (base,), data_dict)
@@ -198,6 +199,14 @@ class Datasets(base):
     jif = Column(String(18), nullable=True)
     jit = Column(String(18), nullable=True)
     asn = Column(String(18), nullable=True)
+
+    foreign_keys = []
+    for filetype in FILE_EXTS:
+        for ext in FILE_EXTS[filetype]:
+            foreign_keys.append(ForeignKeyConstraint([filetype],
+                ['wfc_{}_{}.filename'.format(filetype, ext)]))
+    foreign_keys = tuple(foreign_keys)
+    __table_args__ = foreign_keys
 
 
 # WFC tables
@@ -255,20 +264,20 @@ WFC_crc_5 = orm_factory('WFC_crc_5')
 WFC_crc_6 = orm_factory('WFC_crc_6')
 
 WFC_jif_0 = orm_factory('WFC_jif_0')
-WFC_jif_1 = orm_factory('WFC_jif_1')
-WFC_jif_2 = orm_factory('WFC_jif_2')
-WFC_jif_3 = orm_factory('WFC_jif_3')
-WFC_jif_4 = orm_factory('WFC_jif_4')
-WFC_jif_5 = orm_factory('WFC_jif_5')
-WFC_jif_6 = orm_factory('WFC_jif_6')
+# WFC_jif_1 = orm_factory('WFC_jif_1')
+# WFC_jif_2 = orm_factory('WFC_jif_2')
+# WFC_jif_3 = orm_factory('WFC_jif_3')
+# WFC_jif_4 = orm_factory('WFC_jif_4')
+# WFC_jif_5 = orm_factory('WFC_jif_5')
+# WFC_jif_6 = orm_factory('WFC_jif_6')
 
 WFC_jit_0 = orm_factory('WFC_jit_0')
-WFC_jit_1 = orm_factory('WFC_jit_1')
-WFC_jit_2 = orm_factory('WFC_jit_2')
-WFC_jit_3 = orm_factory('WFC_jit_3')
-WFC_jit_4 = orm_factory('WFC_jit_4')
-WFC_jit_5 = orm_factory('WFC_jit_5')
-WFC_jit_6 = orm_factory('WFC_jit_6')
+# WFC_jit_1 = orm_factory('WFC_jit_1')
+# WFC_jit_2 = orm_factory('WFC_jit_2')
+# WFC_jit_3 = orm_factory('WFC_jit_3')
+# WFC_jit_4 = orm_factory('WFC_jit_4')
+# WFC_jit_5 = orm_factory('WFC_jit_5')
+# WFC_jit_6 = orm_factory('WFC_jit_6')
 
 WFC_asn_0 = orm_factory('WFC_asn_0')
 WFC_asn_1 = orm_factory('WFC_asn_1')
