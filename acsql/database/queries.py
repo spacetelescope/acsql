@@ -55,13 +55,14 @@ from acsql.database.database_interface import WFC_flt_1
 from acsql.database.database_interface import WFC_flt_4
 
 
-def all_filenames(rootname):
-    """Queries for all filenames that exist for the given rootname.
+def all_filenames(dataset):
+    """Queries for all filenames that exist for the given dataset.
 
     Parameters
     ----------
-    rootname : str
-        The rootname to query by.
+    dataset : str
+        Any portion of (or entire) rootname (e.g. 'jd2615qi', or
+        'jd2615').
 
     Returns
     -------
@@ -70,11 +71,18 @@ def all_filenames(rootname):
         performing the query.
     """
 
-    # No proper way to do this yet until we enforce a foreign key
-    # constraint in the database
+    query = session.query(Datasets)\
+        .filter(Datasets.rootname.like('{}%'.format(dataset)))
+    query_results = query.all()
 
-    pass
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
+    for result in query_results:
+        results_dict = result.__dict__
+        del results_dict['_sa_instance_state']
+        print(results_dict)
+
+    return query
 
 def filters_for_rootname(rootname):
     """Queries for the FILTER1/FILTER2 combination for the geven
@@ -96,7 +104,7 @@ def filters_for_rootname(rootname):
         .filter(WFC_raw_0.rootname == rootname)
     query_results = query.one()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
     print('{}: {}'.format(rootname, query_results))
 
     return query
@@ -124,7 +132,7 @@ def filter_distribution():
     query_results = query.all()
     db_count = session.query(WFC_raw_0).count()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         perc_used = round((result[2] / db_count) * 100., 2)
@@ -153,7 +161,7 @@ def rootnames_for_target(targname):
             .filter(WFC_raw_0.targname == targname)
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -187,7 +195,7 @@ def filenames_for_calibration(calibration_keyword, value):
         .filter(calibration_keyword_obj == value)
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
@@ -221,7 +229,7 @@ def goodmean_for_dataset(dataset):
             .filter(Master.rootname.like('{}%'.format(dataset)))
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -247,7 +255,7 @@ def rootnames_with_postflash():
 
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -269,7 +277,7 @@ def non_asn_rootnames():
         .filter(~exists().where(and_(Master.rootname == WFC_asn_0.rootname)))
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
@@ -301,7 +309,7 @@ def asn_in_date_range(begin_date, end_date):
         .filter(date_obs <= end_date)
     query_results = query.all()
 
-    print('\nQuery performed:\n {}'.format(str(query)))
+    print('\nQuery performed:\n\n {}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
