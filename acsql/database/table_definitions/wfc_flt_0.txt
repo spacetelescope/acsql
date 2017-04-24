@@ -51,7 +51,6 @@ OSCNTAB, String
 PFLTFILE, String
 PATTSTEP, Integer
 PROPOSID, Integer
-FILENAME, String
 ASN_ID, String
 INSTRUME, String
 P1_ORINT, Float

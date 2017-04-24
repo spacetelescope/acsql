@@ -9,7 +9,6 @@ DATE, String
 EQUINOX, Float
 INSTRUME, String
 PROPOSID, Integer
-FILENAME, String
 ASN_ID, String
 ASN_PROD, Bool
 ASN_STAT, String

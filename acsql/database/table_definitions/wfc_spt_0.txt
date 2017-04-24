@@ -12,7 +12,6 @@ MAG_V, Float
 MU_EPOCH, String
 MAG_R, Float
 NPRATRG, Float
-FILENAME, String
 TRK_TYPE, String
 CMD_EXP, Float
 SS_A1SZE, Float

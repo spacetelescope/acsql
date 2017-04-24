@@ -96,7 +96,6 @@ D004WKEY, String
 D002DATA, String
 PROPOSID, Integer
 D004OUCO, String
-FILENAME, String
 D002PIXF, Float
 INSTRUME, String
 P1_ORINT, Float

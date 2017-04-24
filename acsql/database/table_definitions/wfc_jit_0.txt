@@ -8,7 +8,6 @@ DATE, String
 EQUINOX, Float
 INSTRUME, String
 PROPOSID, Integer
-FILENAME, String
 ASN_ID, String
 PROC_TYP, String
 FILETYPE, String
