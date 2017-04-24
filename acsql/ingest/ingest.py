@@ -65,6 +65,7 @@ def make_file_dict(filename):
     file_dict['basename'] = os.path.basename(filename)
     file_dict['rootname'] = file_dict['basename'].split('_')[0][:-1]
     file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
+    file_dict['proposid'] = file_dict['basename'][0:4]
 
     # Metadata kewords
     if file_dict['filetype'] in ['raw', 'flt', 'flc', 'drz']:
@@ -73,9 +74,9 @@ def make_file_dict(filename):
     # JPEG related kewords
     if file_dict['filetype'] in ['raw', 'flt', 'flc']:
         file_dict['jpg_filename'] = file_dict['basename'].replace('.fits', '.jpg')
-        file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['jpg_filename'])
+        file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['proposid'], file_dict['jpg_filename'])
         file_dict['thumbnail_filename'] = file_dict['basename'].replace('.fits', '.thumb')
-        file_dict['thumbnail_dst'] = os.path.join(SETTINGS['thumbnail_dir'], file_dict['thumbnail_filename'])
+        file_dict['thumbnail_dst'] = os.path.join(SETTINGS['thumbnail_dir'], file_dict['proposid'], file_dict['thumbnail_filename'])
     else:
         file_dict['jpg_filename'] = None
         file_dict['jpg_dst'] = None
@@ -95,7 +96,7 @@ def make_jpeg(file_dict):
         process.
     """
 
-    logging.info('\tCreating JPEG')
+    logging.info('\t\tCreating JPEG')
 
     hdulist = fits.open(file_dict['filename'], mode='readonly')
     data = hdulist[1].data
@@ -127,6 +128,12 @@ def make_jpeg(file_dict):
     data = np.flipud(data)
     data = np.uint8(data)
 
+    # Create parent JPEG directory if necessary
+    jpg_dir = os.path.dirname(file_dict['jpg_dst'])
+    if not os.path.exists(jpg_dir):
+        os.makedirs(jpg_dir)
+        logging.info('\t\tCreated directory {}'.format(jpg_dir))
+
     # Write the image to a JPEG
     image = Image.fromarray(data)
     image.save(file_dict['jpg_dst'])
@@ -145,10 +152,18 @@ def make_thumbnail(file_dict):
         process.
     """
 
-    logging.info('\tCreating Thumbnail')
+    logging.info('\t\tCreating Thumbnail')
 
+    # Create parent Thumbnail directory if necessary
+    thumb_dir = os.path.dirname(file_dict['thumbnail_dst'])
+    if not os.path.exists(thumb_dir):
+        os.makedirs(thumb_dir)
+        logging.info('\t\tCreated directory {}'.format(thumb_dir))
+
+    # Make a copy of the JPEG in the thumbnail directory
     shutil.copyfile(file_dict['jpg_dst'], file_dict['thumbnail_dst'])
 
+    # Open the copied JPEG and reduce its size
     image = Image.open(file_dict['thumbnail_dst'])
     image.thumbnail((128, 128), Image.ANTIALIAS)
     image.save(file_dict['thumbnail_dst'], 'JPEG')
@@ -289,11 +304,11 @@ def ingest(rootname_path, filetype='all'):
 
                 update_datasets_table(file_dict)
 
-                # # Make JPEGs and Thumbnails
-                # if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-                #     make_jpeg(file_dict)
-                # if file_dict['filetype'] == 'flt':
-                #     make_thumbnail(file_dict)
+                # Make JPEGs and Thumbnails
+                if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+                    make_jpeg(file_dict)
+                if file_dict['filetype'] == 'flt':
+                    make_thumbnail(file_dict)
 
     except IntegrityError as e:
         logging.warning('Unable to ingest {}: {}'.format(rootname_path, e))
