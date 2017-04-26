@@ -42,7 +42,7 @@ import numpy
 import sqlalchemy
 from sqlalchemy import Table
 
-from acsql.database import database_interface
+import acsql
 
 __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
@@ -154,9 +154,9 @@ def insert_or_update(table, data_dict):
     """
     """
 
-    table_obj = getattr(database_interface, table)
-    session = getattr(database_interface, 'session')
-    base = getattr(database_interface, 'base')
+    table_obj = getattr(acsql.database.database_interface, table)
+    session = getattr(acsql.database.database_interface, 'session')
+    base = getattr(acsql.database.database_interface, 'base')
 
     # Check to see if a record exists for the rootname
     query = session.query(table_obj)\
