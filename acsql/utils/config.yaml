@@ -1,0 +1,6 @@
+connection_string : 'dialect+driver://username:password@host:port/database'
+filesystem : ''
+log_dir : ''
+jpeg_dir : ''
+thumbnail_dir : ''
+ncores : 1
