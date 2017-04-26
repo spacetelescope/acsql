@@ -2,3 +2,4 @@ astropy
 numpy
 numpydoc
 sqlalchemy
+-e git://github.com/spacetelescope/stak.git#egg=stak
