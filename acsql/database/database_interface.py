@@ -118,7 +118,9 @@ def loadConnection(connection_string):
     Parameters
     ----------
     connection_string : str
-        The connection string to connect to the acsql database.
+        The connection string to connect to the acsql database.  The
+        connection string should take the form:
+        ``dialect+driver://username:password@host:port/database``
 
     Returns
     -------
