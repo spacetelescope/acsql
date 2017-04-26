@@ -1,0 +1,4 @@
+astropy
+numpy
+numpydoc
+sqlalchemy
