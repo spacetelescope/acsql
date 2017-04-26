@@ -11,5 +11,6 @@ setup(
     classifiers = ['Programming Language :: Python'],
     packages = find_packages(),
     install_requires = [],
-    version = 0.0
+    version = 0.0,
+    include_package_data=True
     )
