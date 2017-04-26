@@ -16,7 +16,6 @@ Advanced Camera for Surveys (ACS) data for easy access and quick-viewing.
    database.rst
    ingest.rst
    utils.rst
-   website.rst
 
 
 Indices and tables
