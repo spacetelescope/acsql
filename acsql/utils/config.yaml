@@ -1,4 +1,4 @@
-connection_string : 'dialect+driver://username:password@host:port/database'
+connection_string : 'dialect+driver://username:password@host:12345/database'
 filesystem : ''
 log_dir : ''
 jpeg_dir : ''
