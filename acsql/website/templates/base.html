@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>ACS Quicklook</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="/../static/css/bootstrap.min.css">
+        <link rel="icon" type="image/png" href="/../static/img/favicon.png">
+
+        <style>
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        @media (min-width:980px) and (max-width:1199px) {
+            .no-overflow {
+                width:11.5vw;
+                overflow:hidden;
+                white-space:nowrap;
+                text-overflow:ellipsis;
+            }
+        }
+        </style>
+
+        <link rel="stylesheet" href="/../static/css/bootstrap-responsive.min.css">
+
+        <script src="/../static/js/modernizr-2.6.2.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="/../static/js/jquery-1.10.1.min.js"><\/script>')</script>
+
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand pull-left no-overflow" href="/">ACS Quicklook</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right">
+                            <li><a href="/database/">Database</a></li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown">Archives <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/images/Cal/">CAL Data</a></li>
+                                    <li><a href="/images/GO/">GO Data</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="/documentation/">Documentation</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+
+            {% block content %}
+            {% endblock %}
+
+            <hr>
+
+            <footer>
+                <p>Space Telescope Science Institute</p>
+            </footer>
+
+        </div>
+
+        <script src="/../static/js/vendor/bootstrap.min.js"></script>
+        <script src="/../static/js/plugins.js"></script>
+        <script src="/../static/js/main.js"></script>
+    </body>
+</html>
