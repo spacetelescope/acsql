@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.css">
+
+<div class="row">
+    <div class="span6">
+        <h2>Database</h2>
+        <p>Query the acsql Database</p>
+        <p><a class="btn" href="/query_database/">Query form &raquo;</a></p>
+    </div>
+    <div class="span6">
+        <h2>Archive</h2>
+        <p>Links to CAL and GO images by proposal ID.</p>
+        <p><a class="btn" href="/images/Cal/">CAL data &raquo;</a>&nbsp;<a class="btn" href="/images/GO/">GO data &raquo;</a></p>
+    </div>
+</div>
+
+<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#scriptstatus').DataTable( {
+        "paging":   false,
+        "bFilter": false,
+        stateSave: true
+    } );
+});
+</script>
+{% endblock%}
