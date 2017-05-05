@@ -75,7 +75,7 @@ def all_filenames(dataset):
         .filter(Datasets.rootname.like('{}%'.format(dataset)))
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         results_dict = result.__dict__
@@ -104,7 +104,7 @@ def filters_for_rootname(rootname):
         .filter(WFC_raw_0.rootname == rootname)
     query_results = query.one()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
     print('{}: {}'.format(rootname, query_results))
 
     return query
@@ -132,7 +132,7 @@ def filter_distribution():
     query_results = query.all()
     db_count = session.query(WFC_raw_0).count()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         perc_used = round((result[2] / db_count) * 100., 2)
@@ -161,7 +161,7 @@ def rootnames_for_target(targname):
             .filter(WFC_raw_0.targname == targname)
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -195,7 +195,7 @@ def filenames_for_calibration(calibration_keyword, value):
         .filter(calibration_keyword_obj == value)
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
@@ -229,7 +229,7 @@ def goodmean_for_dataset(dataset):
             .filter(Master.rootname.like('{}%'.format(dataset)))
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -255,7 +255,7 @@ def rootnames_with_postflash():
 
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result)
@@ -277,7 +277,7 @@ def non_asn_rootnames():
         .filter(~exists().where(and_(Master.rootname == WFC_asn_0.rootname)))
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
@@ -285,9 +285,9 @@ def non_asn_rootnames():
     return query
 
 
-def asn_in_date_range(begin_date, end_date):
-    """Queries for ASN filenames for observations that occur between
-    the ``begin_date`` and ``end_date``.
+def filenames_in_date_range(begin_date, end_date):
+    """Queries for filenames for observations that occur between the
+    ``begin_date`` and ``end_date``.
 
     Parameters
     ----------
@@ -304,12 +304,12 @@ def asn_in_date_range(begin_date, end_date):
     """
 
     date_obs = getattr(WFC_raw_0, 'date-obs')  # Python doesn't like hyphens
-    query = session.query(WFC_asn_0.filename)\
+    query = session.query(WFC_raw_0.filename)\
         .filter(date_obs >= begin_date)\
         .filter(date_obs <= end_date)
     query_results = query.all()
 
-    print('\nQuery performed:\n\n {}\n'.format(str(query)))
+    print('\nQuery performed:\n\n{}\n'.format(str(query)))
 
     for result in query_results:
         print(result[0])
