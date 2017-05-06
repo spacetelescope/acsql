@@ -204,7 +204,7 @@ class Datasets(base):
 
     foreign_keys = []
     for filetype in FILE_EXTS:
-        for ext in FILE_EXTS[filetype]:
+        for ext in [0, 1]:
             foreign_keys.append(ForeignKeyConstraint([filetype],
                 ['wfc_{}_{}.filename'.format(filetype, ext)]))
     foreign_keys = tuple(foreign_keys)
