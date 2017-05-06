@@ -338,57 +338,37 @@ WFC_asn_1 = orm_factory('WFC_asn_1')
 # HRC_asn_1 = orm_factory('HRC_asn_1')
 
 
-# # SBC tables
-# SBC_raw_0 = orm_factory('SBC_raw_0')
-# SBC_raw_1 = orm_factory('SBC_raw_1')
-# SBC_raw_2 = orm_factory('SBC_raw_2')
-# SBC_raw_3 = orm_factory('SBC_raw_3')
+# SBC tables
+SBC_raw_0 = orm_factory('SBC_raw_0')
+SBC_raw_1 = orm_factory('SBC_raw_1')
+SBC_raw_2 = orm_factory('SBC_raw_2')
+SBC_raw_3 = orm_factory('SBC_raw_3')
 
-# SBC_flt_0 = orm_factory('SBC_flt_0')
-# SBC_flt_1 = orm_factory('SBC_flt_1')
-# SBC_flt_2 = orm_factory('SBC_flt_2')
-# SBC_flt_3 = orm_factory('SBC_flt_3')
+SBC_flt_0 = orm_factory('SBC_flt_0')
+SBC_flt_1 = orm_factory('SBC_flt_1')
+SBC_flt_2 = orm_factory('SBC_flt_2')
+SBC_flt_3 = orm_factory('SBC_flt_3')
 
-# SBC_flc_0 = orm_factory('SBC_flc_0')
-# SBC_flc_1 = orm_factory('SBC_flc_1')
-# SBC_flc_2 = orm_factory('SBC_flc_2')
-# SBC_flc_3 = orm_factory('SBC_flc_3')
+SBC_spt_0 = orm_factory('SBC_spt_0')
+SBC_spt_1 = orm_factory('SBC_spt_1')
 
-# SBC_spt_0 = orm_factory('SBC_spt_0')
-# SBC_spt_1 = orm_factory('SBC_spt_1')
+SBC_drz_0 = orm_factory('SBC_drz_0')
+SBC_drz_1 = orm_factory('SBC_drz_1')
+SBC_drz_2 = orm_factory('SBC_drz_2')
+SBC_drz_3 = orm_factory('SBC_drz_3')
 
-# SBC_drz_0 = orm_factory('SBC_drz_0')
-# SBC_drz_1 = orm_factory('SBC_drz_1')
-# SBC_drz_2 = orm_factory('SBC_drz_2')
-# SBC_drz_3 = orm_factory('SBC_drz_3')
+SBC_jif_0 = orm_factory('SBC_jif_0')
+SBC_jif_1 = orm_factory('SBC_jif_1')
+SBC_jif_2 = orm_factory('SBC_jif_2')
+SBC_jif_3 = orm_factory('SBC_jif_3')
 
-# SBC_drc_0 = orm_factory('SBC_drc_0')
-# SBC_drc_1 = orm_factory('SBC_drc_1')
-# SBC_drc_2 = orm_factory('SBC_drc_2')
-# SBC_drc_3 = orm_factory('SBC_drc_3')
+SBC_jit_0 = orm_factory('SBC_jit_0')
+SBC_jit_1 = orm_factory('SBC_jit_1')
+SBC_jit_2 = orm_factory('SBC_jit_2')
+SBC_jit_3 = orm_factory('SBC_jit_3')
 
-# SBC_crj_0 = orm_factory('SBC_crj_0')
-# SBC_crj_1 = orm_factory('SBC_crj_1')
-# SBC_crj_2 = orm_factory('SBC_crj_2')
-# SBC_crj_3 = orm_factory('SBC_crj_3')
-
-# SBC_crc_0 = orm_factory('SBC_crc_0')
-# SBC_crc_1 = orm_factory('SBC_crc_1')
-# SBC_crc_2 = orm_factory('SBC_crc_2')
-# SBC_crc_3 = orm_factory('SBC_crc_3')
-
-# SBC_jif_0 = orm_factory('SBC_jif_0')
-# SBC_jif_1 = orm_factory('SBC_jif_1')
-# SBC_jif_2 = orm_factory('SBC_jif_2')
-# SBC_jif_3 = orm_factory('SBC_jif_3')
-
-# SBC_jit_0 = orm_factory('SBC_jit_0')
-# SBC_jit_1 = orm_factory('SBC_jit_1')
-# SBC_jit_2 = orm_factory('SBC_jit_2')
-# SBC_jit_3 = orm_factory('SBC_jit_3')
-
-# SBC_asn_0 = orm_factory('SBC_asn_0')
-# SBC_asn_1 = orm_factory('SBC_asn_1')
+SBC_asn_0 = orm_factory('SBC_asn_0')
+SBC_asn_1 = orm_factory('SBC_asn_1')
 
 
 if __name__ == '__main__':

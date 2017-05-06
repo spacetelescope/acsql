@@ -54,18 +54,26 @@ import acsql
 __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
 
-# Define possible file type/extension combinations
-FILE_EXTS = {'jif': [0, 1, 2, 3, 4, 5, 6],
-             'jit': [0, 1, 2, 3, 4, 5, 6],
-             'flt': [0, 1, 2, 3, 4, 5, 6],
-             'flc': [0, 1, 2, 3, 4, 5, 6],
-             'drz': [0, 1, 2, 3],
-             'drc': [0, 1, 2, 3],
-             'raw': [0, 1, 2, 3, 4, 5, 6],
-             'crj': [0, 1, 2, 3, 4, 5, 6],
-             'crc': [0, 1, 2, 3, 4, 5, 6],
-             'spt': [0, 1],
-             'asn': [0, 1]}
+# Define possible detector/filetype/extension combinations
+WFC_FILE_EXTS = {'jif': [0, 1, 2, 3, 4, 5, 6],
+                 'jit': [0, 1, 2, 3, 4, 5, 6],
+                 'flt': [0, 1, 2, 3, 4, 5, 6],
+                 'flc': [0, 1, 2, 3, 4, 5, 6],
+                 'drz': [0, 1, 2, 3],
+                 'drc': [0, 1, 2, 3],
+                 'raw': [0, 1, 2, 3, 4, 5, 6],
+                 'crj': [0, 1, 2, 3, 4, 5, 6],
+                 'crc': [0, 1, 2, 3, 4, 5, 6],
+                 'spt': [0, 1],
+                 'asn': [0, 1]}
+
+SBC_FILE_EXTS = {'jif': [0, 1, 2],
+                 'jit': [0, 1, 2],
+                 'flt': [0, 1, 2, 3],
+                 'drz': [0, 1, 2, 3],
+                 'raw': [0, 1, 2, 3],
+                 'spt': [0, 1],
+                 'asn': [0, 1]}
 
 
 def get_settings():
@@ -139,7 +147,7 @@ def get_table_defs():
     table_def_directory = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
     table_def_directory = table_def_directory.replace('utils', 'database/table_definitions/')
-    table_def_files = glob.glob(os.path.join(table_def_directory, '*'))
+    table_def_files = glob.glob(os.path.join(table_def_directory, '*.txt'))
 
     table_defs = {}
 
