@@ -74,12 +74,23 @@ def get_detector(filename, filetype):
     """
 
     try:
-        detector = fits.getval(filename, 'detector', 0)
+        detector = fits.getval(filename, 'detector', 0).lower()
     except KeyError:
         raw = filename.replace(filetype, 'raw')
-        detector = fits.getval(raw, 'detector', 0)
+        flt = filename.replace(filetype, 'flt')
+        spt = filename.replace(filetype, 'spt')
+        drz = filename.replace(filetype, 'drz')
+        for filename in [raw, flt, spt, drz]:
+            try:
+                detector = fits.getval(raw, 'detector', 0).lower()
+                break
+            except KeyError:
+                detector = None
 
-    return detector.lower()
+    if not detector:
+        logging.warning('Cannot determine detector for {}'.format(filename))
+
+    return detector
 
 def make_file_dict(filename):
     """Create a dictionary that holds information that is useful for
