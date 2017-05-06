@@ -113,13 +113,14 @@ def make_jpeg(file_dict):
 
     # If the image is full-frame WFC, add on the other extension
     if len(hdulist) > 4 and hdulist[0].header['detector'] == 'WFC':
-        data2 = hdulist[4].data
-        height = data.shape[0] + data2.shape[0]
-        width = data.shape[1]
-        new_array = np.zeros((height, width))
-        new_array[0:height/2, :] = data
-        new_array[height/2:height, :] = data2
-        data = new_array
+        if hdulist[4].header['EXTNAME'] == 'SCI':
+            data2 = hdulist[4].data
+            height = data.shape[0] + data2.shape[0]
+            width = data.shape[1]
+            new_array = np.zeros((height, width))
+            new_array[0:height/2, :] = data
+            new_array[height/2:height, :] = data2
+            data = new_array
 
     # Clip the top and bottom 1% of pixels.
     sorted_data = copy.copy(data)
@@ -242,14 +243,21 @@ def update_header_table(file_dict, ext, detector):
         The detector (e.g. ``wfc``).
     """
 
-    # Check if extension exists before proceeding
+    # Check if header is an ingestable header before proceeding
+    valid_extnames = ['PRIMARY', 'SCI', 'ERR', 'DQ', 'UDL']
     ext_exists = True
     try:
         header = fits.getheader(file_dict['filename'], ext)
+        if ext == 0:
+            extname = 'PRIMARY'
+        else:
+            extname = header['EXTNAME']
     except IndexError:
         ext_exists = False
+        extname = None
 
-    if ext_exists:
+    # Ingest the header if it is ingestable
+    if ext_exists and extname in valid_extnames:
 
         table = "{}_{}_{}".format(detector.upper(),
                                   file_dict['filetype'].lower(),
