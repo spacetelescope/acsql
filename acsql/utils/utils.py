@@ -75,6 +75,10 @@ SBC_FILE_EXTS = {'jif': [0, 1, 2],
                  'spt': [0, 1],
                  'asn': [0, 1]}
 
+# Define ingestable filetypes
+VALID_FILETYPES = ['jif', 'jit', 'flt', 'flc', 'drz', 'drc', 'raw', 'crj',
+                   'crc', 'spt', 'asn']
+
 
 def get_settings():
     """Returns the settings that are located in the acsql config file.
