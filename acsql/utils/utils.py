@@ -55,8 +55,8 @@ __config__ = os.path.realpath(os.path.join(os.getcwd(),
                                            os.path.dirname(__file__)))
 
 # Define possible file type/extension combinations
-FILE_EXTS = {'jif': [0],
-             'jit': [0],
+FILE_EXTS = {'jif': [0, 1, 2, 3, 4, 5, 6],
+             'jit': [0, 1, 2, 3, 4, 5, 6],
              'flt': [0, 1, 2, 3, 4, 5, 6],
              'flc': [0, 1, 2, 3, 4, 5, 6],
              'drz': [0, 1, 2, 3],

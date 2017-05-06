@@ -242,27 +242,34 @@ def update_header_table(file_dict, ext, detector):
         The detector (e.g. ``wfc``).
     """
 
-    table = "{}_{}_{}".format(detector.upper(),
-                              file_dict['filetype'].lower(),
-                              str(ext))
+    # Check if extension exists before proceeding
+    ext_exists = True
+    try:
+        header = fits.getheader(file_dict['filename'], ext)
+    except IndexError:
+        ext_exists = False
 
-    header = fits.getheader(file_dict['filename'], ext)
+    if ext_exists:
 
-    exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', 'FILENAME', '']
-    input_dict = {'rootname': file_dict['rootname'],
-                  'filename': file_dict['basename']}
+        table = "{}_{}_{}".format(detector.upper(),
+                                  file_dict['filetype'].lower(),
+                                  str(ext))
 
-    for key, value in header.items():
-        key = key.strip()
-        if key in exclude_list or value == "":
-            continue
-        elif key not in TABLE_DEFS[table.lower()]:
-            logging.warning('{} not in {}'.format(key, table))
-            continue
-        input_dict[key.lower()] = value
+        exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', 'FILENAME', '']
+        input_dict = {'rootname': file_dict['rootname'],
+                      'filename': file_dict['basename']}
 
-    insert_or_update(table, input_dict)
-    logging.info('\t\tUpdated {} table.'.format(table))
+        for key, value in header.items():
+            key = key.strip()
+            if key in exclude_list or value == "":
+                continue
+            elif key not in TABLE_DEFS[table.lower()]:
+                logging.warning('{} not in {}'.format(key, table))
+                continue
+            input_dict[key.lower()] = value
+
+        insert_or_update(table, input_dict)
+        logging.info('\t\tUpdated {} table.'.format(table))
 
 
 def update_master_table(rootname_path):
