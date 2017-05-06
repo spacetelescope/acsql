@@ -47,7 +47,6 @@ from acsql.database.database_interface import Datasets
 from acsql.database.database_interface import session
 from acsql.utils import utils
 from acsql.utils.utils import insert_or_update
-from acsql.utils.utils import WFC_FILE_EXTS, SBC_FILE_EXTS
 from acsql.utils.utils import SETTINGS
 from acsql.utils.utils import TABLE_DEFS
 from acsql.utils.utils import VALID_FILETYPES
@@ -76,15 +75,15 @@ def get_detector(filename, filetype):
     try:
         detector = fits.getval(filename, 'detector', 0).lower()
     except KeyError:
-        raw = filename.replace(filetype, 'raw')
-        flt = filename.replace(filetype, 'flt')
-        spt = filename.replace(filetype, 'spt')
-        drz = filename.replace(filetype, 'drz')
-        for filename in [raw, flt, spt, drz]:
+        raw = glob.glob(os.path.join(os.path.dirname(filename), '*raw.fits'))
+        flt = glob.glob(os.path.join(os.path.dirname(filename), '*flt.fits'))
+        spt = glob.glob(os.path.join(os.path.dirname(filename), '*spt.fits'))
+        drz = glob.glob(os.path.join(os.path.dirname(filename), '*drz.fits'))
+        for test_file in [raw, flt, spt, drz]:
             try:
-                detector = fits.getval(raw, 'detector', 0).lower()
+                detector = fits.getval(test_file[0], 'detector', 0).lower()
                 break
-            except KeyError:
+            except (IndexError, KeyError):
                 detector = None
 
     if not detector:
