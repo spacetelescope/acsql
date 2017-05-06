@@ -1,31 +1,36 @@
 """This module contains several functions that are useful to various
-modules within the acsql package.  See individual function docstrings
-for further information.
+modules within the ``acsql`` package.  See individual function
+docstrings for further information.
 
 Authors
 -------
-    Matthew Bourque, 2017
+    Matthew Bourque
 
 Use
 ---
 
     The functions within this module are intened to be imported by
     various acsql modules and scripts, as such:
+    ::
 
-    from acsql.utils.utils import insert_or_update
-    from acsql.utils.utils import SETTINGS
-    from acsql.utils.utils import setup_logging
+        from acsql.utils.utils import insert_or_update
+        from acsql.utils.utils import SETTINGS
+        from acsql.utils.utils import setup_logging
 
     There also exists static importable data:
+    ::
 
-    from acsql.utils.utils import FILE_EXTS
-    from acsql.utils.utils import TABLE_DEFS
+        from acsql.utils.utils import FILE_EXTS
+        from acsql.utils.utils import TABLE_DEFS
 
 Dependencies
 ------------
     External library dependencies include:
 
-    (1) sqlalchemy
+    - ``acsql``
+    - ``astropy``
+    - ``numpy``
+    - ``sqlalchemy``
 """
 
 import datetime
@@ -41,6 +46,8 @@ import astropy
 import numpy
 import sqlalchemy
 from sqlalchemy import Table
+from sqlalchemy.exc import DataError
+from sqlalchemy.exc import IntegrityError
 
 import acsql
 
@@ -151,7 +158,19 @@ TABLE_DEFS = get_table_defs()
 
 
 def insert_or_update(table, data_dict):
-    """
+    """Insert or update a record in the given ``table`` with the data
+    in the ``data_dict``.
+
+    A record is inserted if the primary key of the record does not
+    already exist in the ``table``.  A record is updated if it does
+    already exist.
+
+    Parameters
+    ----------
+    table : str
+        The name of the table to insert/update into.
+    data_dict : dict
+        A dictionary containing the data to insert/update.
     """
 
     table_obj = getattr(acsql.database.database_interface, table)
@@ -167,7 +186,11 @@ def insert_or_update(table, data_dict):
     if not query_count:
         tab = Table(table.lower(), base.metadata, autoload=True)
         insert_obj = tab.insert()
-        insert_obj.execute(data_dict)
+        try:
+            insert_obj.execute(data_dict)
+        except (DataError, IntegrityError) as e:
+            logging.warning('\tUnable to insert {} into {}: {}'.format(
+                            data_dict['filename'], table, e))
 
     else:
         query.update(data_dict)
