@@ -37,7 +37,7 @@ import numpy as np
 from stak import Hselect
 
 from acsql.utils import utils
-from acsql.utils.utils import SETTINGS, WFC_FILE_EXTS, SBC_FILE_EXTS
+from acsql.utils.utils import SETTINGS
 
 
 def make_tabledefs(detector):
@@ -90,3 +90,4 @@ if __name__ == '__main__':
 
     make_tabledefs('wfc')
     make_tabledefs('sbc')
+    make_tabledefs('hrc')

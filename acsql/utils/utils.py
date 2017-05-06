@@ -75,6 +75,15 @@ SBC_FILE_EXTS = {'jif': [0, 1, 2],
                  'spt': [0, 1],
                  'asn': [0, 1]}
 
+HRC_FILE_EXTS = {'jif': [0, 1, 2],
+                 'jit': [0, 1, 2],
+                 'flt': [0, 1, 2, 3],
+                 'drz': [0, 1, 2, 3],
+                 'raw': [0, 1, 2, 3],
+                 'crj': [0, 1, 2, 3],
+                 'spt': [0, 1],
+                 'asn': [0, 1]}
+
 # Define ingestable filetypes
 VALID_FILETYPES = ['jif', 'jit', 'flt', 'flc', 'drz', 'drc', 'raw', 'crj',
                    'crc', 'spt', 'asn']
