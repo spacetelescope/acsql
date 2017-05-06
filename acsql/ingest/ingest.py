@@ -244,7 +244,8 @@ def update_header_table(file_dict, ext, detector):
     """
 
     # Check if header is an ingestable header before proceeding
-    valid_extnames = ['PRIMARY', 'SCI', 'ERR', 'DQ', 'UDL']
+    valid_extnames = ['PRIMARY', 'SCI', 'ERR', 'DQ', 'UDL', 'jit', 'jif',
+                      'ASN', 'WHT', 'CTX']
     ext_exists = True
     try:
         header = fits.getheader(file_dict['filename'], ext)
