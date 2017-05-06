@@ -6,8 +6,8 @@ extensions.
 
 Authors
 -------
-    Matthew Bourque, 2017
-    Sara Ogaz, 2017
+    Matthew Bourque
+    Sara Ogaz
 
 Use
 ---
@@ -17,9 +17,20 @@ Use
 
         from acsql.ingest.ingest import ingest
         ingest(rootname)
+
+Dependencies
+------------
+    External library dependencies include:
+
+    - ``acsql``
+    - ``astropy``
+    - ``numpy``
+    - ``PIL``
+    - ``sqlalchemy``
 """
 
 import copy
+from datetime import date
 import glob
 import logging
 import os
@@ -29,7 +40,6 @@ from astropy.io import fits
 import numpy as np
 from sqlalchemy import Table
 from sqlalchemy.exc import IntegrityError
-from datetime import date
 from PIL import Image
 
 from acsql.database.database_interface import base
@@ -193,14 +203,22 @@ def update_datasets_table(file_dict):
 
         tab = Table('datasets', base.metadata, autoload=True)
         insert_obj = tab.insert()
-        insert_obj.execute(data_dict)
+        try:
+            insert_obj.execute(data_dict)
+        except IntegrityError as e:
+            logging.warning('\tUnable to insert {} into datasets table: {}'\
+                .format(file_dict['basename'], e))
 
     # If there are results, add the filename to the existing entry
     else:
         data_dict = query.one().__dict__
         del data_dict['_sa_instance_state']
         data_dict[file_dict['filetype']] = file_dict['basename']
-        query.update(data_dict)
+        try:
+            query.update(data_dict)
+        except IntegrityError as e:
+            logging.warning('\tUnable to update {} in datasets table: {}'\
+                .format(file_dict['basename'], e))
 
     session.commit()
     logging.info('\t\tUpdated datasets table.')
@@ -283,32 +301,28 @@ def ingest(rootname_path, filetype='all'):
         The path to the rootname directory in the MAST cache.
     """
 
-    try:
-        update_master_table(rootname_path)
+    update_master_table(rootname_path)
 
-        if filetype == 'all':
-            search = '*.fits'
-        else:
-            search = '*{}.fits'.format(filetype)
-        file_paths = glob.glob(os.path.join(rootname_path, search))
+    if filetype == 'all':
+        search = '*.fits'
+    else:
+        search = '*{}.fits'.format(filetype)
+    file_paths = glob.glob(os.path.join(rootname_path, search))
 
-        for filename in file_paths:
-            if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
+    for filename in file_paths:
+        if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
 
-                # Make dictionary that holds all the information you would ever
-                # want about the file
-                file_dict = make_file_dict(filename)
+            # Make dictionary that holds all the information you would ever
+            # want about the file
+            file_dict = make_file_dict(filename)
 
-                for ext in FILE_EXTS[file_dict['filetype']]:
-                    update_header_table(file_dict, ext, 'wfc')
+            for ext in FILE_EXTS[file_dict['filetype']]:
+                update_header_table(file_dict, ext, 'wfc')
 
-                update_datasets_table(file_dict)
+            update_datasets_table(file_dict)
 
-                # Make JPEGs and Thumbnails
-                if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-                    make_jpeg(file_dict)
-                if file_dict['filetype'] == 'flt':
-                    make_thumbnail(file_dict)
-
-    except IntegrityError as e:
-        logging.warning('Unable to ingest {}: {}'.format(rootname_path, e))
+            # Make JPEGs and Thumbnails
+            if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+                make_jpeg(file_dict)
+            if file_dict['filetype'] == 'flt':
+                make_thumbnail(file_dict)
