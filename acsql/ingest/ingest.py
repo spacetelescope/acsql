@@ -45,11 +45,41 @@ from PIL import Image
 from acsql.database.database_interface import base
 from acsql.database.database_interface import Datasets
 from acsql.database.database_interface import session
+from acsql.utils import utils
 from acsql.utils.utils import insert_or_update
-from acsql.utils.utils import FILE_EXTS
+from acsql.utils.utils import WFC_FILE_EXTS, SBC_FILE_EXTS
 from acsql.utils.utils import SETTINGS
 from acsql.utils.utils import TABLE_DEFS
+from acsql.utils.utils import VALID_FILETYPES
 
+
+def get_detector(filename, filetype):
+    """Return the ``detector`` associated with the file.
+
+    If the ``detector`` keyword does not exist in the file's primary
+    header, then the corresponding ``raw`` file is used to determine
+    the detector.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file.
+    filetype : str
+        The filetype (e.g. ``flt``)
+
+    Returns
+    -------
+    detector : str
+        The detector (e.g. ``WFC``)
+    """
+
+    try:
+        detector = fits.getval(filename, 'detector', 0)
+    except KeyError:
+        raw = filename.replace(filetype, 'raw')
+        detector = fits.getval(raw, 'detector', 0)
+
+    return detector.lower()
 
 def make_file_dict(filename):
     """Create a dictionary that holds information that is useful for
@@ -72,14 +102,15 @@ def make_file_dict(filename):
 
     # Filename related keywords
     file_dict['filename'] = os.path.abspath(filename)
+    file_dict['dirname'] = os.path.dirname(filename)
     file_dict['basename'] = os.path.basename(filename)
     file_dict['rootname'] = file_dict['basename'].split('_')[0][:-1]
     file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
     file_dict['proposid'] = file_dict['basename'][0:4]
 
     # Metadata kewords
-    if file_dict['filetype'] in ['raw', 'flt', 'flc', 'drz']:
-        file_dict['detector'] = fits.getval(file_dict['filename'], 'detector', 0)
+    file_dict['detector'] = get_detector(file_dict['filename'], file_dict['filetype'])
+    file_dict['file_exts'] = getattr(utils, '{}_FILE_EXTS'.format(file_dict['detector'].upper()))[file_dict['filetype']]
 
     # JPEG related kewords
     if file_dict['filetype'] in ['raw', 'flt', 'flc']:
@@ -225,7 +256,7 @@ def update_datasets_table(file_dict):
     logging.info('\t\tUpdated datasets table.')
 
 
-def update_header_table(file_dict, ext, detector):
+def update_header_table(file_dict, ext):
     """Insert/update an entry for the file in the appropriate header
     table (e.g. ``wfc_raw_0``).
 
@@ -239,8 +270,6 @@ def update_header_table(file_dict, ext, detector):
         process.
     ext : int
         The header extension.
-    detector : str
-        The detector (e.g. ``wfc``).
     """
 
     # Check if header is an ingestable header before proceeding
@@ -260,7 +289,7 @@ def update_header_table(file_dict, ext, detector):
     # Ingest the header if it is ingestable
     if ext_exists and extname in valid_extnames:
 
-        table = "{}_{}_{}".format(detector.upper(),
+        table = "{}_{}_{}".format(file_dict['detector'].upper(),
                                   file_dict['filetype'].lower(),
                                   str(ext))
 
@@ -281,24 +310,25 @@ def update_header_table(file_dict, ext, detector):
         logging.info('\t\tUpdated {} table.'.format(table))
 
 
-def update_master_table(rootname_path):
+def update_master_table(file_dict):
     """Insert/update an entry in the ``master`` table for the given
-    rootname.
+    file.
 
     Parameters
     ----------
-    rootname_path : str
-        The path to the rootname directory in the MAST cache.
+    file_dict : dict
+        A dictionary containing various data useful for the ingestion
+        process.
     """
 
-    logging.info('\tIngesting {}'.format(rootname_path))
+    logging.info('\tIngesting {}'.format(file_dict['dirname']))
 
     # Insert a record in the master table
-    input_dict = {'rootname': rootname_path.split('/')[-1][:-1],
-                  'path': rootname_path,
+    input_dict = {'rootname': file_dict['rootname'],
+                  'path': file_dict['dirname'],
                   'first_ingest_date': date.today().isoformat(),
                   'last_ingest_date': date.today().isoformat(),
-                  'detector': 'WFC'}
+                  'detector': file_dict['detector']}
     insert_or_update('Master', input_dict)
     logging.info('\t\tUpdated master table.')
 
@@ -317,24 +347,31 @@ def ingest(rootname_path, filetype='all'):
         The path to the rootname directory in the MAST cache.
     """
 
-    update_master_table(rootname_path)
-
     if filetype == 'all':
         search = '*.fits'
     else:
         search = '*{}.fits'.format(filetype)
     file_paths = glob.glob(os.path.join(rootname_path, search))
 
+    first_file = True
     for filename in file_paths:
-        if os.path.basename(filename).split('.')[0][10:] not in ['trl', 'flt_hlet']:
+        filetype = os.path.basename(filename).split('.')[0][10:]
+        if filetype in VALID_FILETYPES:
 
             # Make dictionary that holds all the information you would ever
             # want about the file
             file_dict = make_file_dict(filename)
 
-            for ext in FILE_EXTS[file_dict['filetype']]:
-                update_header_table(file_dict, ext, 'wfc')
+            # Update master table if necessary
+            if first_file:
+                update_master_table(file_dict)
+                first_file = False
 
+            # Update header tables
+            for ext in file_dict['file_exts']:
+                update_header_table(file_dict, ext)
+
+            # Update datasets table
             update_datasets_table(file_dict)
 
             # Make JPEGs and Thumbnails
