@@ -56,7 +56,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
 from sqlalchemy import Time
 
-from acsql.utils.utils import SETTINGS, FILE_EXTS
+from acsql.utils.utils import SETTINGS, WFC_FILE_EXTS, SBC_FILE_EXTS
 
 
 def define_columns(data_dict, class_name):
@@ -202,13 +202,13 @@ class Datasets(base):
     jit = Column(String(18), nullable=True)
     asn = Column(String(18), nullable=True)
 
-    foreign_keys = []
-    for filetype in FILE_EXTS:
-        for ext in [0, 1]:
-            foreign_keys.append(ForeignKeyConstraint([filetype],
-                ['wfc_{}_{}.filename'.format(filetype, ext)]))
-    foreign_keys = tuple(foreign_keys)
-    __table_args__ = foreign_keys
+    # foreign_keys = []
+    # for filetype in FILE_EXTS:
+    #     for ext in [0, 1]:
+    #         foreign_keys.append(ForeignKeyConstraint([filetype],
+    #             ['wfc_{}_{}.filename'.format(filetype, ext)]))
+    # foreign_keys = tuple(foreign_keys)
+    # __table_args__ = foreign_keys
 
 
 # WFC tables
@@ -360,12 +360,10 @@ SBC_drz_3 = orm_factory('SBC_drz_3')
 SBC_jif_0 = orm_factory('SBC_jif_0')
 SBC_jif_1 = orm_factory('SBC_jif_1')
 SBC_jif_2 = orm_factory('SBC_jif_2')
-SBC_jif_3 = orm_factory('SBC_jif_3')
 
 SBC_jit_0 = orm_factory('SBC_jit_0')
 SBC_jit_1 = orm_factory('SBC_jit_1')
 SBC_jit_2 = orm_factory('SBC_jit_2')
-SBC_jit_3 = orm_factory('SBC_jit_3')
 
 SBC_asn_0 = orm_factory('SBC_asn_0')
 SBC_asn_1 = orm_factory('SBC_asn_1')
