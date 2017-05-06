@@ -1,41 +1,48 @@
-"""This module provides ORMs for the acsql database, as well as engine
-and session objects for connecting to the database.
+"""This module provides ORMs for the ``acsql`` database, as well as
+``engine`` and ``session`` objects for connecting to the database.
 
-The load_connection() function within this module allows the user to
-connect to the acsql database via the session, base, and engine objects
-(described below).  The classes within serve as ORMs (Object-relational
-mappings) that define the individual tables of the relational database.
+The ``load_connection()`` function within this module allows the user
+to connect to the ``acsql`` database via the ``session``, ``base``,
+and ``engine`` objects (described below).  The classes within serve as
+ORMs (Object-relational mappings) that define the individual tables of
+the relational database.
 
-The engine object serves as the low-level database API and perhaps most
-importantly contains dialects which allows the sqlalchemy module to
-communicate with the database.
+The ``engine`` object serves as the low-level database API and perhaps
+most importantly contains dialects which allows the ``sqlalchemy``
+module to communicate with the database.
 
-The base object serves as a base class for class definitions.  It
-produces Table objects and constructs ORMs.
+The ``base`` object serves as a base class for class definitions.  It
+produces ``Table`` objects and constructs ORMs.
 
-The session object manages operations on ORM-mapped objects, as
+The ``session`` object manages operations on ORM-mapped objects, as
 construced by the base.  These operations include querying, for
 example.
 
 Authors
 -------
-    Matthew Bourque, 2017
+    Matthew Bourque
 
 Use
 ---
-    This module is intended to be imported from various acsql modules
-    and scripts.  The importable objects from this module are as
-    follows:
+    This module is intended to be imported from various ``acsql``
+    modules and scripts.  The importable objects from this module are
+    as follows:
+    ::
 
-    from acsql.database.database_interface import base
-    from acsql.database.database_interface import engine
-    from acsql.database.database_interface import session
+        from acsql.database.database_interface import base
+        from acsql.database.database_interface import engine
+        from acsql.database.database_interface import session
+        from acsql.database.database_interface import Master
+        from acsql.database.database_interface import Datasets
+        from acsql.database.database_interface import <header_table>
 
 Dependencies
 ------------
     External library dependencies include:
 
-    (1) sqlalchemy
+    - ``acsql``
+    - ``pymysql``
+    - ``sqlalchemy``
 """
 
 import os
@@ -56,7 +63,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
 from sqlalchemy import Time
 
-from acsql.utils.utils import SETTINGS, WFC_FILE_EXTS, SBC_FILE_EXTS
+from acsql.utils.utils import SETTINGS
 
 
 def define_columns(data_dict, class_name):
@@ -107,18 +114,19 @@ def define_columns(data_dict, class_name):
     return data_dict
 
 
-def loadConnection(connection_string):
-    """Return session, base, and engine objects for connecting to the
-    acsql database.
+def load_connection(connection_string):
+    """Return ``session``, ``base``, and ``engine`` objects for
+    connecting to the ``acsql`` database.
 
-    Create and engine using an given connection_string. Create a Base
-    class and Session class from the engine. Create an instance of the
-    Session class. Return the session, base, and engine instances.
+    Create an ``engine`` using an given ``connection_string``. Create a
+    ``base`` class and ``session`` class from the ``engine``. Create an
+    instance of the ``session`` class. Return the ``session``,
+    ``base``, and ``engine`` instances.
 
     Parameters
     ----------
     connection_string : str
-        The connection string to connect to the acsql database.  The
+        The connection string to connect to the ``acsql`` database. The
         connection string should take the form:
         ``dialect+driver://username:password@host:port/database``
 
@@ -132,6 +140,7 @@ def loadConnection(connection_string):
     engine : engine object
         Provides a source of database connectivity and behavior.
     """
+
     engine = create_engine(connection_string, echo=False, pool_timeout=100000)
     base = declarative_base(engine)
     Session = sessionmaker(bind=engine)
@@ -140,11 +149,11 @@ def loadConnection(connection_string):
     return session, base, engine
 
 
-session, base, engine = loadConnection(SETTINGS['connection_string'])
+session, base, engine = load_connection(SETTINGS['connection_string'])
 
 
 def orm_factory(class_name):
-    """Create a SQLAlchemy ORM Classes with the given class_name.
+    """Create a SQLAlchemy ORM Classes with the given ``class_name``.
 
     Parameters
     ----------
