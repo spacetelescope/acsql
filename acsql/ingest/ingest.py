@@ -79,9 +79,16 @@ def get_detector(filename, filetype):
         flt = glob.glob(os.path.join(os.path.dirname(filename), '*flt.fits'))
         spt = glob.glob(os.path.join(os.path.dirname(filename), '*spt.fits'))
         drz = glob.glob(os.path.join(os.path.dirname(filename), '*drz.fits'))
-        for test_file in [raw, flt, spt, drz]:
+        jit = glob.glob(os.path.join(os.path.dirname(filename), '*jit.fits'))
+        for test_files in [raw, flt, spt, drz, jit]:
             try:
-                detector = fits.getval(test_file[0], 'detector', 0).lower()
+                test_file = test_files[0]
+                if 'jit' in test_file:
+                    detector = fits.getval(test_file, 'config', 0)\
+                        .lower().split('/')[1]
+
+                else:
+                    detector = fits.getval(test_file, 'detector', 0).lower()
                 break
             except (IndexError, KeyError):
                 detector = None
