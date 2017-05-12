@@ -52,7 +52,7 @@ from acsql.utils.utils import TABLE_DEFS
 from acsql.utils.utils import VALID_FILETYPES
 
 
-def get_detector(filename, filetype):
+def get_detector(rootname_path):
     """Return the ``detector`` associated with the file.
 
     If the ``detector`` keyword does not exist in the file's primary
@@ -61,10 +61,8 @@ def get_detector(filename, filetype):
 
     Parameters
     ----------
-    filename : str
-        The path to the file.
-    filetype : str
-        The filetype (e.g. ``flt``)
+    rootname_path : str
+        The path to the rootname parent directory.
 
     Returns
     -------
@@ -72,29 +70,27 @@ def get_detector(filename, filetype):
         The detector (e.g. ``WFC``)
     """
 
-    try:
-        detector = fits.getval(filename, 'detector', 0).lower()
-    except KeyError:
-        raw = glob.glob(os.path.join(os.path.dirname(filename), '*raw.fits'))
-        flt = glob.glob(os.path.join(os.path.dirname(filename), '*flt.fits'))
-        spt = glob.glob(os.path.join(os.path.dirname(filename), '*spt.fits'))
-        drz = glob.glob(os.path.join(os.path.dirname(filename), '*drz.fits'))
-        jit = glob.glob(os.path.join(os.path.dirname(filename), '*jit.fits'))
-        for test_files in [raw, flt, spt, drz, jit]:
-            try:
-                test_file = test_files[0]
-                if 'jit' in test_file:
-                    detector = fits.getval(test_file, 'config', 0)\
-                        .lower().split('/')[1]
+    raw = glob.glob(os.path.join(rootname_path, '*raw.fits'))
+    flt = glob.glob(os.path.join(rootname_path, '*flt.fits'))
+    spt = glob.glob(os.path.join(rootname_path, '*spt.fits'))
+    drz = glob.glob(os.path.join(rootname_path, '*drz.fits'))
+    jit = glob.glob(os.path.join(rootname_path, '*jit.fits'))
 
-                else:
-                    detector = fits.getval(test_file, 'detector', 0).lower()
-                break
-            except (IndexError, KeyError):
-                detector = None
+    for test_files in [raw, flt, spt, drz, jit]:
+        try:
+            test_file = test_files[0]
+            if 'jit' in test_file:
+                detector = fits.getval(test_file, 'config', 0)\
+                    .lower().split('/')[1]
+            else:
+                detector = fits.getval(test_file, 'detector', 0).lower()
+            break
+        except (IndexError, KeyError):
+            detector = None
 
     if not detector:
-        logging.warning('Cannot determine detector for {}'.format(filename))
+        logging.warning('Cannot determine detector for {}'\
+            .format(rootname_path))
 
     return detector
 
@@ -126,7 +122,7 @@ def make_file_dict(filename):
     file_dict['proposid'] = file_dict['basename'][0:4]
 
     # Metadata kewords
-    file_dict['detector'] = get_detector(file_dict['filename'], file_dict['filetype'])
+    file_dict['detector'] = get_detector(file_dict['dirname'])
     file_dict['file_exts'] = getattr(utils, '{}_FILE_EXTS'.format(file_dict['detector'].upper()))[file_dict['filetype']]
 
     # JPEG related kewords
@@ -154,7 +150,7 @@ def make_jpeg(file_dict):
         process.
     """
 
-    logging.info('\t\tCreating JPEG')
+    logging.info('{}: Creating JPEG'.format(file_dict['rootname']))
 
     hdulist = fits.open(file_dict['filename'], mode='readonly')
     data = hdulist[1].data
@@ -191,7 +187,8 @@ def make_jpeg(file_dict):
     jpg_dir = os.path.dirname(file_dict['jpg_dst'])
     if not os.path.exists(jpg_dir):
         os.makedirs(jpg_dir)
-        logging.info('\t\tCreated directory {}'.format(jpg_dir))
+        logging.info('{}: Created directory {}'\
+            .format(file_dict['rootname'], jpg_dir))
 
     # Write the image to a JPEG
     image = Image.fromarray(data)
@@ -211,13 +208,14 @@ def make_thumbnail(file_dict):
         process.
     """
 
-    logging.info('\t\tCreating Thumbnail')
+    logging.info('{}: Creating Thumbnail'.format(file_dict['rootname']))
 
     # Create parent Thumbnail directory if necessary
     thumb_dir = os.path.dirname(file_dict['thumbnail_dst'])
     if not os.path.exists(thumb_dir):
         os.makedirs(thumb_dir)
-        logging.info('\t\tCreated directory {}'.format(thumb_dir))
+        logging.info('{}: Created directory {}'\
+            .format(file_dict['rootname'], thumb_dir))
 
     # Make a copy of the JPEG in the thumbnail directory
     shutil.copyfile(file_dict['jpg_dst'], file_dict['thumbnail_dst'])
@@ -255,8 +253,8 @@ def update_datasets_table(file_dict):
         try:
             insert_obj.execute(data_dict)
         except IntegrityError as e:
-            logging.warning('\tUnable to insert {} into datasets table: {}'\
-                .format(file_dict['basename'], e))
+            logging.warning('{}: Unable to insert {} into datasets table: {}'\
+                .format(file_dict['rootname'], file_dict['basename'], e))
 
     # If there are results, add the filename to the existing entry
     else:
@@ -266,11 +264,12 @@ def update_datasets_table(file_dict):
         try:
             query.update(data_dict)
         except IntegrityError as e:
-            logging.warning('\tUnable to update {} in datasets table: {}'\
-                .format(file_dict['basename'], e))
+            logging.warning('{}: Unable to update {} in datasets table: {}'\
+                .format(file_dict['rootname'], file_dict['basename'], e))
 
     session.commit()
-    logging.info('\t\tUpdated datasets table.')
+    logging.info('{}: Updated datasets table for {}.'\
+        .format(file_dict['rootname'], file_dict['filetype']))
 
 
 def update_header_table(file_dict, ext):
@@ -319,15 +318,17 @@ def update_header_table(file_dict, ext):
             if key in exclude_list or value == "":
                 continue
             elif key not in TABLE_DEFS[table.lower()]:
-                logging.warning('{} not in {}'.format(key, table))
+                logging.warning('{}: {} not in {}'\
+                    .format(file_dict['rootname'], key, table))
                 continue
             input_dict[key.lower()] = value
 
         insert_or_update(table, input_dict)
-        logging.info('\t\tUpdated {} table.'.format(table))
+        logging.info('{}: Updated {} table.'.format(file_dict['rootname'],
+                                                      table))
 
 
-def update_master_table(file_dict):
+def update_master_table(rootname_path):
     """Insert/update an entry in the ``master`` table for the given
     file.
 
@@ -338,16 +339,16 @@ def update_master_table(file_dict):
         process.
     """
 
-    logging.info('\tIngesting {}'.format(file_dict['dirname']))
+    rootname = os.path.basename(rootname_path)[:-1]
 
     # Insert a record in the master table
-    input_dict = {'rootname': file_dict['rootname'],
-                  'path': file_dict['dirname'],
+    data_dict = {'rootname': rootname,
+                  'path': rootname_path,
                   'first_ingest_date': date.today().isoformat(),
                   'last_ingest_date': date.today().isoformat(),
-                  'detector': file_dict['detector']}
-    insert_or_update('Master', input_dict)
-    logging.info('\t\tUpdated master table.')
+                  'detector': get_detector(rootname_path)}
+    insert_or_update('Master', data_dict)
+    logging.info('{}: Updated master table.'.format(rootname))
 
 
 def ingest(rootname_path, filetype='all'):
@@ -364,13 +365,18 @@ def ingest(rootname_path, filetype='all'):
         The path to the rootname directory in the MAST cache.
     """
 
+    rootname = os.path.basename(rootname_path)[:-1]
+    logging.info('{}: Begin ingestion'.format(rootname))
+
+    # Update the master table for the rootname
+    update_master_table(rootname_path)
+
     if filetype == 'all':
         search = '*.fits'
     else:
         search = '*{}.fits'.format(filetype)
     file_paths = glob.glob(os.path.join(rootname_path, search))
 
-    first_file = True
     for filename in file_paths:
         filetype = os.path.basename(filename).split('.')[0][10:]
         if filetype in VALID_FILETYPES:
@@ -378,11 +384,6 @@ def ingest(rootname_path, filetype='all'):
             # Make dictionary that holds all the information you would ever
             # want about the file
             file_dict = make_file_dict(filename)
-
-            # Update master table if necessary
-            if first_file:
-                update_master_table(file_dict)
-                first_file = False
 
             # Update header tables
             for ext in file_dict['file_exts']:
@@ -396,3 +397,5 @@ def ingest(rootname_path, filetype='all'):
                 make_jpeg(file_dict)
             if file_dict['filetype'] == 'flt':
                 make_thumbnail(file_dict)
+
+    logging.info('{}: End ingestion'.format(rootname))
