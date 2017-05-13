@@ -195,8 +195,8 @@ def insert_or_update(table, data_dict):
     """
 
     table_obj = getattr(acsql.database.database_interface, table)
-    session = getattr(acsql.database.database_interface, 'session')
-    base = getattr(acsql.database.database_interface, 'base')
+    session, base, engine = acsql.database.database_interface.\
+        load_connection(SETTINGS['connection_string'])
 
     # Check to see if a record exists for the rootname
     query = session.query(table_obj)\
@@ -211,10 +211,11 @@ def insert_or_update(table, data_dict):
             insert_obj.execute(data_dict)
         except (DataError, IntegrityError) as e:
             logging.warning('\tUnable to insert {} into {}: {}'.format(
-                            data_dict['rootname'], table, e))
+                            data_dict['filename'], table, e))
 
     else:
         query.update(data_dict)
 
     session.commit()
     session.close()
+    engine.dispose()
