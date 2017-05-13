@@ -8,7 +8,7 @@ The ``database`` subpackage contains various modules for constructing and intera
 database_interface
 ------------------
 .. automodule:: database.database_interface
-    :members: define_columns, loadConnection, orm_factory
+    :members: define_columns, get_special_column, load_connection, orm_factory
     :undoc-members:
     :show-inheritance:
 
@@ -29,6 +29,13 @@ queries
 reset_database
 --------------
 .. automodule:: database.reset_database
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+update_tabledefs
+----------------
+.. automodule:: database.update_tabledefs
     :members:
     :undoc-members:
     :show-inheritance:

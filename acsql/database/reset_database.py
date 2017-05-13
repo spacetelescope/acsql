@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-"""Reset all tables in the acsql database.
+"""Reset all tables in the ``acsql`` database.
 
 Authors
 -------
@@ -9,7 +9,15 @@ Authors
 Use
 ---
     This script is intended to be used in the command line:
-    >>> python reset_database.py
+    ::
+
+        python reset_database.py
+
+Dependencies
+------------
+    External library dependencies include:
+
+    - ``acsql``
 """
 
 from acsql.database.database_interface import base

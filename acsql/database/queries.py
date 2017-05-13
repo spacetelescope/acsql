@@ -5,15 +5,15 @@
 
 The available queries are:
 
-    1. all_filenames
-    2. filters_for_rootname(rootname)
-    3. filter_distribution()
-    4. rootnames_for_target(targname)
-    5. filenames_for_calibration(calibration_keyword, value)
-    6. goodmean_for_dataset(dataset)
-    7. rootnames_with_postflash()
-    8. non_asn_rootnames()
-    9. asn_in_date_rage()
+    1. ``all_filenames``
+    2. ``filters_for_rootname(rootname)``
+    3. ``filter_distribution()``
+    4. ``rootnames_for_target(targname)``
+    5. ``filenames_for_calibration(calibration_keyword, value)``
+    6. ``goodmean_for_dataset(dataset)``
+    7. ``rootnames_with_postflash()``
+    8. ``non_asn_rootnames()``
+    9. ``filenames_in_date_rage()``
 
 See each function's docstrings for further details.
 
@@ -23,23 +23,33 @@ perform additional operations with the query and/or its results.
 
 Authors
 -------
-    Sara Ogaz
-    Matthew Bourque
+    - Sara Ogaz
+    - Matthew Bourque
 
 Use
 ---
     This script is intended to be imported as such:
+    ::
 
-    >>> from acsql.database import queries
+        from acsql.database import queries
 
     ``queries`` can then be used to perform individual queries, e.g.:
+    ::
 
-    >>> query = queries.filter_distribution()
+        query = queries.filter_distribution()
 
     Each function will print the results to the screen, but the user
     may also perform the query and handle the results themselves, e.g.:
+    ::
 
-    >>> results = query.all()
+        results = query.all()
+
+Dependencies
+------------
+    External library dependencies include:
+
+    - ``acsql``
+    - ``sqlalchemy``
 """
 
 from sqlalchemy import and_

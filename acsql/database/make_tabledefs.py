@@ -6,8 +6,8 @@ corresponds to a header table in the ``acsql`` database.
 
 Authors
 -------
-    Sara Ogaz
-    Matthew Bourque
+    - Sara Ogaz
+    - Matthew Bourque
 
 Use
 ---
