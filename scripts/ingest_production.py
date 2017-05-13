@@ -44,8 +44,9 @@ import os
 
 from astropy.io import fits
 
+from acsql.database.database_interface import Master, session
 from acsql.ingest.ingest import ingest
-from acsql.utils.utils import FILE_EXTS, SETTINGS, setup_logging
+from acsql.utils.utils import SETTINGS, setup_logging, VALID_FILETYPES
 
 
 def get_rootnames_to_ingest():
@@ -60,21 +61,26 @@ def get_rootnames_to_ingest():
         but not in the ``acsql`` database.
     """
 
+    logging.info('Gathering files to ingest')
+
     # Query the database to determine which rootnames already exist
-    # results = session.query(Master.rootname).all()
-    # db_rootnames = set([item for item in results])
-    db_rootnames = set()
+    results = session.query(Master.rootname).all()
+    db_rootnames = set([item[0] for item in results])
 
     # Gather list of rootnames that exist in the filesystem
-    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j9c*', '*'))
-    fsys_rootnames = set([os.path.basename(item) for item in fsys_paths])
+    fsys_paths = glob.glob(os.path.join(SETTINGS['filesystem'], 'j*', '*'))
+    fsys_rootnames = set([os.path.basename(item)[:-1] for item in fsys_paths])
 
     # Determine new rootnames to ingest
     new_rootnames = fsys_rootnames - db_rootnames
 
     # Re-retreive the full paths
     rootnames_to_ingest = [item for item in fsys_paths if
-                           os.path.basename(item) in new_rootnames]
+                           os.path.basename(item)[:-1] in new_rootnames]
+
+    logging.info('{} rootnames in database'.format(len(db_rootnames)))
+    logging.info('{} rootnames in filesystem'.format(len(fsys_rootnames)))
+    logging.info('{} rootnames to ingest'.format(len(rootnames_to_ingest)))
 
     return rootnames_to_ingest
 
@@ -167,12 +173,11 @@ def parse_args():
         An argparse object containing all of the arguments
     """
 
-    valid_filetypes = list(FILE_EXTS.keys())
-    valid_filetypes.extend(['all'])
+    VALID_FILETYPES.extend(['all'])
 
     # Create help strings
     filetype_help = 'The filetypes to ingest.  Can be one of the following: '
-    filetype_help += '{}.  If "all", then all '.format(valid_filetypes)
+    filetype_help += '{}.  If "all", then all '.format(VALID_FILETYPES)
     filetype_help += 'availble filetypes for each rootname will be ingested. '
     filetype_help += 'If a specific filetype is given, then only that '
     filetype_help += 'filetype will be ingested. "all" is the default option.'
@@ -219,9 +224,8 @@ def test_args(args):
     """
 
     # Ensure the filetype is valid
-    valid_filetypes = list(FILE_EXTS.keys())
-    valid_filetypes.extend(['all'])
-    assert args.filetype in valid_filetypes,\
+    VALID_FILETYPES.extend(['all'])
+    assert args.filetype in VALID_FILETYPES,\
         '{} is not a valid filetype'.format(args.filetype)
 
     # Ensure that the ingest_filelist exists
