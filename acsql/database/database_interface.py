@@ -83,12 +83,16 @@ def define_columns(data_dict, class_name):
         definitions added.
     """
 
+    special_keywords = ['RULEFILE']
+
     with open(os.path.join(os.path.split(__file__)[0], 'table_definitions',
                            class_name.lower() + '.txt'), 'r') as f:
         data = f.readlines()
     keywords = [item.strip().split(', ') for item in data]
     for keyword in keywords:
-        if keyword[1] == 'Integer':
+        if keyword[0] in special_keywords:
+            data_dict[keyword[0].lower()] = get_special_column(keyword[0])
+        elif keyword[1] == 'Integer':
             data_dict[keyword[0].lower()] = Column(Integer())
         elif keyword[1] == 'String':
             data_dict[keyword[0].lower()] = Column(String(100))
@@ -112,6 +116,26 @@ def define_columns(data_dict, class_name):
             data_dict['aperture'] = Column(String(100), index=True)
 
     return data_dict
+
+
+def get_special_column(keyword):
+    """Treat specific keywords separately.
+
+    Parameters
+    ----------
+    keyword : str
+        The header keyword.
+
+    Returns
+    -------
+    Column : obj
+        A SQLAlchemy Column object for the given ``keyword``.
+    """
+
+    if keyword == 'RULEFILE':
+        return Column(String(500))
+    else:
+        return Column(String(100))
 
 
 def load_connection(connection_string):
