@@ -42,9 +42,9 @@ from sqlalchemy import Table
 from sqlalchemy.exc import IntegrityError
 from PIL import Image
 
-from acsql.database.database_interface import base
+#from acsql.database.database_interface import base
 from acsql.database.database_interface import Datasets
-from acsql.database.database_interface import session
+from acsql.database.database_interface import load_connection
 from acsql.utils import utils
 from acsql.utils.utils import insert_or_update
 from acsql.utils.utils import SETTINGS
@@ -55,9 +55,9 @@ from acsql.utils.utils import VALID_FILETYPES
 def get_detector(rootname_path):
     """Return the ``detector`` associated with the file.
 
-    If the ``detector`` keyword does not exist in the file's primary
-    header, then the corresponding ``raw`` file is used to determine
-    the detector.
+    The ``detector`` is attempted to be drawn from various filetypes
+    from the given ``rootname`` (i.e. ``raw``, ``flt``, ``spt``,
+    ``drz``, ``jit``).
 
     Parameters
     ----------
@@ -118,6 +118,7 @@ def make_file_dict(filename):
     file_dict['dirname'] = os.path.dirname(filename)
     file_dict['basename'] = os.path.basename(filename)
     file_dict['rootname'] = file_dict['basename'].split('_')[0][:-1]
+    file_dict['full_rootname'] = file_dict['basename'].split('_')[0]
     file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
     file_dict['proposid'] = file_dict['basename'][0:4]
 
@@ -236,6 +237,8 @@ def update_datasets_table(file_dict):
         process.
     """
 
+    session, base, engine = load_connection(SETTINGS['connection_string'])
+
     # Check to see if a record exists for the rootname
     query = session.query(Datasets)\
         .filter(Datasets.rootname == file_dict['rootname'])
@@ -254,7 +257,7 @@ def update_datasets_table(file_dict):
             insert_obj.execute(data_dict)
         except IntegrityError as e:
             logging.warning('{}: Unable to insert {} into datasets table: {}'\
-                .format(file_dict['rootname'], file_dict['basename'], e))
+                .format(file_dict['full_rootname'], file_dict['basename'], e))
 
     # If there are results, add the filename to the existing entry
     else:
@@ -265,9 +268,12 @@ def update_datasets_table(file_dict):
             query.update(data_dict)
         except IntegrityError as e:
             logging.warning('{}: Unable to update {} in datasets table: {}'\
-                .format(file_dict['rootname'], file_dict['basename'], e))
+                .format(file_dict['full_rootname'], file_dict['basename'], e))
 
     session.commit()
+    session.close()
+    engine.dispose()
+
     logging.info('{}: Updated datasets table for {}.'\
         .format(file_dict['rootname'], file_dict['filetype']))
 
@@ -319,7 +325,7 @@ def update_header_table(file_dict, ext):
                 continue
             elif key not in TABLE_DEFS[table.lower()]:
                 logging.warning('{}: {} not in {}'\
-                    .format(file_dict['rootname'], key, table))
+                    .format(file_dict['full_rootname'], key, table))
                 continue
             input_dict[key.lower()] = value
 
