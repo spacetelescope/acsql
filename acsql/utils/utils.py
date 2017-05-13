@@ -48,6 +48,7 @@ import sqlalchemy
 from sqlalchemy import Table
 from sqlalchemy.exc import DataError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import InternalError
 
 import acsql
 
@@ -209,7 +210,7 @@ def insert_or_update(table, data_dict):
         insert_obj = tab.insert()
         try:
             insert_obj.execute(data_dict)
-        except (DataError, IntegrityError) as e:
+        except (DataError, IntegrityError, InternalError) as e:
             logging.warning('\tUnable to insert {} into {}: {}'.format(
                             data_dict['filename'], table, e))
 
