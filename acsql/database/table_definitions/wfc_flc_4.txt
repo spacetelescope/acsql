@@ -171,3 +171,4 @@ DP1.NAXES, Float
 MEANBLEV, Float
 SNRMAX, Float
 PA_APER, Float
+EQUINOXO, Float

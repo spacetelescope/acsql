@@ -39,3 +39,12 @@ CTYPE2, String
 CTYPE1, String
 PA_APER, Float
 VAFACTOR, Float
+CDELT1, Float
+EQUINOX, Float
+CDELT2, Float
+CUNIT1, String
+RADESYS, String
+LATPOLE, Float
+WCSNAME, String
+CUNIT2, String
+LONPOLE, Float

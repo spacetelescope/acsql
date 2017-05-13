@@ -18,3 +18,4 @@ TELESCOP, String
 BITPIX, Integer
 CONFIG, String
 PDB_VER, String
+OMS_VER, String

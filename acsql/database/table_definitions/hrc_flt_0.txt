@@ -159,3 +159,7 @@ BIASFILE, String
 SHADFILE, String
 GRAPHTAB, String
 DETECTOR, String
+UPWCSVER, String
+SIPNAME, String
+DISTNAME, String
+PYWCSVER, String

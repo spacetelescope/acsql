@@ -51,3 +51,4 @@ SNRMAX, Float
 PHOTFLAM, Float
 VAFACTOR, Float
 WCSNAME, String
+EQUINOXO, String

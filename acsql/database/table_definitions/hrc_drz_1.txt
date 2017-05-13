@@ -46,3 +46,4 @@ PHOTPLAM, Float
 PHOTFLAM, Float
 VAFACTOR, Float
 WCSNAME, String
+EQUINOXO, Float

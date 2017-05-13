@@ -59,3 +59,7 @@ GUIDEACT, String
 GSACQ, String
 STARTIME, String
 NLOSSES, Integer
+N_TM_GAP, Integer
+SLEWING, String
+TLM_PROB, Bool
+TM_GAP, Float

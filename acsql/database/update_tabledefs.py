@@ -76,7 +76,6 @@ def update_tabledefs(logfile):
             dtype = hsel.table[keyword].dtype
         except:
             print('Cannot determine datatype for {}. Defaulting to String'.format(keyword))
-            num_bad += 1
             dtype = np.dtype('S80')
 
         if dtype in [np.dtype('S68'), np.dtype('S80')]:
@@ -100,8 +99,6 @@ def update_tabledefs(logfile):
                 f.write('{}, {}\n'.format(keyword, col_type))
 
         print('Updated {} with {}'.format(tabledefs_file, keyword))
-
-        break
 
 if __name__ == '__main__':
 

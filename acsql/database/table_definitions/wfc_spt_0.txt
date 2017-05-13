@@ -279,3 +279,12 @@ CIRVELOC, Float
 PA_APER, Float
 SCAN_COR, String
 V3APERCE, Float
+ALIAS1, String
+TARKEY8, String
+TARKEY6, String
+TARDESC2, String
+TARKEY3, String
+TARGCAT2, String
+TARKEY7, String
+ALIAS2, String
+TARKEY2, String
