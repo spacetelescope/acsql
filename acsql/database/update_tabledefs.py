@@ -30,8 +30,10 @@ Use
         python update_tabledefs.py <logfile>
 
     Required arguments:
-    ``logfile`` -- The path to an ``acsql.ingest.ingest.py`` log to be
-        used to determine new header keywords.
+    ::
+
+        logfile: The path to an ``acsql.ingest.ingest.py`` log to be
+            used to determine new header keywords.
 
 Dependencies
 ------------
@@ -137,7 +139,7 @@ def update_tabledefs(logfile):
 
         if dtype in [np.dtype('S68'), np.dtype('S80')]:
             col_type = 'String'
-            db_type = 'VARCHAR(100)'
+            db_type = 'VARCHAR(50)'
         elif dtype in [np.int64]:
             col_type = 'Integer'
             db_type = 'INTEGER'
@@ -161,7 +163,7 @@ def update_tabledefs(logfile):
         print('Updated {} with {}'.format(tabledefs_file, keyword))
 
         # Add ALTER TABLE command to list of commands
-        command = 'ALTER TABLE {} ADD {} {}'.format(table.lower(),
+        command = 'ALTER TABLE {} ADD {} {};'.format(table.lower(),
                                                     keyword.lower(), db_type)
         command_list.append(command)
 
