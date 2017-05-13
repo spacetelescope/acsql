@@ -6,8 +6,8 @@ extensions.
 
 Authors
 -------
-    Matthew Bourque
-    Sara Ogaz
+    - Matthew Bourque
+    - Sara Ogaz
 
 Use
 ---
@@ -35,6 +35,7 @@ import glob
 import logging
 import os
 import shutil
+import urllib.request
 
 from astropy.io import fits
 import numpy as np
@@ -42,7 +43,6 @@ from sqlalchemy import Table
 from sqlalchemy.exc import IntegrityError
 from PIL import Image
 
-#from acsql.database.database_interface import base
 from acsql.database.database_interface import Datasets
 from acsql.database.database_interface import load_connection
 from acsql.utils import utils
@@ -52,22 +52,36 @@ from acsql.utils.utils import TABLE_DEFS
 from acsql.utils.utils import VALID_FILETYPES
 
 
-def get_detector(rootname_path):
-    """Return the ``detector`` associated with the file.
-
-    The ``detector`` is attempted to be drawn from various filetypes
-    from the given ``rootname`` (i.e. ``raw``, ``flt``, ``spt``,
-    ``drz``, ``jit``).
+def get_detector(test_file):
+    """Return the ``detector`` associated with the given ``test_file``,
+    if possible.
 
     Parameters
     ----------
-    rootname_path : str
-        The path to the rootname parent directory.
+    test_file : str
+        The path to the file to attempt to get the ``detector`` header
+        keyword from.
 
     Returns
     -------
     detector : str
         The detector (e.g. ``WFC``)
+    """
+
+    if 'jit' in test_file:
+        detector = fits.getval(test_file, 'config', 0)
+        if detector == 'S/C': #FGS observation
+            detector = None
+        else:
+            detector = detector.lower().split('/')[1]
+    else:
+        detector = fits.getval(test_file, 'detector', 0).lower()
+
+    return detector
+
+
+def get_metadata_from_test_files(rootname_path, keyword):
+    """
     """
 
     raw = glob.glob(os.path.join(rootname_path, '*raw.fits'))
@@ -79,20 +93,47 @@ def get_detector(rootname_path):
     for test_files in [raw, flt, spt, drz, jit]:
         try:
             test_file = test_files[0]
-            if 'jit' in test_file:
-                detector = fits.getval(test_file, 'config', 0)\
-                    .lower().split('/')[1]
-            else:
-                detector = fits.getval(test_file, 'detector', 0).lower()
+            if keyword == 'detector':
+                value = get_detector(test_file)
+            elif keyword == 'proposid':
+                value = get_proposid(test_file)
             break
         except (IndexError, KeyError):
-            detector = None
+            value = None
 
-    if not detector:
-        logging.warning('Cannot determine detector for {}'\
-            .format(rootname_path))
+    if not value:
+        logging.warning('Cannot determine {} for {}'\
+            .format(keyword, rootname_path))
 
-    return detector
+    return value
+
+
+def get_obstype(proposid):
+    """
+    """
+
+    if not proposid:
+        obstype = None
+    else:
+        try:
+            url = 'http://www.stsci.edu/cgi-bin/get-proposal-info?id='
+            url += '{}&submit=Go&observatory=HST'.format(proposid)
+            webpage = urllib.request.urlopen(url)
+            obstype = webpage.readlines()[11].split(b'prop_type">')[-1].split(b'</a>')[0].decode()
+        except:
+            obstype = None
+
+    return obstype
+
+
+def get_proposid(test_file):
+    """
+    """
+
+    proposid = fits.getval(test_file, 'proposid', 0)
+
+    return proposid
+
 
 def make_file_dict(filename):
     """Create a dictionary that holds information that is useful for
@@ -123,7 +164,7 @@ def make_file_dict(filename):
     file_dict['proposid'] = file_dict['basename'][0:4]
 
     # Metadata kewords
-    file_dict['detector'] = get_detector(file_dict['dirname'])
+    file_dict['detector'] = get_metadata_from_test_files(file_dict['dirname'], 'detector')
     file_dict['file_exts'] = getattr(utils, '{}_FILE_EXTS'.format(file_dict['detector'].upper()))[file_dict['filetype']]
 
     # JPEG related kewords
@@ -214,9 +255,12 @@ def make_thumbnail(file_dict):
     # Create parent Thumbnail directory if necessary
     thumb_dir = os.path.dirname(file_dict['thumbnail_dst'])
     if not os.path.exists(thumb_dir):
-        os.makedirs(thumb_dir)
-        logging.info('{}: Created directory {}'\
-            .format(file_dict['rootname'], thumb_dir))
+        try:
+            os.makedirs(thumb_dir)
+            logging.info('{}: Created directory {}'\
+                .format(file_dict['rootname'], thumb_dir))
+        except FileExistsError:
+            pass
 
     # Make a copy of the JPEG in the thumbnail directory
     shutil.copyfile(file_dict['jpg_dst'], file_dict['thumbnail_dst'])
@@ -346,13 +390,17 @@ def update_master_table(rootname_path):
     """
 
     rootname = os.path.basename(rootname_path)[:-1]
+    proposid = get_metadata_from_test_files(rootname_path, 'proposid')
+    obstype = get_obstype(proposid)
 
     # Insert a record in the master table
     data_dict = {'rootname': rootname,
                   'path': rootname_path,
                   'first_ingest_date': date.today().isoformat(),
                   'last_ingest_date': date.today().isoformat(),
-                  'detector': get_detector(rootname_path)}
+                  'detector': get_metadata_from_test_files(rootname_path,
+                                                           'detector'),
+                  'obstype': obstype}
     insert_or_update('Master', data_dict)
     logging.info('{}: Updated master table.'.format(rootname))
 
