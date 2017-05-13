@@ -83,7 +83,7 @@ def define_columns(data_dict, class_name):
         definitions added.
     """
 
-    special_keywords = ['RULEFILE']
+    special_keywords = ['RULEFILE', 'FWERROR', 'FW2ERROR']
 
     with open(os.path.join(os.path.split(__file__)[0], 'table_definitions',
                            class_name.lower() + '.txt'), 'r') as f:
@@ -134,6 +134,8 @@ def get_special_column(keyword):
 
     if keyword == 'RULEFILE':
         return Column(String(500))
+    elif keyword in ['FWERROR', 'FW2ERROR']:
+        return Column(String(100))
     else:
         return Column(String(100))
 
