@@ -163,3 +163,13 @@ BIASFILE, String
 SHADFILE, String
 GRAPHTAB, String
 DETECTOR, String
+P2_PSPAC, Float
+P2_LSPAC, Float
+P2_FRAME, String
+P2_ANGLE, Float
+P2_ORINT, Float
+PATTERN2, String
+P2_NPTS, Integer
+P2_SHAPE, String
+P2_CENTR, String
+P2_PURPS, String

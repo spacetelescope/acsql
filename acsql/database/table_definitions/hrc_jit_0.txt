@@ -19,3 +19,4 @@ BITPIX, Integer
 CONFIG, String
 PDB_VER, String
 OMS_VER, String
+ASN_MTYP, String

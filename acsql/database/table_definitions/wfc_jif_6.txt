@@ -63,3 +63,6 @@ PROCTIME, String
 YPIXINC, Float
 V2_RMS, Float
 RECENTR, Float
+SGSTAR, String
+GSFAIL, String
+SLEWING, Bool

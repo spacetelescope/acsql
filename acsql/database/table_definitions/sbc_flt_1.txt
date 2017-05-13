@@ -136,3 +136,4 @@ OCX11, Float
 DP1.NAXES, Float
 SNRMAX, Float
 PA_APER, Float
+EQUINOXO, Float

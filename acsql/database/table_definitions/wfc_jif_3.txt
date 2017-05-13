@@ -63,3 +63,8 @@ TLM_PROB, Bool
 N_TM_GAP, Integer
 TM_GAP, Float
 GS_GAP, Float
+SGSTAR, String
+GSFAIL, String
+TDF-DOWN, Bool
+NO_TLM, Bool
+SLEWING, Bool

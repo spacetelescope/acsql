@@ -48,3 +48,4 @@ RADESYS, String
 PA_APER, Float
 VAFACTOR, Float
 WCSNAME, String
+EQUINOX, Float

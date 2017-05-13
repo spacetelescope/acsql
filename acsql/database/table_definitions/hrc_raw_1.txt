@@ -124,3 +124,17 @@ MEANBLEV, Float
 SNRMAX, Float
 BSCALE, Float
 PA_APER, Float
+EQUINOXO, Float
+CPERR2, Float
+DP2.AXIS.1, Float
+DP1.EXTVER, Float
+DP1.NAXES, Float
+DP2.NAXES, Float
+DP1.AXIS.2, Float
+DP2.AXIS.2, Float
+CPDIS1, String
+NPOLEXT, String
+CPDIS2, String
+CPERR1, Float
+DP1.AXIS.1, Float
+DP2.EXTVER, Float

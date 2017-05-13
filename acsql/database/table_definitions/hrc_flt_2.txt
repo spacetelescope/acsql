@@ -48,3 +48,6 @@ LATPOLE, Float
 WCSNAME, String
 CUNIT2, String
 LONPOLE, Float
+NPIX2, Integer
+NPIX1, Integer
+PIXVALUE, Float

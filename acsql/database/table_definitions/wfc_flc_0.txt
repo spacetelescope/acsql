@@ -178,3 +178,5 @@ P2_NPTS, Integer
 P2_PSPAC, Float
 P2_FRAME, String
 P2_PURPS, String
+P2_LSPAC, Float
+P2_ANGLE, Float

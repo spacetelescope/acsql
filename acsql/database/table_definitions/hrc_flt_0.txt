@@ -163,3 +163,13 @@ UPWCSVER, String
 SIPNAME, String
 DISTNAME, String
 PYWCSVER, String
+P2_ANGLE, Float
+P2_LSPAC, Float
+P2_ORINT, Float
+P2_CENTR, String
+P2_NPTS, Integer
+P2_FRAME, String
+P2_SHAPE, String
+P2_PSPAC, Float
+P2_PURPS, String
+PATTERN2, String

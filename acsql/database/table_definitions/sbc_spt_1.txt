@@ -254,3 +254,5 @@ DETECTOR, String
 TDFRES5H, Float
 MIFREADS, Integer
 WFCGAINC, String
+DATE, String
+ORIGIN, String

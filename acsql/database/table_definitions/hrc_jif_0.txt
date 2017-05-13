@@ -79,3 +79,4 @@ T_SISAFE, String
 T_FW_ERR, String
 T_FGSFAL, String
 T_NOSLEW, String
+ASN_MTYP, String

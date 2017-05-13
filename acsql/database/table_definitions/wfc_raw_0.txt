@@ -166,3 +166,5 @@ P2_PSPAC, Float
 P2_FRAME, String
 P2_CENTR, String
 P2_ORINT, Float
+P2_LSPAC, Float
+P2_ANGLE, Float

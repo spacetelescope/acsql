@@ -62,3 +62,8 @@ EXTNAME, String
 APERTURE, String
 OBSERVTN, String
 GUIDEACT, String
+SGSTAR, String
+TDF-DOWN, Bool
+GS_GAP, Float
+NO_TLM, Bool
+GSFAIL, String
