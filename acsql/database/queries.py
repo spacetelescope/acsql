@@ -94,6 +94,7 @@ def all_filenames(dataset):
 
     return query
 
+
 def filters_for_rootname(rootname):
     """Queries for the FILTER1/FILTER2 combination for the geven
     observation.
