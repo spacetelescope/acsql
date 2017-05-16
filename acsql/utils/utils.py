@@ -212,7 +212,7 @@ def insert_or_update(table, data_dict):
             insert_obj.execute(data_dict)
         except (DataError, IntegrityError, InternalError) as e:
             logging.warning('\tUnable to insert {} into {}: {}'.format(
-                            data_dict['filename'], table, e))
+                            data_dict['rootname'], table, e))
 
     else:
         query.update(data_dict)
