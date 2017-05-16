@@ -222,6 +222,7 @@ def make_file_dict(filename):
     file_dict['full_rootname'] = file_dict['basename'].split('_')[0]
     file_dict['filetype'] = file_dict['basename'].split('.fits')[0].split('_')[-1]
     file_dict['proposid'] = file_dict['basename'][0:4]
+    file_dict['proposid_int'] = get_metadata_from_test_files(file_dict['dirname'], 'proposid')
 
     # Metadata kewords
     file_dict['detector'] = get_metadata_from_test_files(file_dict['dirname'], 'detector')
@@ -231,9 +232,9 @@ def make_file_dict(filename):
     # JPEG related kewords
     if file_dict['filetype'] in ['raw', 'flt', 'flc']:
         file_dict['jpg_filename'] = file_dict['basename'].replace('.fits', '.jpg')
-        file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['proposid'], file_dict['jpg_filename'])
+        file_dict['jpg_dst'] = os.path.join(SETTINGS['jpeg_dir'], file_dict['proposid_int'], file_dict['jpg_filename'])
         file_dict['thumbnail_filename'] = file_dict['basename'].replace('.fits', '.thumb')
-        file_dict['thumbnail_dst'] = os.path.join(SETTINGS['thumbnail_dir'], file_dict['proposid'], file_dict['thumbnail_filename'])
+        file_dict['thumbnail_dst'] = os.path.join(SETTINGS['thumbnail_dir'], file_dict['proposid_int'], file_dict['thumbnail_filename'])
     else:
         file_dict['jpg_filename'] = None
         file_dict['jpg_dst'] = None
@@ -450,9 +451,8 @@ def update_master_table(rootname_path):
 
     Parameters
     ----------
-    file_dict : dict
-        A dictionary containing various data useful for the ingestion
-        process.
+    rootname_path
+        The path to the rootname directory in the MAST cache.
     """
 
     rootname = os.path.basename(rootname_path)[:-1]
