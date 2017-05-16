@@ -132,13 +132,13 @@ def get_metadata_from_test_files(rootname_path, keyword):
     return value
 
 
-def get_obstype(proposid):
-    """Return the ``obstype`` for the given ``proposid``.
+def get_proposal_type(proposid):
+    """Return the ``proposal_type`` for the given ``proposid``.
 
-    The ``obstype`` is the type of proposal (e.g. ``CAL``, ``GO``,
-    etc.).  The ``obstype`` is scraped from the MAST proposal status
-    webpage for the given ``proposid``.  If the ``obstype`` cannot be
-    determined, a ``None`` value is returned.
+    The ``proposal_type`` is the type of proposal (e.g. ``CAL``,
+    ``GO``, etc.).  The ``proposal_type`` is scraped from the MAST
+    proposal status webpage for the given ``proposid``.  If the
+    ``proposal_type`` cannot be determined, a ``None`` value is returned.
 
     Parameters
     ----------
@@ -147,22 +147,23 @@ def get_obstype(proposid):
 
     Returns
     -------
-    obstype : int or None
+    proposal_type : int or None
         The proposal type (e.g. ``CAL``).
     """
 
     if not proposid:
-        obstype = None
+        proposal_type = None
     else:
         try:
             url = 'http://www.stsci.edu/cgi-bin/get-proposal-info?id='
             url += '{}&submit=Go&observatory=HST'.format(proposid)
             webpage = urllib.request.urlopen(url)
-            obstype = webpage.readlines()[11].split(b'prop_type">')[-1].split(b'</a>')[0].decode()
+            proposal_type = webpage.readlines()[11].split(b'prop_type">')[-1]
+            proposal_type = proposal_type.split(b'</a>')[0].decode()
         except:
-            obstype = None
+            proposal_type = None
 
-    return obstype
+    return proposal_type
 
 
 def get_proposid(filename):
@@ -447,7 +448,7 @@ def update_master_table(rootname_path):
 
     rootname = os.path.basename(rootname_path)[:-1]
     proposid = get_metadata_from_test_files(rootname_path, 'proposid')
-    obstype = get_obstype(proposid)
+    proposal_type = get_proposal_type(proposid)
 
     # Insert a record in the master table
     data_dict = {'rootname': rootname,
@@ -456,7 +457,7 @@ def update_master_table(rootname_path):
                   'last_ingest_date': date.today().isoformat(),
                   'detector': get_metadata_from_test_files(rootname_path,
                                                            'detector'),
-                  'obstype': obstype}
+                  'proposal_type': proposal_type}
     insert_or_update('Master', data_dict)
     logging.info('{}: Updated master table.'.format(rootname))
 

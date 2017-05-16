@@ -216,7 +216,7 @@ class Master(base):
     first_ingest_date = Column(Date, nullable=False)
     last_ingest_date = Column(Date, nullable=False)
     detector = Column(Enum('WFC', 'HRC', 'SBC'), nullable=False)
-    obstype = Column(String(10), nullable=True)
+    proposal_type = Column(String(10), nullable=True)
 
 
 class Datasets(base):
