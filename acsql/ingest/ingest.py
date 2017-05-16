@@ -215,7 +215,8 @@ def make_file_dict(filename):
 
     # Metadata kewords
     file_dict['detector'] = get_metadata_from_test_files(file_dict['dirname'], 'detector')
-    file_dict['file_exts'] = getattr(utils, '{}_FILE_EXTS'.format(file_dict['detector'].upper()))[file_dict['filetype']]
+    if file_dict['detector']:
+        file_dict['file_exts'] = getattr(utils, '{}_FILE_EXTS'.format(file_dict['detector'].upper()))[file_dict['filetype']]
 
     # JPEG related kewords
     if file_dict['filetype'] in ['raw', 'flt', 'flc']:
@@ -495,16 +496,17 @@ def ingest(rootname_path, filetype='all'):
             file_dict = make_file_dict(filename)
 
             # Update header tables
-            for ext in file_dict['file_exts']:
-                update_header_table(file_dict, ext)
+            if 'file_exts' in file_dict:
+                for ext in file_dict['file_exts']:
+                    update_header_table(file_dict, ext)
 
-            # Update datasets table
-            update_datasets_table(file_dict)
+                # Update datasets table
+                update_datasets_table(file_dict)
 
-            # Make JPEGs and Thumbnails
-            if file_dict['filetype'] in ['raw', 'flt', 'flc']:
-                make_jpeg(file_dict)
-            if file_dict['filetype'] == 'flt':
-                make_thumbnail(file_dict)
+                # Make JPEGs and Thumbnails
+                if file_dict['filetype'] in ['raw', 'flt', 'flc']:
+                    make_jpeg(file_dict)
+                if file_dict['filetype'] == 'flt':
+                    make_thumbnail(file_dict)
 
     logging.info('{}: End ingestion'.format(rootname))
