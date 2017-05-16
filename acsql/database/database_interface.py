@@ -216,7 +216,11 @@ class Master(base):
     first_ingest_date = Column(Date, nullable=False)
     last_ingest_date = Column(Date, nullable=False)
     detector = Column(Enum('WFC', 'HRC', 'SBC'), nullable=False)
-    proposal_type = Column(String(10), nullable=True)
+    proposal_type = Column(Enum('CAL/ACS', 'CAL/OTA', 'CAL/STIS', 'CAL/WFC3',
+                                'ENG/ACS', 'GO', 'GO/DD', 'GO/PAR', 'GTO/ACS',
+                                'GTO/COS', 'NASA', 'SM3/ACS', 'SM3/ERO',
+                                'SM4/ACS', 'SM4/COS', 'SM4/ERO', 'SNAP'),
+                           nullable=True)
 
 
 class Datasets(base):

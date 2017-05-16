@@ -89,6 +89,12 @@ HRC_FILE_EXTS = {'jif': [0, 1, 2],
 VALID_FILETYPES = ['jif', 'jit', 'flt', 'flc', 'drz', 'drc', 'raw', 'crj',
                    'crc', 'spt', 'asn']
 
+# Define value proposal types
+VALID_PROPOSAL_TYPES = ['CAL/ACS', 'CAL/OTA', 'CAL/STIS', 'CAL/WFC3',
+                        'ENG/ACS', 'GO', 'GO/DD', 'GO/PAR', 'GTO/ACS',
+                        'GTO/COS', 'NASA', 'SM3/ACS', 'SM3/ERO', 'SM4/ACS',
+                        'SM4/COS', 'SM4/ERO', 'SNAP']
+
 
 def get_settings():
     """Returns the settings that are located in the acsql config file.

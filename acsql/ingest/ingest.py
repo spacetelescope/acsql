@@ -51,6 +51,7 @@ from acsql.utils.utils import insert_or_update
 from acsql.utils.utils import SETTINGS
 from acsql.utils.utils import TABLE_DEFS
 from acsql.utils.utils import VALID_FILETYPES
+from acsql.utils.utils import VALID_PROPOSAL_TYPES
 
 
 def get_detector(test_file):
@@ -161,7 +162,15 @@ def get_proposal_type(proposid):
             proposal_type = webpage.readlines()[11].split(b'prop_type">')[-1]
             proposal_type = proposal_type.split(b'</a>')[0].decode()
         except:
+            logging.warning('\tCannot determine proposal type for {}'\
+                .format(proposid))
             proposal_type = None
+
+    # Check for bad proposal types
+    if proposal_type not in VALID_PROPOSAL_TYPES:
+        logging.warning('\tCannot determine proposal type for {}'\
+            .format(proposid))
+        proposal_type = None
 
     return proposal_type
 
