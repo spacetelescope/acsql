@@ -38,6 +38,7 @@ import shutil
 import urllib.request
 
 from astropy.io import fits
+from astropy.io.fits.verify import VerifyError
 import numpy as np
 from sqlalchemy import Table
 from sqlalchemy.exc import IntegrityError
@@ -81,7 +82,30 @@ def get_detector(test_file):
 
 
 def get_metadata_from_test_files(rootname_path, keyword):
-    """
+    """Return the value of the given ``keyword`` and ``rootname_path``.
+
+    The given ``rootname_path`` is checked for various filetypes that
+    are beleived to have the ``keyword`` that is sought, in order
+    of most likeliness: ``raw``, ``flt``, ``spt``, ``drz``, and
+    ``jit``.  If a candidate file is found, it is used to determine
+    the value of the ``keyword`` in the primary header.  If no
+    candidate file exists, or the ``keyword`` value cannot be
+    determined from the primary header, a ``value`` of ``None`` is
+    returned, essentially ending the ingestion process for the given
+    rootname.
+
+    Parameters
+    ----------
+    rootname_path : str
+        The path to the rootname in the MAST cache.
+    keyword : str
+        The header keyword to determine the value of (e.g.
+        ``detector``)
+
+    Returns
+    -------
+    value : str or None
+        The header keyword value.
     """
 
     raw = glob.glob(os.path.join(rootname_path, '*raw.fits'))
@@ -109,7 +133,22 @@ def get_metadata_from_test_files(rootname_path, keyword):
 
 
 def get_obstype(proposid):
-    """
+    """Return the ``obstype`` for the given ``proposid``.
+
+    The ``obstype`` is the type of proposal (e.g. ``CAL``, ``GO``,
+    etc.).  The ``obstype`` is scraped from the MAST proposal status
+    webpage for the given ``proposid``.  If the ``obstype`` cannot be
+    determined, a ``None`` value is returned.
+
+    Parameters
+    ----------
+    proposid : str
+        The proposal ID (e.g. ``12345``).
+
+    Returns
+    -------
+    obstype : int or None
+        The proposal type (e.g. ``CAL``).
     """
 
     if not proposid:
@@ -126,11 +165,22 @@ def get_obstype(proposid):
     return obstype
 
 
-def get_proposid(test_file):
-    """
+def get_proposid(filename):
+    """Return the proposal ID from the primary header of the given
+    ``filename``.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file to get the ``proposid`` form.
+
+    Returns
+    -------
+    proposid : int
+        The proposal ID (e.g. ``12345``).
     """
 
-    proposid = fits.getval(test_file, 'proposid', 0)
+    proposid = fits.getval(filename, 'proposid', 0)
 
     return proposid
 
@@ -363,19 +413,24 @@ def update_header_table(file_dict, ext):
         input_dict = {'rootname': file_dict['rootname'],
                       'filename': file_dict['basename']}
 
-        for key, value in header.items():
-            key = key.strip()
-            if key in exclude_list or value == "":
-                continue
-            elif key not in TABLE_DEFS[table.lower()]:
-                logging.warning('{}: {} not in {}'\
-                    .format(file_dict['full_rootname'], key, table))
-                continue
-            input_dict[key.lower()] = value
+        try:
+            for key, value in header.items():
+                key = key.strip()
+                if key in exclude_list or value == "":
+                    continue
+                elif key not in TABLE_DEFS[table.lower()]:
+                    logging.warning('{}: {} not in {}'\
+                        .format(file_dict['full_rootname'], key, table))
+                    continue
+                input_dict[key.lower()] = value
 
-        insert_or_update(table, input_dict)
-        logging.info('{}: Updated {} table.'.format(file_dict['rootname'],
+            insert_or_update(table, input_dict)
+            logging.info('{}: Updated {} table.'.format(file_dict['rootname'],
                                                       table))
+
+        except VerifyError as e:
+            logging.warning('\tUnable to insert {} into {}: {}'.format(
+                file_dict['rootname'], table, e))
 
 
 def update_master_table(rootname_path):
