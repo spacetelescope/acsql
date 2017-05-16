@@ -83,7 +83,8 @@ def define_columns(data_dict, class_name):
         definitions added.
     """
 
-    special_keywords = ['RULEFILE', 'FWERROR', 'FW2ERROR']
+    special_keywords = ['RULEFILE', 'FWERROR', 'FW2ERROR', 'PROPTTL1',
+                        'TARDESCR', 'QUALCOM2']
 
     with open(os.path.join(os.path.split(__file__)[0], 'table_definitions',
                            class_name.lower() + '.txt'), 'r') as f:
@@ -95,7 +96,7 @@ def define_columns(data_dict, class_name):
         elif keyword[1] == 'Integer':
             data_dict[keyword[0].lower()] = Column(Integer())
         elif keyword[1] == 'String':
-            data_dict[keyword[0].lower()] = Column(String(100))
+            data_dict[keyword[0].lower()] = Column(String(50))
         elif keyword[1] == 'Float':
             data_dict[keyword[0].lower()] = Column(Float())
         elif keyword[1] == 'Decimal':
@@ -113,7 +114,7 @@ def define_columns(data_dict, class_name):
                 keyword[0], keyword[1]))
 
         if 'aperture' in data_dict:
-            data_dict['aperture'] = Column(String(100), index=True)
+            data_dict['aperture'] = Column(String(50), index=True)
 
     return data_dict
 
@@ -132,12 +133,12 @@ def get_special_column(keyword):
         A SQLAlchemy Column object for the given ``keyword``.
     """
 
-    if keyword == 'RULEFILE':
+    if keyword in ['RULEFILE', 'PROPTTL1', 'TARDESCR', 'QUALCOM2']:
         return Column(String(500))
     elif keyword in ['FWERROR', 'FW2ERROR']:
         return Column(String(100))
     else:
-        return Column(String(100))
+        return Column(String(50))
 
 
 def load_connection(connection_string):
@@ -199,6 +200,7 @@ def orm_factory(class_name):
                                    nullable=False)
     data_dict['filename'] = Column(String(18), nullable=False, unique=True)
     data_dict = define_columns(data_dict, class_name)
+    data_dict['__table_args__'] = {'mysql_row_format': 'DYNAMIC'}
 
     return type(class_name.upper(), (base,), data_dict)
 
@@ -214,7 +216,7 @@ class Master(base):
     first_ingest_date = Column(Date, nullable=False)
     last_ingest_date = Column(Date, nullable=False)
     detector = Column(Enum('WFC', 'HRC', 'SBC'), nullable=False)
-    obstype = Column(Enum('CAL', 'GO'), nullable=True)
+    obstype = Column(String(10), nullable=True)
 
 
 class Datasets(base):
