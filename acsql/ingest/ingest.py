@@ -80,13 +80,13 @@ def get_proposal_type(proposid):
             proposal_type = webpage.readlines()[11].split(b'prop_type">')[-1]
             proposal_type = proposal_type.split(b'</a>')[0].decode()
         except:
-            logging.warning('\tCannot determine proposal type for {}'\
+            logging.warning('Cannot determine proposal type for {}'\
                 .format(proposid))
             proposal_type = None
 
     # Check for bad proposal types
     if proposal_type not in VALID_PROPOSAL_TYPES:
-        logging.warning('\tCannot determine proposal type for {}'\
+        logging.warning('Cannot determine proposal type for {}'\
             .format(proposid))
         proposal_type = None
 

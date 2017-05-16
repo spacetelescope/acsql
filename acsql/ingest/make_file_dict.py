@@ -137,7 +137,7 @@ def get_proposid(filename):
         The proposal ID (e.g. ``12345``).
     """
 
-    proposid = fits.getval(filename, 'proposid', 0)
+    proposid = str(fits.getval(filename, 'proposid', 0))
 
     return proposid
 
