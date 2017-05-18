@@ -160,3 +160,11 @@ BIASFILE, String
 SHADFILE, String
 GRAPHTAB, String
 DETECTOR, String
+P2_FRAME, String
+P2_SHAPE, String
+P2_CENTR, String
+P2_PURPS, String
+P2_ORINT, String
+P2_NPTS, String
+PATTERN2, String
+P2_PSPAC, String

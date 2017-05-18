@@ -929,3 +929,4 @@ D032OUWE, String
 D030WTSC, String
 D030COEF, String
 D027DEXP, String
+QUALCOM3, String

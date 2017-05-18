@@ -80,3 +80,5 @@ T_FW_ERR, String
 T_FGSFAL, String
 T_NOSLEW, String
 ASN_MTYP, String
+TACXSLEW, String
+TACYSLEW, String

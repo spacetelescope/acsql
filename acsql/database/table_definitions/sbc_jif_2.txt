@@ -64,3 +64,6 @@ TLM_PROB, String
 N_TM_GAP, String
 GS_GAP, Float
 TM_GAP, String
+TDF-DOWN, String
+GSFAIL, String
+SGSTAR, String

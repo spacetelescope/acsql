@@ -67,3 +67,4 @@ SGSTAR, String
 GSFAIL, String
 TDF-DOWN, Bool
 NO_TLM, Bool
+SLEWING, Bool

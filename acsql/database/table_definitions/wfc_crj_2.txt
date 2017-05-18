@@ -39,3 +39,6 @@ CTYPE2, String
 CTYPE1, String
 PA_APER, Float
 VAFACTOR, Float
+NPIX2, String
+PIXVALUE, String
+NPIX1, String

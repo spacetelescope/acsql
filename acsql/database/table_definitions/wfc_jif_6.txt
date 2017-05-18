@@ -66,3 +66,4 @@ RECENTR, Float
 SGSTAR, String
 GSFAIL, String
 SLEWING, Bool
+GS_GAP, Float

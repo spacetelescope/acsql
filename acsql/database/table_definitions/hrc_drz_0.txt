@@ -912,3 +912,4 @@ D026WTSC, String
 D030ISCL, String
 D030OUCO, String
 D042PIXF, String
+T_SGSTAR, String
