@@ -124,3 +124,4 @@ CCDTAB, String
 SHADFILE, String
 GRAPHTAB, String
 DETECTOR, String
+GROUPS, Bool

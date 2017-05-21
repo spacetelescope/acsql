@@ -137,3 +137,5 @@ DP1.NAXES, Float
 SNRMAX, Float
 PA_APER, Float
 EQUINOXO, Float
+DATAMIN, Float
+DATAMAX, Float

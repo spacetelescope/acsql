@@ -175,3 +175,5 @@ PATTERN2, String
 P2_SHAPE, String
 P2_PSPAC, String
 P2_FRAME, String
+P2_ANGLE, String
+P2_LSPAC, String

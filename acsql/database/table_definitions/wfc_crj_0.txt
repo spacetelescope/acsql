@@ -167,3 +167,5 @@ P2_NPTS, String
 P2_PURPS, String
 P2_SHAPE, String
 P2_PSPAC, String
+P2_LSPAC, String
+P2_ANGLE, String

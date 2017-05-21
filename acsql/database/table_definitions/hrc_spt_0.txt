@@ -294,3 +294,5 @@ MT_LV1_3, String
 MT_LV1_2, String
 MT_LV1_4, String
 TARKEY4, String
+MT_LV2_2, String
+TARKEY5, String

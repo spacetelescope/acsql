@@ -959,3 +959,4 @@ D048OUWE, String
 D044OUWE, String
 D043FVAL, String
 D041WTSC, Integer
+MTFLAG, String

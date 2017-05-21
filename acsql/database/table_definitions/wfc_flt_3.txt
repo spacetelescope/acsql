@@ -43,3 +43,6 @@ PA_APER, Float
 VAFACTOR, Float
 WCSNAME, String
 EQUINOX, Float
+NPIX1, Integer
+PIXVALUE, Integer
+NPIX2, Integer

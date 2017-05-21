@@ -168,3 +168,5 @@ P2_ORINT, String
 P2_NPTS, String
 PATTERN2, String
 P2_PSPAC, String
+P2_ANGLE, String
+P2_LSPAC, String
