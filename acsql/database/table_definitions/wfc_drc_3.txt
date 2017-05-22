@@ -34,3 +34,4 @@ CTYPE1, String
 RADESYS, String
 VAFACTOR, Float
 WCSNAME, String
+NAXIS3, Integer

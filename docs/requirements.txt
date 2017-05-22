@@ -1,0 +1,6 @@
+astropy
+numpy
+numpydoc
+sqlalchemy
+pymysql
+-e git://github.com/spacetelescope/stak.git#egg=stak

@@ -89,5 +89,4 @@ ENV/
 .ropeproject
 
 # Repository specific
-*config.yaml
 *.fits

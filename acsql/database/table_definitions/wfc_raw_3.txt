@@ -35,3 +35,5 @@ DATAMAX, Float
 CTYPE1, String
 PA_APER, Float
 VAFACTOR, Float
+NAXIS1, Integer
+NAXIS2, Integer

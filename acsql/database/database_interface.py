@@ -1,41 +1,48 @@
-"""This module provides ORMs for the acsql database, as well as engine
-and session objects for connecting to the database.
+"""This module provides ORMs for the ``acsql`` database, as well as
+``engine`` and ``session`` objects for connecting to the database.
 
-The load_connection() function within this module allows the user to
-connect to the acsql database via the session, base, and engine objects
-(described below).  The classes within serve as ORMs (Object-relational
-mappings) that define the individual tables of the relational database.
+The ``load_connection()`` function within this module allows the user
+to connect to the ``acsql`` database via the ``session``, ``base``,
+and ``engine`` objects (described below).  The classes within serve as
+ORMs (Object-relational mappings) that define the individual tables of
+the relational database.
 
-The engine object serves as the low-level database API and perhaps most
-importantly contains dialects which allows the sqlalchemy module to
-communicate with the database.
+The ``engine`` object serves as the low-level database API and perhaps
+most importantly contains dialects which allows the ``sqlalchemy``
+module to communicate with the database.
 
-The base object serves as a base class for class definitions.  It
-produces Table objects and constructs ORMs.
+The ``base`` object serves as a base class for class definitions.  It
+produces ``Table`` objects and constructs ORMs.
 
-The session object manages operations on ORM-mapped objects, as
+The ``session`` object manages operations on ORM-mapped objects, as
 construced by the base.  These operations include querying, for
 example.
 
 Authors
 -------
-    Matthew Bourque, 2017
+    Matthew Bourque
 
 Use
 ---
-    This module is intended to be imported from various acsql modules
-    and scripts.  The importable objects from this module are as
-    follows:
+    This module is intended to be imported from various ``acsql``
+    modules and scripts.  The importable objects from this module are
+    as follows:
+    ::
 
-    from acsql.database.database_interface import base
-    from acsql.database.database_interface import engine
-    from acsql.database.database_interface import session
+        from acsql.database.database_interface import base
+        from acsql.database.database_interface import engine
+        from acsql.database.database_interface import session
+        from acsql.database.database_interface import Master
+        from acsql.database.database_interface import Datasets
+        from acsql.database.database_interface import <header_table>
 
 Dependencies
 ------------
     External library dependencies include:
 
-    (1) sqlalchemy
+    - ``acsql``
+    - ``pymysql``
+    - ``sqlalchemy``
 """
 
 import os
@@ -50,6 +57,7 @@ from sqlalchemy import Index
 from sqlalchemy import Enum
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy import Integer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
@@ -75,15 +83,20 @@ def define_columns(data_dict, class_name):
         definitions added.
     """
 
+    special_keywords = ['RULEFILE', 'FWERROR', 'FW2ERROR', 'PROPTTL1',
+                        'TARDESCR', 'QUALCOM2']
+
     with open(os.path.join(os.path.split(__file__)[0], 'table_definitions',
                            class_name.lower() + '.txt'), 'r') as f:
         data = f.readlines()
     keywords = [item.strip().split(', ') for item in data]
     for keyword in keywords:
-        if keyword[1] == 'Integer':
+        if keyword[0] in special_keywords:
+            data_dict[keyword[0].lower()] = get_special_column(keyword[0])
+        elif keyword[1] == 'Integer':
             data_dict[keyword[0].lower()] = Column(Integer())
         elif keyword[1] == 'String':
-            data_dict[keyword[0].lower()] = Column(String(100))
+            data_dict[keyword[0].lower()] = Column(String(50))
         elif keyword[1] == 'Float':
             data_dict[keyword[0].lower()] = Column(Float())
         elif keyword[1] == 'Decimal':
@@ -101,23 +114,48 @@ def define_columns(data_dict, class_name):
                 keyword[0], keyword[1]))
 
         if 'aperture' in data_dict:
-            data_dict['aperture'] = Column(String(100), index=True)
+            data_dict['aperture'] = Column(String(50), index=True)
 
     return data_dict
 
 
-def loadConnection(connection_string):
-    """Return session, base, and engine objects for connecting to the
-    acsql database.
+def get_special_column(keyword):
+    """Treat specific keywords separately.
 
-    Create and engine using an given connection_string. Create a Base
-    class and Session class from the engine. Create an instance of the
-    Session class. Return the session, base, and engine instances.
+    Parameters
+    ----------
+    keyword : str
+        The header keyword.
+
+    Returns
+    -------
+    Column : obj
+        A SQLAlchemy Column object for the given ``keyword``.
+    """
+
+    if keyword in ['RULEFILE', 'PROPTTL1', 'TARDESCR', 'QUALCOM2']:
+        return Column(String(500))
+    elif keyword in ['FWERROR', 'FW2ERROR']:
+        return Column(String(100))
+    else:
+        return Column(String(50))
+
+
+def load_connection(connection_string):
+    """Return ``session``, ``base``, and ``engine`` objects for
+    connecting to the ``acsql`` database.
+
+    Create an ``engine`` using an given ``connection_string``. Create a
+    ``base`` class and ``session`` class from the ``engine``. Create an
+    instance of the ``session`` class. Return the ``session``,
+    ``base``, and ``engine`` instances.
 
     Parameters
     ----------
     connection_string : str
-        The connection string to connect to the acsql database.
+        The connection string to connect to the ``acsql`` database. The
+        connection string should take the form:
+        ``dialect+driver://username:password@host:port/database``
 
     Returns
     -------
@@ -129,6 +167,7 @@ def loadConnection(connection_string):
     engine : engine object
         Provides a source of database connectivity and behavior.
     """
+
     engine = create_engine(connection_string, echo=False, pool_timeout=100000)
     base = declarative_base(engine)
     Session = sessionmaker(bind=engine)
@@ -137,11 +176,11 @@ def loadConnection(connection_string):
     return session, base, engine
 
 
-session, base, engine = loadConnection(SETTINGS['connection_string'])
+session, base, engine = load_connection(SETTINGS['connection_string'])
 
 
 def orm_factory(class_name):
-    """Create a SQLAlchemy ORM Classes with the given class_name.
+    """Create a SQLAlchemy ORM Classes with the given ``class_name``.
 
     Parameters
     ----------
@@ -159,8 +198,9 @@ def orm_factory(class_name):
     data_dict['rootname'] = Column(String(8), ForeignKey('master.rootname'),
                                    primary_key=True, index=True,
                                    nullable=False)
-    data_dict['filename'] = Column(String(9), unique=True, nullable=False)
+    data_dict['filename'] = Column(String(18), nullable=False, unique=True)
     data_dict = define_columns(data_dict, class_name)
+    data_dict['__table_args__'] = {'mysql_row_format': 'DYNAMIC'}
 
     return type(class_name.upper(), (base,), data_dict)
 
@@ -176,7 +216,11 @@ class Master(base):
     first_ingest_date = Column(Date, nullable=False)
     last_ingest_date = Column(Date, nullable=False)
     detector = Column(Enum('WFC', 'HRC', 'SBC'), nullable=False)
-    obstype = Column(Enum('CAL', 'GO'), nullable=True)
+    proposal_type = Column(Enum('CAL/ACS', 'CAL/OTA', 'CAL/STIS', 'CAL/WFC3',
+                                'ENG/ACS', 'GO', 'GO/DD', 'GO/PAR', 'GTO/ACS',
+                                'GTO/COS', 'NASA', 'SM3/ACS', 'SM3/ERO',
+                                'SM4/ACS', 'SM4/COS', 'SM4/ERO', 'SNAP'),
+                           nullable=True)
 
 
 class Datasets(base):
@@ -187,17 +231,25 @@ class Datasets(base):
     __tablename__ = 'datasets'
     rootname = Column(String(8), ForeignKey('master.rootname'),
                       primary_key=True, index=True, nullable=False)
-    raw = Column(String(8), nullable=True)
-    flt = Column(String(8), nullable=True)
-    flc = Column(String(8), nullable=True)
-    spt = Column(String(8), nullable=True)
-    drz = Column(String(8), nullable=True)
-    drc = Column(String(8), nullable=True)
-    crj = Column(String(8), nullable=True)
-    crc = Column(String(8), nullable=True)
-    jif = Column(String(8), nullable=True)
-    jit = Column(String(8), nullable=True)
-    asn = Column(String(8), nullable=True)
+    raw = Column(String(18), nullable=True)
+    flt = Column(String(18), nullable=True)
+    flc = Column(String(18), nullable=True)
+    spt = Column(String(18), nullable=True)
+    drz = Column(String(18), nullable=True)
+    drc = Column(String(18), nullable=True)
+    crj = Column(String(18), nullable=True)
+    crc = Column(String(18), nullable=True)
+    jif = Column(String(18), nullable=True)
+    jit = Column(String(18), nullable=True)
+    asn = Column(String(18), nullable=True)
+
+    # foreign_keys = []
+    # for filetype in FILE_EXTS:
+    #     for ext in [0, 1]:
+    #         foreign_keys.append(ForeignKeyConstraint([filetype],
+    #             ['wfc_{}_{}.filename'.format(filetype, ext)]))
+    # foreign_keys = tuple(foreign_keys)
+    # __table_args__ = foreign_keys
 
 
 # WFC tables
@@ -274,112 +326,82 @@ WFC_asn_0 = orm_factory('WFC_asn_0')
 WFC_asn_1 = orm_factory('WFC_asn_1')
 
 
-# # HRC tables
-# HRC_raw_0 = orm_factory('HRC_raw_0')
-# HRC_raw_1 = orm_factory('HRC_raw_1')
-# HRC_raw_2 = orm_factory('HRC_raw_2')
-# HRC_raw_3 = orm_factory('HRC_raw_3')
+# HRC tables
+HRC_raw_0 = orm_factory('HRC_raw_0')
+HRC_raw_1 = orm_factory('HRC_raw_1')
+HRC_raw_2 = orm_factory('HRC_raw_2')
+HRC_raw_3 = orm_factory('HRC_raw_3')
 
-# HRC_flt_0 = orm_factory('HRC_flt_0')
-# HRC_flt_1 = orm_factory('HRC_flt_1')
-# HRC_flt_2 = orm_factory('HRC_flt_2')
-# HRC_flt_3 = orm_factory('HRC_flt_3')
+HRC_flt_0 = orm_factory('HRC_flt_0')
+HRC_flt_1 = orm_factory('HRC_flt_1')
+HRC_flt_2 = orm_factory('HRC_flt_2')
+HRC_flt_3 = orm_factory('HRC_flt_3')
 
-# HRC_flc_0 = orm_factory('HRC_flc_0')
-# HRC_flc_1 = orm_factory('HRC_flc_1')
-# HRC_flc_2 = orm_factory('HRC_flc_2')
-# HRC_flc_3 = orm_factory('HRC_flc_3')
+HRC_spt_0 = orm_factory('HRC_spt_0')
+HRC_spt_1 = orm_factory('HRC_spt_1')
 
-# HRC_spt_0 = orm_factory('HRC_spt_0')
-# HRC_spt_1 = orm_factory('HRC_spt_1')
+HRC_drz_0 = orm_factory('HRC_drz_0')
+HRC_drz_1 = orm_factory('HRC_drz_1')
+HRC_drz_2 = orm_factory('HRC_drz_2')
+HRC_drz_3 = orm_factory('HRC_drz_3')
 
-# HRC_drz_0 = orm_factory('HRC_drz_0')
-# HRC_drz_1 = orm_factory('HRC_drz_1')
-# HRC_drz_2 = orm_factory('HRC_drz_2')
-# HRC_drz_3 = orm_factory('HRC_drz_3')
+HRC_crj_0 = orm_factory('HRC_crj_0')
+HRC_crj_1 = orm_factory('HRC_crj_1')
+HRC_crj_2 = orm_factory('HRC_crj_2')
+HRC_crj_3 = orm_factory('HRC_crj_3')
 
-# HRC_drc_0 = orm_factory('HRC_drc_0')
-# HRC_drc_1 = orm_factory('HRC_drc_1')
-# HRC_drc_2 = orm_factory('HRC_drc_2')
-# HRC_drc_3 = orm_factory('HRC_drc_3')
+HRC_jif_0 = orm_factory('HRC_jif_0')
+HRC_jif_1 = orm_factory('HRC_jif_1')
+HRC_jif_2 = orm_factory('HRC_jif_2')
 
-# HRC_crj_0 = orm_factory('HRC_crj_0')
-# HRC_crj_1 = orm_factory('HRC_crj_1')
-# HRC_crj_2 = orm_factory('HRC_crj_2')
-# HRC_crj_3 = orm_factory('HRC_crj_3')
+HRC_jit_0 = orm_factory('HRC_jit_0')
+HRC_jit_1 = orm_factory('HRC_jit_1')
+HRC_jit_2 = orm_factory('HRC_jit_2')
 
-# HRC_crc_0 = orm_factory('HRC_crc_0')
-# HRC_crc_1 = orm_factory('HRC_crc_1')
-# HRC_crc_2 = orm_factory('HRC_crc_2')
-# HRC_crc_3 = orm_factory('HRC_crc_3')
-
-# HRC_jif_0 = orm_factory('HRC_jif_0')
-# HRC_jif_1 = orm_factory('HRC_jif_1')
-# HRC_jif_2 = orm_factory('HRC_jif_2')
-# HRC_jif_3 = orm_factory('HRC_jif_3')
-
-# HRC_jit_0 = orm_factory('HRC_jit_0')
-# HRC_jit_1 = orm_factory('HRC_jit_1')
-# HRC_jit_2 = orm_factory('HRC_jit_2')
-# HRC_jit_3 = orm_factory('HRC_jit_3')
-
-# HRC_asn_0 = orm_factory('HRC_asn_0')
-# HRC_asn_1 = orm_factory('HRC_asn_1')
+HRC_asn_0 = orm_factory('HRC_asn_0')
+HRC_asn_1 = orm_factory('HRC_asn_1')
 
 
-# # SBC tables
-# SBC_raw_0 = orm_factory('SBC_raw_0')
-# SBC_raw_1 = orm_factory('SBC_raw_1')
-# SBC_raw_2 = orm_factory('SBC_raw_2')
-# SBC_raw_3 = orm_factory('SBC_raw_3')
+# SBC tables
+SBC_raw_0 = orm_factory('SBC_raw_0')
+SBC_raw_1 = orm_factory('SBC_raw_1')
+SBC_raw_2 = orm_factory('SBC_raw_2')
+SBC_raw_3 = orm_factory('SBC_raw_3')
 
-# SBC_flt_0 = orm_factory('SBC_flt_0')
-# SBC_flt_1 = orm_factory('SBC_flt_1')
-# SBC_flt_2 = orm_factory('SBC_flt_2')
-# SBC_flt_3 = orm_factory('SBC_flt_3')
+SBC_flt_0 = orm_factory('SBC_flt_0')
+SBC_flt_1 = orm_factory('SBC_flt_1')
+SBC_flt_2 = orm_factory('SBC_flt_2')
+SBC_flt_3 = orm_factory('SBC_flt_3')
 
-# SBC_flc_0 = orm_factory('SBC_flc_0')
-# SBC_flc_1 = orm_factory('SBC_flc_1')
-# SBC_flc_2 = orm_factory('SBC_flc_2')
-# SBC_flc_3 = orm_factory('SBC_flc_3')
+SBC_spt_0 = orm_factory('SBC_spt_0')
+SBC_spt_1 = orm_factory('SBC_spt_1')
 
-# SBC_spt_0 = orm_factory('SBC_spt_0')
-# SBC_spt_1 = orm_factory('SBC_spt_1')
+SBC_drz_0 = orm_factory('SBC_drz_0')
+SBC_drz_1 = orm_factory('SBC_drz_1')
+SBC_drz_2 = orm_factory('SBC_drz_2')
+SBC_drz_3 = orm_factory('SBC_drz_3')
 
-# SBC_drz_0 = orm_factory('SBC_drz_0')
-# SBC_drz_1 = orm_factory('SBC_drz_1')
-# SBC_drz_2 = orm_factory('SBC_drz_2')
-# SBC_drz_3 = orm_factory('SBC_drz_3')
+SBC_jif_0 = orm_factory('SBC_jif_0')
+SBC_jif_1 = orm_factory('SBC_jif_1')
+SBC_jif_2 = orm_factory('SBC_jif_2')
 
-# SBC_drc_0 = orm_factory('SBC_drc_0')
-# SBC_drc_1 = orm_factory('SBC_drc_1')
-# SBC_drc_2 = orm_factory('SBC_drc_2')
-# SBC_drc_3 = orm_factory('SBC_drc_3')
+SBC_jit_0 = orm_factory('SBC_jit_0')
+SBC_jit_1 = orm_factory('SBC_jit_1')
+SBC_jit_2 = orm_factory('SBC_jit_2')
 
-# SBC_crj_0 = orm_factory('SBC_crj_0')
-# SBC_crj_1 = orm_factory('SBC_crj_1')
-# SBC_crj_2 = orm_factory('SBC_crj_2')
-# SBC_crj_3 = orm_factory('SBC_crj_3')
-
-# SBC_crc_0 = orm_factory('SBC_crc_0')
-# SBC_crc_1 = orm_factory('SBC_crc_1')
-# SBC_crc_2 = orm_factory('SBC_crc_2')
-# SBC_crc_3 = orm_factory('SBC_crc_3')
-
-# SBC_jif_0 = orm_factory('SBC_jif_0')
-# SBC_jif_1 = orm_factory('SBC_jif_1')
-# SBC_jif_2 = orm_factory('SBC_jif_2')
-# SBC_jif_3 = orm_factory('SBC_jif_3')
-
-# SBC_jit_0 = orm_factory('SBC_jit_0')
-# SBC_jit_1 = orm_factory('SBC_jit_1')
-# SBC_jit_2 = orm_factory('SBC_jit_2')
-# SBC_jit_3 = orm_factory('SBC_jit_3')
-
-# SBC_asn_0 = orm_factory('SBC_asn_0')
-# SBC_asn_1 = orm_factory('SBC_asn_1')
+SBC_asn_0 = orm_factory('SBC_asn_0')
+SBC_asn_1 = orm_factory('SBC_asn_1')
 
 
 if __name__ == '__main__':
 
-    base.metadata.create_all()
+    # Give user a second chance
+    prompt = ('About to reset all table(s) for database instance {}. Do you '
+        'wish to proceed? (y/n)\n'.format(SETTINGS['connection_string']))
+
+    response = input(prompt)
+
+    if response.lower() == 'y':
+        print('Resetting table(s)')
+        base.metadata.drop_all()
+        base.metadata.create_all()

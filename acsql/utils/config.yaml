@@ -1,0 +1,6 @@
+connection_string : 'mysql+pymysql://username:password@host:12345/database'
+filesystem : ''
+log_dir : ''
+jpeg_dir : ''
+thumbnail_dir : ''
+ncores : 1

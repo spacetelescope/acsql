@@ -2,17 +2,32 @@
 
 """Creates static text files that hold header keywords and keyword
 data types for each ACS filetype (and each extension).  Each text file
-corresponds to a header table in the acsql database.
+corresponds to a header table in the ``acsql`` database.
 
 Authors
 -------
-    Sara Ogaz
-    Matthew Bourque
+    - Sara Ogaz
+    - Matthew Bourque
 
 Use
 ---
     This module is intended to be run via the command line as such:
-    >>> python make_tabledefs.py
+    ::
+
+        python make_tabledefs.py
+
+Dependencies
+------------
+    External library dependencies include:
+
+    - ``acsql``
+    - ``numpy``
+    - ``stak`` (``https://github.com/spacetelescope/stak``)
+
+Notes
+-----
+    The ``stak.Hselect`` dependency still depends on Python 2 at the
+    time of this writing.
 """
 
 import glob
@@ -21,60 +36,58 @@ import os
 import numpy as np
 from stak import Hselect
 
+from acsql.utils import utils
 from acsql.utils.utils import SETTINGS
 
 
-def make_tabledefs(detector, file_folder):
+def make_tabledefs(detector):
     """
-    Function to auto-produce the table_definition files
-    for acsql project.  Uses stak.Hselect.
+    Function to auto-produce the table_definition files.
 
-    Note that due to how hselect handles ASN files, they must be
-    handeled separately.
+    Note that due to how ``hselect`` handles ``ASN`` files, they must
+    be handeled separately.
 
     Parameters
     ----------
     detector : str
-        The detector (e.g. 'wfc').
-    file_folder: str
-        The directory to which the table definition file will be
-        written.
+        The detector (e.g. ``wfc``).
     """
-    file_types = {'jif': [0,1,2,3,4,5,6], 'jit': [0,1,2,3,4,5,6],
-                  'flt': [0,1,2,3,4,5,6], 'flc': [0,1,2,3,4,5,6],
-                  'drz': [0,1,2,3], 'drc': [0,1,2,3],
-                  'raw': [0,1,2,3,4,5,6], 'crj': [0,1,2,3,4,5,6],
-                  'crc': [0,1,2,3,4,5,6], 'spt': [0,1]}
-    for ftype in file_types:
-        # Get filelist
-        file_paths = os.path.join(file_folder, 'test_files/',
-                                  '*{}.fits'.format(ftype))
-        all_files = glob.glob(file_paths)
 
-        for ext in file_types[ftype]:
-            file_name = "{}_{}_{}.txt".format(detector, ftype, ext)
-            # Run hselect to gather datatypes for all keywords
+    file_exts = getattr(utils, '{}_FILE_EXTS'.format(detector.upper()))
+
+    for ftype in file_exts:
+
+        all_files = glob.glob('table_definitions/test_files/test_{}_{}*.fits'\
+            .format(detector, ftype))
+
+        for ext in file_exts[ftype]:
+
+            filename = 'table_definitions/{}_{}_{}.txt'.format(detector,
+                ftype, ext)
             hsel = Hselect(all_files, '*', extension=(ext,))
 
-            print("Making file {}".format(file_name))
-            with open(file_name, 'w') as f:
+            print('Making file {}'.format(filename))
+            with open(filename, 'w') as f:
                 for col in hsel.table.itercols():
-                    if col.name in ['ROOTNAME', 'Filename', 'Ext']:
+                    if col.name in ['ROOTNAME', 'Filename', 'FILENAME', 'Ext']:
                         continue
                     elif col.dtype in [np.dtype('S68'), np.dtype('S80')]:
-                        ptype = "String"
+                        ptype = 'String'
                     elif col.dtype in [np.int64]:
-                        ptype = "Integer"
+                        ptype = 'Integer'
                     elif col.dtype in [bool]:
-                        ptype = "Bool"
+                        ptype = 'Bool'
                     elif col.dtype in [np.float64]:
-                        ptype = "Float"
+                        ptype = 'Float'
                     else:
-                        print("Couldn't find type match: {}:{}".format(
+                        print('Could not find type match: {}:{}'.format(
                             col.name, col.dtype))
 
-                    f.write("{}, {}\n".format(col.name, ptype))
+                    f.write('{}, {}\n'.format(col.name, ptype))
 
 
-if __name__ == "__main__":
-    make_tabledefs('wfc', 'table_definitions/')
+if __name__ == '__main__':
+
+    make_tabledefs('wfc')
+    make_tabledefs('sbc')
+    make_tabledefs('hrc')
