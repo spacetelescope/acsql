@@ -1,8 +1,29 @@
 #! /usr/bin/env python
 
+import glob
+
 from flask import Flask, render_template
+import numpy as np
+
+from acsql.utils.utils import SETTINGS
 
 app = Flask(__name__)
+
+
+@app.route('/archive/')
+def archive():
+    """
+    """
+
+    proposal_list = glob.glob(os.path.join(SETTINGS['jpeg_dir'], '*'))
+
+    # rearrange list so that it appears in six columns
+    ncols = 6
+    if len(proposal_list) % ncols != 0:
+            proposal_list.extend([''] * (ncols - (len(proposal_list) % ncols)))
+    proposal_array = np.asarray(proposal_list).reshape(ncols, len(proposal_list) / ncols).T
+
+    return render_template('archive.html', proposal_array=proposal_array)
 
 
 def handle_500(trace):
