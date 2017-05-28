@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="/../static/css/loader.css">
+<link rel="stylesheet" href="/../static/css/thumbnails.css">
+
+<div class="row">
+    <div class="span12">
+    {% if thumbnail_dict.num_images %}
+        {% if thumbnail_dict.type == 'unlooked' %}
+            <h3>{{thumbnail_dict.num_images}} Unlooked Images</h3>
+        {% elif thumbnail_dict.type == 'hold'%}
+            <h3>{{thumbnail_dict.num_images}} Images On Hold</h3>
+        {% elif thumbnail_dict.type == 'images' %}
+            <h3>{{thumbnail_dict.kind[0]}} Proposal {{thumbnail_dict.ProposalID}}{% if thumbnail_dict.VisitNumber %}, Visit {{ thumbnail_dict.VisitNumber }}{% endif %} {% if thumbnail_dict.ProposalTitle %}<small>{{thumbnail_dict.ProposalTitle}}{% endif %}</small></h3>
+        {% elif thumbnail_dict.type == 'results' %}
+            {% if thumbnail_dict.num_images == 1 %}
+                <h4>Your query returned 1 result.</h4>
+            {% else %}
+                <h4>Your query returned {{thumbnail_dict.num_images}} results.</h4>
+            {% endif %}
+        {% endif %}
+        {% if thumbnail_dict.buttons %}
+        <form id="filtering" style="margin-bottom:0;">
+            <div id="filterOptions" class="container">
+                {% if thumbnail_dict.type == 'images' %}
+                    <div class="form-group">
+                        {% if thumbnail_dict.cycle %}Cycle {{thumbnail_dict.cycle}}, {{thumbnail_dict.schedule}}<br>{% endif %}
+                        {{thumbnail_dict.num_images}} images{% if thumbnail_dict.num_visits %}, {{thumbnail_dict.num_visits}} visits{% endif %}
+                        <br>
+                        <a href={{thumbnail_dict.link}} target="_blank">Proposal info</a>
+                    </div>
+                {% endif %}
+                {% for key,buttonlist in thumbnail_dict.buttons.items() %}
+                    <div class="form-group">
+                        {% if key == 'proposid' %}
+                            <label for="{{key}}">Show only proposal:</label>
+                            <select class="form-control" id="{{key}}">
+                                <option value="all">All proposals</option>
+                        {% elif key == 'visnum' %}
+                            <label for="{{key}}">Show only visit:</label>
+                            <select class="form-control" id="{{key}}">
+                                <option value="all">All visits</option>
+                        {% elif key == 'targname' %}
+                            <label for="{{key}}">Show only target:</label>
+                            <select class="form-control" id="{{key}}">
+                                <option value="all">All targets</option>
+                        {% else %}
+                            <label for="{{key}}">Show only {{key}}:</label>
+                            <select class="form-control" id="{{key}}">
+                                <option value="all">All {{key}}s</option>
+                        {% endif %}
+                                {% for b in buttonlist %}
+                                    <option value="{{b}}">{{b}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                {% endfor %}
+            </div>
+            <div class="row" id="sortOptions">
+                <div class="span6">
+                    Sort by:&nbsp;&nbsp;
+                    <label class="radio inline"><input type="radio" name="sort" id="unsort" checked>default</label>
+                    <label class="radio inline"><input type="radio" name="sort" id="sort-expstart">expstart</label>
+                    <label class="radio inline"><input type="radio" name="sort" id="sort-exptime">exptime</label>
+                </div>
+                <div class="span5 text-right">
+                {% if thumbnail_dict.buttons|length > 2 %}
+                    Filter logic:&nbsp;&nbsp;
+                    <label class="radio inline"><input type="radio" name="logic" value="and" checked>"AND"</label>
+                    <label class="radio inline"><input type="radio" name="logic" value="or">"OR"</label>
+                {% endif %}
+                </div>
+                <div class="span1 text-right">
+                    <button id="clear" class="btn btn-danger" type="reset" value="Reset">Clear</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+        <!-- <button class="btn btn-default" id="sort-expstart">Sort by expstart</button>
+        <button class="btn btn-default" id="unsort">Default order</button> -->
+
+            <div id="loading">
+                <div class="cssload-loader-inner" style="height:100px;margin:0 auto;">
+                    <div class="cssload-cssload-loader-line-wrap-wrap">
+                        <div class="cssload-loader-line-wrap"></div>
+                    </div>
+                    <div class="cssload-cssload-loader-line-wrap-wrap">
+                        <div class="cssload-loader-line-wrap"></div>
+                    </div>
+                    <div class="cssload-cssload-loader-line-wrap-wrap">
+                        <div class="cssload-loader-line-wrap"></div>
+                    </div>
+                    <div class="cssload-cssload-loader-line-wrap-wrap">
+                        <div class="cssload-loader-line-wrap"></div>
+                    </div>
+                    <div class="cssload-cssload-loader-line-wrap-wrap">
+                        <div class="cssload-loader-line-wrap"></div>
+                    </div>
+                </div>
+                <br>
+                Loading thumbnails...
+            </div>
+
+            <div id="onload">
+                <div id="thumbnail-array">
+                        {% for i in range(thumbnail_dict.num_images) %}
+                            <div class="thumb" page="{{i+1}}" detector="{{thumbnail_dict.detector[i]}}" filter="{{thumbnail_dict.filter[i]}}" expstart="{{thumbnail_dict.expstart[i]}}"  exptime="{{thumbnail_dict.exptime[i]}}" targname="{{thumbnail_dict.targname[i]}}" kind="{{thumbnail_dict.kind[i].upper()}}" proposid="{{thumbnail_dict.proposid[i]}}" visnum="{{thumbnail_dict.visnum[i]}}" style="background:url(/../{{thumbnail_dict.thumbnail[i]}}) no-repeat;">
+                                <div class="overlay">
+                                    <strong>{{thumbnail_dict.rootname[i]}}</strong><br>
+                                    {% if thumbnail_dict.type != 'images' %}
+                                    {{thumbnail_dict.kind[i]}} {{thumbnail_dict.proposid[i]}}<br>
+                                    {% endif %}
+                                    Filter: {{thumbnail_dict.filter[i]}}<br>
+                                    Exptime: {{thumbnail_dict.exptime[i]}}<br>
+                                    Target: {{thumbnail_dict.targname[i]}}<br>
+                                </div>
+                                {% if thumbnail_dict.type in ['unlooked', 'hold'] %}
+                                <a href="{{url_for('daily_ql', folder=thumbnail_dict.type, page=i+1)}}" target="_blank">
+                                {% else %}
+                                <a href="{{thumbnail_dict.viewlink[i]}}" target="_blank">
+                                {% endif %}
+                                    <img src="/../{{thumbnail_dict.thumbnail[i]}}", style="opacity:0;">
+                                </a>
+                            </div>
+                        {% endfor %}
+                </div>
+            </div>
+    {% else %}
+        <p>
+            <h5>There are no {{thumbnail_dict.type}} thumbnails to display.</h5>
+        </p>
+    {% endif %} <!--if thumbnail_dict-->
+    </div>
+</div>
+
+<script type="text/javascript">
+    function preloader(){
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("onload").style.display = "block";
+        $(".thumb img").attr('src', '/../static/img/wow.png');
+    }
+    window.onload = preloader;
+</script>
+
+<script src="/../static/js/tinysort.min.js"></script>
+<script src="/../static/js/thumbnails.js"></script>
+
+{% endblock %}
