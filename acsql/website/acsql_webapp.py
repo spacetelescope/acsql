@@ -15,85 +15,82 @@ from acsql.utils.utils import SETTINGS
 app = Flask(__name__)
 
 
-def get_image_lists(image_dict):
+def get_image_lists(proposal_dict):
     """
     """
 
-    jpeg_proposal_path = os.path.join(SETTINGS['jpeg_dir'], proposal)
-    thumb_proposal_path = os.path.join(SETTINGS['thumbnail_dir'], proposal)
+    jpeg_proposal_path = os.path.join(SETTINGS['jpeg_dir'], proposal_dict['proposal_id'])
+    thumb_proposal_path = os.path.join(SETTINGS['thumbnail_dir'], proposal_dict['proposal_id'])
 
-    image_dict['raw_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*raw.jpg'))
-    image_dict['flt_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flt.jpg'))
-    image_dict['flc_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flc.jpg'))
+    proposal_dict['raw_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*raw.jpg'))
+    proposal_dict['flt_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flt.jpg'))
+    proposal_dict['flc_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flc.jpg'))
+    proposal_dict['flt_thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*flt.thumb'))
 
-    image_dict['raw_thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*raw.thumb'))
-    image_dict['flt_thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*flt.thumb'))
-    image_dict['flc_thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*flc.thumb'))
-
-    return image_dict
+    return proposal_dict
 
 
-def get_keyword_metadata(image_dict):
+def get_keyword_metadata(proposal_dict):
     """
     """
 
-    image_dict['exptimes'] = []
-    image_dict['filter1s'] = []
-    image_dict['filter2s'] = []
-    image_dict['targnames'] = []
-    image_dict['expstarts'] = []
+    proposal_dict['exptimes'] = []
+    proposal_dict['filter1s'] = []
+    proposal_dict['filter2s'] = []
+    proposal_dict['targnames'] = []
+    proposal_dict['expstarts'] = []
 
     session = getattr(database_interface, 'session')
 
-    for rootname in image_dict['rootnames']:
+    for rootname in proposal_dict['rootnames']:
 
         detector = session.query(Master.detector)\
-            .filter(Master.rootname == rootname).one()
+            .filter(Master.rootname == rootname).one()[0]
 
         table = getattr(database_interface, '{}_raw_0'.format(detector))
         results = session.query(
-            table.exptime, table.filter1, table.filter2, table.targname, table.date_obs, table.time_obs)\
+            table.exptime, table.filter1, table.filter2, table.targname, getattr(table, 'date-obs'), getattr(table, 'time-obs'))\
             .filter(table.rootname == rootname).one()
 
-        image_dict['exptimes'].append(results[0])
-        image_dict['filter1s'].append(results[1])
-        image_dict['filter2s'].append(results[2])
-        image_dict['targnames'].append(results[3])
-        image_dict['expstarts'].append(results[4])
+        proposal_dict['exptimes'].append(results[0])
+        proposal_dict['filter1s'].append(results[1])
+        proposal_dict['filter2s'].append(results[2])
+        proposal_dict['targnames'].append(results[3])
+        proposal_dict['expstarts'].append(results[4])
 
     session.close()
 
-    return image_dict
+    return proposal_dict
 
-def get_proposal_status(image_dict):
+def get_proposal_status(proposal_dict):
     """
     """
 
-    image_dict['status_page'] = ('http://www.stsci.edu/cgi-bin/get-proposal'
-        '-info?id={}&submit=Go&observatory=HST').format(proposal)
+    proposal_dict['status_page'] = ('http://www.stsci.edu/cgi-bin/get-proposal'
+        '-info?id={}&submit=Go&observatory=HST').format(proposal_dict['proposal_id'])
 
-    req = requests.get(image_dict['status_page'], timeout=3) # timeout in 3 seconds
+    req = requests.get(proposal_dict['status_page'], timeout=3)
 
-    if req.ok: # quick way of checking that page we're trying to access is valid
+    if req.ok:
 
         status_string = req.content.decode() # get HTML content of page
-        image_dict['proposal_title'] = html.unescape(status_string.\
+        proposal_dict['proposal_title'] = html.unescape(status_string.\
             split('<b>Title:</b> ')[1].\
             split('<br>')[0])
-        image_dict['cycle'] = html.unescape(status_string.\
+        proposal_dict['cycle'] = html.unescape(status_string.\
             split('<b>Cycle:</b> ')[1].\
             split('<br>')[0])
-        image_dict['schedule'] = html.unescape(status_string.\
+        proposal_dict['schedule'] = html.unescape(status_string.\
             split('/proposal-help-HST.html#')[2].\
             split('">')[0])
 
     else:
-        print('Request failed: {}'.format(image_dict['status_page']))
-        image_dict['proposal_title'] = 'proposal title unavailable'
-        image_dict['cycle'] = None
-        image_dict['schedule'] = None
+        print('Request failed: {}'.format(proposal_dict['status_page']))
+        proposal_dict['proposal_title'] = 'proposal title unavailable'
+        proposal_dict['cycle'] = None
+        proposal_dict['schedule'] = None
 
-    return image_dict
+    return proposal_dict
 
 
 @app.route('/archive/')
@@ -103,13 +100,13 @@ def archive():
 
     # Get list of all proposal numbers
     proposal_list = glob.glob(os.path.join(SETTINGS['jpeg_dir'], '*'))
-    proposal_list = sorted([os.path.basename(item) for item in proposal_list])
+    proposal_list = sorted([int(os.path.basename(item)) for item in proposal_list])
 
-    # rearrange list so that it appears in six columns
-    ncols = 6
+    # rearrange list so that it appears in multiple columns
+    ncols = 12
     if len(proposal_list) % ncols != 0:
             proposal_list.extend([''] * (ncols - (len(proposal_list) % ncols)))
-    proposal_array = np.asarray(proposal_list).reshape(ncols, len(proposal_list) / ncols).T
+    proposal_array = np.asarray(proposal_list).reshape(ncols, int(len(proposal_list) / ncols)).T
 
     return render_template('archive.html', proposal_array=proposal_array)
 
@@ -169,14 +166,14 @@ def view_proposal(proposal):
     """
     """
 
-    image_dict = {}
-    image_dict = get_image_lists(image_dict)
-    image_dict['proposal_id'] = proposal
-    image_dict['num_images'] = len(flt_jpeg_list)
-    image_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in image_dict['flt_jpegs']]
-    image_dict['visits'] = [os.path.basename(item).split('_')[0][4:6] for item in image_dict['flt_jpegs']]
-    image_dict = get_proposal_status(image_dict)
-    image_dict = get_keyword_metadata(img_dict)
+    proposal_dict = {}
+    proposal_dict['proposal_id'] = proposal
+    proposal_dict = get_image_lists(proposal_dict)
+    proposal_dict['num_images'] = len(proposal_dict['flt_jpegs'])
+    proposal_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in proposal_dict['flt_jpegs']]
+    proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6] for item in proposal_dict['flt_jpegs']]
+    proposal_dict = get_proposal_status(proposal_dict)
+    proposal_dict = get_keyword_metadata(proposal_dict)
 
     return render_template('404.html')
 
