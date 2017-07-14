@@ -15,6 +15,21 @@ from acsql.utils.utils import SETTINGS
 app = Flask(__name__)
 
 
+def get_buttons_dict(proposal_dict):
+    """
+    """
+
+    proposal_dict['buttons'] = {}
+    proposal_dict['buttons']['detector'] = sorted(set(proposal_dict['detectors']))
+    proposal_dict['buttons']['visit'] = sorted(set(proposal_dict['visits']))
+    proposal_dict['buttons']['target'] = sorted(set(proposal_dict['targnames']))
+    proposal_dict['buttons']['filter'] = sorted(set([
+        '{}/{}'.format(filter1, filter2)
+        for filter1, filter2
+        in zip(proposal_dict['filter1s'], proposal_dict['filter2s'])]))
+
+    return proposal_dict
+
 def get_image_lists(proposal_dict):
     """
     """
@@ -25,7 +40,7 @@ def get_image_lists(proposal_dict):
     proposal_dict['raw_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*raw.jpg'))
     proposal_dict['flt_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flt.jpg'))
     proposal_dict['flc_jpegs'] = glob.glob(os.path.join(jpeg_proposal_path, '*flc.jpg'))
-    proposal_dict['flt_thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*flt.thumb'))
+    proposal_dict['thumbs'] = glob.glob(os.path.join(thumb_proposal_path, '*flt.thumb'))
 
     return proposal_dict
 
@@ -34,6 +49,7 @@ def get_keyword_metadata(proposal_dict):
     """
     """
 
+    proposal_dict['detectors'] = []
     proposal_dict['exptimes'] = []
     proposal_dict['filter1s'] = []
     proposal_dict['filter2s'] = []
@@ -52,6 +68,7 @@ def get_keyword_metadata(proposal_dict):
             table.exptime, table.filter1, table.filter2, table.targname, getattr(table, 'date-obs'), getattr(table, 'time-obs'))\
             .filter(table.rootname == rootname).one()
 
+        proposal_dict['detectors'].append(detector)
         proposal_dict['exptimes'].append(results[0])
         proposal_dict['filter1s'].append(results[1])
         proposal_dict['filter2s'].append(results[2])
@@ -171,11 +188,15 @@ def view_proposal(proposal):
     proposal_dict = get_image_lists(proposal_dict)
     proposal_dict['num_images'] = len(proposal_dict['flt_jpegs'])
     proposal_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in proposal_dict['flt_jpegs']]
-    proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6] for item in proposal_dict['flt_jpegs']]
+    proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['flt_jpegs']]
+    proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
     proposal_dict = get_proposal_status(proposal_dict)
     proposal_dict = get_keyword_metadata(proposal_dict)
+    proposal_dict = get_buttons_dict(proposal_dict)
+    proposal_dict['viewlinks'] = ['localhost:5000/archive/{}/{}'.format(proposal_dict['proposal_id'], rootname) for rootname in proposal_dict['rootnames']]
 
-    return render_template('404.html')
+    print(proposal_dict)
+    return render_template('view_proposal.html', proposal_dict=proposal_dict)
 
 
 if __name__ == '__main__':
