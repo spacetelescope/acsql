@@ -85,11 +85,11 @@
                     {% for i in range(proposal_dict.num_images) %}
                         <div class="thumb" page="{{i+1}}" detector="{{proposal_dict.detectors[i]}}" filter1="{{proposal_dict.filter1s[i]}}" filter2="{{proposal_dict.filter2s[i]}}" expstart="{{proposal_dict.expstarts[i]}}"  exptime="{{proposal_dict.exptimes[i]}}" targname="{{proposal_dict.targnames[i]}}" proposid="{{proposal_dict.proposal_id}}" visit="{{proposal_dict.visits[i]}}" style="background:url(/../{{proposal_dict.thumbs[i]}}) no-repeat;">
                             <div class="overlay">
-                                <strong>{{proposal_dict.filenames[i]}}</strong><br>
-                                Detector: {{proposal_dict.detectors[i]}}
-                                Filter: {{proposal_dict.filter1s[i]}} / {{proposal_dict.filter2s[i]}}<br>
-                                Exptime: {{proposal_dict.exptimes[i]}}<br>
-                                Target: {{proposal_dict.targnames[i]}}<br>
+                                <strong>{{proposal_dict.filenames[i]}}</strong><br><font size="0.5">
+                                <b>Detector:</b> {{proposal_dict.detectors[i]}}<br>
+                                <b>Filter:</b> {{proposal_dict.filter1s[i]}} / {{proposal_dict.filter2s[i]}}<br>
+                                <b>Exptime:</b> {{proposal_dict.exptimes[i]}}<br>
+                                <b>Target:</b> {{proposal_dict.targnames[i]}}<br></font>
                             </div>
                             <a href="{{proposal_dict.viewlinks[i]}}" target="_blank">
                                 <img src="{{proposal_dict.thumbs[i]}}", style="opacity:0;">

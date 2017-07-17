@@ -6,18 +6,18 @@
 
     <!-- Filename title -->
     <div class="span12">
-        <h3>{{image_dict.rootname}}</h3>
+        <h3>{{image_dict.filename}}</h3>
     </div>
 
     <!-- Image metadata -->
     <div class="span5">
         <p>
-        Proposal <a href={{image_dict.proposal_link}} target="_blank">{{image_dict.proposal_id}}</a> <i>: {{image_dict.proposal_title}}</i><br>
+        <b>Proposal <a href={{image_dict.proposal_link}} target="_blank">{{image_dict.proposal_id}}</a>:</b> <i> {{image_dict.proposal_title}}</i><br>
         Image {{image_dict.index}} of {{image_dict.num_images}}<br>
 
         <!-- FITS download links -->
         {% if (not image_dict.fits_links) or (image_dict.fits_links|length == 0) %}
-            No FITS downloads available
+            No FITS downloads available yet
         {% else %}
             Downloads:
             {% for key, link in image_dict.fits_links.items() %}
@@ -32,18 +32,18 @@
     </div>
     <div class="span3">
         <p>
-        Expstart: {{image_dict.expstart}}<br>
-        Filter: {{image_dict.filter1}}/{{image_dict.filter2}}<br>
-        Aperture: {{image_dict.aperture}}<br>
-        Exposure time: {{image_dict.exptime}}<br>
+        <b>Expstart:</b> {{image_dict.expstart}}<br>
+        <b>Filter:</b> {{image_dict.filter1}}/{{image_dict.filter2}}<br>
+        <b>Aperture:</b> {{image_dict.aperture}}<br>
+        <b>Exposure time:</b> {{image_dict.exptime}}<br>
         </p>
     </div>
     <div class="span4">
         <p>
-        Expflag: {{image_dict.expflag}}, Quality: {{image_dict.quality}}<br>
-        Coordinates: {{image_dict.ra}}, {{image_dict.dec}}<br>
-        Target: {{image_dict.targname}}<br>
-        PI: {{image_dict.pi_first_name}} {{image_dict.pi_last_name}}<br>
+        <b>Expflag:</b> {{image_dict.expflag}}, Quality: {{image_dict.quality}}<br>
+        <b>Coordinates:</b> {{image_dict.ra}}, {{image_dict.dec}}<br>
+        <b>Target:</b> {{image_dict.targname}}<br>
+        <b>PI:</b> {{image_dict.pi_first_name}} {{image_dict.pi_last_name}}<br>
         </p>
     </div>
 </div>
@@ -51,7 +51,7 @@
 <!-- Image -->
 <div class="row">
     <div class="fleximage">
-        <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}}>
+        <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align="middle">
     </div>
 </div>
 

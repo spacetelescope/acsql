@@ -161,11 +161,12 @@ def get_view_image_dict(proposal, filename):
     image_dict['view_url'] = 'archive/{}/{}'.format(image_dict['proposal_id'], image_dict['filename'])
     image_dict['fits_links'] = {}
     image_dict['proposal_name'] = image_dict['filename'][0:4]
-    image_dict['flt'] = os.path.join(
-                            SETTINGS['filesystem'],
-                            image_dict['proposal_name'],
-                            image_dict['rootname'],
-                            '{}_flt.fits'.format(image_dict['rootname']))
+    # image_dict['fits_links']['FLT'] = os.path.join(
+    #                                       SETTINGS['filesystem'],
+    #                                       image_dict['proposal_name'],
+    #                                       image_dict['filename'],
+    #                                       '{}_flt.fits'.format(image_dict['filename']))
+
 
     return image_dict
 
