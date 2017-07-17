@@ -85,6 +85,7 @@ def get_proposal_buttons_dict(proposal_dict):
         '{}/{}'.format(filter1, filter2)
         for filter1, filter2
         in zip(proposal_dict['filter1s'], proposal_dict['filter2s'])]))
+    print(proposal_dict['buttons']['detector'])
 
     return proposal_dict
 
