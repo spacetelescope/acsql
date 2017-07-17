@@ -23,11 +23,16 @@ def get_image_lists(data_dict):
     return data_dict
 
 
-def get_metadata_from_database(data_dict):
+def get_metadata_from_database(data_dict, mode):
     """
     """
 
     session = getattr(database_interface, 'session')
+
+    if mode == 'proposal':
+        iterable = data_dict['rootnames']
+    elif mode == 'image':
+        iterable = list(data_dict['rootname'])
 
     results = []
     for rootname in data_dict['rootnames']:
@@ -92,6 +97,7 @@ def initialize_data_dict(proposal):
     data_dict['proposal_id'] = proposal
     data_dict = get_image_lists(data_dict)
     data_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in data_dict['flt_jpegs']]
+    data_dict['filenames'] = [os.path.basename(item).split('_')[0] for item in data_dict['flt_jpegs']]
     data_dict['num_images'] = len(data_dict['flt_jpegs'])
     data_dict = get_proposal_status(data_dict)
 
@@ -129,14 +135,15 @@ def get_proposal_status(data_dict):
     return data_dict
 
 
-def get_view_image_dict(proposal, rootname):
+def get_view_image_dict(proposal, filename):
     """
     """
 
     image_dict = initialize_data_dict(proposal)
-    image_dict = get_metadata_from_database(image_dict)
-    image_dict['rootname'] = rootname
-    image_dict['index'] = image_dict['rootnames'].index(image_dict['rootname'])
+    image_dict['filename'] = filename
+    image_dict['rootname'] = filename[:-1]
+    image_dict = get_metadata_from_database(image_dict, 'image')
+    image_dict['index'] = image_dict['filenames'].index(image_dict['filename'])
     image_dict['expstart'] = image_dict['expstarts'][image_dict['index']]
     image_dict['filter1'] = image_dict['filter1s'][image_dict['index']]
     image_dict['filter2'] = image_dict['filter2s'][image_dict['index']]
@@ -149,10 +156,10 @@ def get_view_image_dict(proposal, rootname):
     image_dict['targname'] = image_dict['targnames'][image_dict['index']]
     image_dict['pi_first_name'] = image_dict['pi_firsts'][image_dict['index']]
     image_dict['pi_last_name'] = image_dict['pi_lasts'][image_dict['index']]
-    image_dict['image'] = 'static/img/jpegs/{}/{}_flt.jpg'.format(image_dict['proposal_id'], image_dict['rootname'])
-    image_dict['view_url'] = 'archive/{}/{}'.format(image_dict['proposal_id'], image_dict['rootname'])
+    image_dict['image'] = '/static/img/jpegs/{}/{}_flt.jpg'.format(image_dict['proposal_id'], image_dict['filename'])
+    image_dict['view_url'] = 'archive/{}/{}'.format(image_dict['proposal_id'], image_dict['filename'])
     image_dict['fits_links'] = {}
-    image_dict['proposal_name'] = image_dict['rootname'][0:4]
+    image_dict['proposal_name'] = image_dict['filename'][0:4]
     image_dict['flt'] = os.path.join(
                             SETTINGS['filesystem'],
                             image_dict['proposal_name'],
@@ -169,8 +176,8 @@ def get_view_proposal_dict(proposal):
     proposal_dict = initialize_data_dict(proposal)
     proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['flt_jpegs']]
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
-    proposal_dict = get_metadata_from_database(proposal_dict)
+    proposal_dict = get_metadata_from_database(proposal_dict, 'proposal')
     proposal_dict = get_proposal_buttons_dict(proposal_dict)
-    proposal_dict['viewlinks'] = ['localhost:5000/archive/{}/{}'.format(proposal_dict['proposal_id'], rootname) for rootname in proposal_dict['rootnames']]
+    proposal_dict['viewlinks'] = ['localhost:5000/archive/{}/{}'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
 
     return proposal_dict

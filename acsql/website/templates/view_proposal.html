@@ -85,7 +85,7 @@
                     {% for i in range(proposal_dict.num_images) %}
                         <div class="thumb" page="{{i+1}}" detector="{{proposal_dict.detectors[i]}}" filter1="{{proposal_dict.filter1s[i]}}" filter2="{{proposal_dict.filter2s[i]}}" expstart="{{proposal_dict.expstarts[i]}}"  exptime="{{proposal_dict.exptimes[i]}}" targname="{{proposal_dict.targnames[i]}}" proposid="{{proposal_dict.proposal_id}}" visit="{{proposal_dict.visits[i]}}" style="background:url(/../{{proposal_dict.thumbs[i]}}) no-repeat;">
                             <div class="overlay">
-                                <strong>{{proposal_dict.rootnames[i]}}</strong><br>
+                                <strong>{{proposal_dict.filenames[i]}}</strong><br>
                                 Detector: {{proposal_dict.detectors[i]}}
                                 Filter: {{proposal_dict.filter1s[i]}} / {{proposal_dict.filter2s[i]}}<br>
                                 Exptime: {{proposal_dict.exptimes[i]}}<br>
