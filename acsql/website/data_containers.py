@@ -85,7 +85,6 @@ def get_proposal_buttons_dict(proposal_dict):
         '{}/{}'.format(filter1, filter2)
         for filter1, filter2
         in zip(proposal_dict['filter1s'], proposal_dict['filter2s'])]))
-    print(proposal_dict['buttons']['detector'])
 
     return proposal_dict
 
@@ -145,6 +144,7 @@ def get_view_image_dict(proposal, filename):
     image_dict['rootname'] = filename[:-1]
     image_dict = get_metadata_from_database(image_dict, 'image')
     image_dict['index'] = image_dict['filenames'].index(image_dict['filename'])
+    image_dict['page'] = image_dict['index'] + 1
     image_dict['expstart'] = image_dict['expstarts'][image_dict['index']]
     image_dict['filter1'] = image_dict['filter1s'][image_dict['index']]
     image_dict['filter2'] = image_dict['filter2s'][image_dict['index']]
@@ -180,6 +180,6 @@ def get_view_proposal_dict(proposal):
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
     proposal_dict = get_metadata_from_database(proposal_dict, 'proposal')
     proposal_dict = get_proposal_buttons_dict(proposal_dict)
-    proposal_dict['viewlinks'] = ['localhost:5000/archive/{}/{}'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
+    proposal_dict['viewlinks'] = ['/archive/{}/{}/'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
 
     return proposal_dict

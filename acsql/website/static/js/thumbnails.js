@@ -63,9 +63,9 @@ var input = "";
 var timer;
 
 $(document).keyup(function(e) {
-    input += e.which;        
+    input += e.which;
     clearTimeout(timer);
-    timer = setTimeout(function() { input = ""; }, 500);    
+    timer = setTimeout(function() { input = ""; }, 500);
     check_input();
 });
 
@@ -74,6 +74,6 @@ function check_input() {
         $(".thumb img").css("opacity", '1.0');
     }
     else if(input=="27") {
-        $(".thumb img").css("opacity", '0.0');      
+        $(".thumb img").css("opacity", '0.0');
     }
 }
