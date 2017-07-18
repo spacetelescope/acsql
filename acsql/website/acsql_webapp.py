@@ -82,12 +82,17 @@ def page_not_found(error):
 
 
 @app.route('/archive/<proposal>/<filename>/')
-def view_image(proposal, filename):
+@app.route('/archive/<proposal>/<filename>/<fits_type>')
+def view_image(proposal, filename, fits_type='flt'):
     """
     """
 
-    image_dict = get_view_image_dict(proposal, filename)
-    return render_template('view_image.html', image_dict=image_dict)
+    if fits_type in ['raw', 'flt', 'flc']:
+        image_dict = get_view_image_dict(proposal, filename, fits_type)
+        return render_template('view_image.html', image_dict=image_dict)\
+
+    else:
+        return render_template('404.html'), 404
 
 
 @app.route('/archive/<proposal>/')

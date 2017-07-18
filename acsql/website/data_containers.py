@@ -8,16 +8,14 @@ from acsql.database.database_interface import Master
 from acsql.utils.utils import SETTINGS
 
 
-def get_image_lists(data_dict):
+def get_image_lists(data_dict, fits_type):
     """
     """
 
     jpeg_proposal_path = os.path.join('static/img/jpegs/', data_dict['proposal_id'])
     thumb_proposal_path = os.path.join('static/img/thumbnails/', data_dict['proposal_id'])
 
-    data_dict['raw_jpegs'] = sorted(glob.glob(os.path.join(jpeg_proposal_path, '*raw.jpg')))
-    data_dict['flt_jpegs'] = sorted(glob.glob(os.path.join(jpeg_proposal_path, '*flt.jpg')))
-    data_dict['flc_jpegs'] = sorted(glob.glob(os.path.join(jpeg_proposal_path, '*flc.jpg')))
+    data_dict['jpegs'] = sorted(glob.glob(os.path.join(jpeg_proposal_path, '*flt.jpg')))
     data_dict['thumbs'] = sorted(glob.glob(os.path.join(thumb_proposal_path, '*flt.thumb')))
 
     return data_dict
@@ -89,16 +87,16 @@ def get_proposal_buttons_dict(proposal_dict):
     return proposal_dict
 
 
-def initialize_data_dict(proposal):
+def initialize_data_dict(proposal, fits_type='flt'):
     """
     """
 
     data_dict = {}
     data_dict['proposal_id'] = proposal
-    data_dict = get_image_lists(data_dict)
-    data_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in data_dict['flt_jpegs']]
-    data_dict['filenames'] = [os.path.basename(item).split('_')[0] for item in data_dict['flt_jpegs']]
-    data_dict['num_images'] = len(data_dict['flt_jpegs'])
+    data_dict = get_image_lists(data_dict, fits_type)
+    data_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in data_dict['jpegs']]
+    data_dict['filenames'] = [os.path.basename(item).split('_')[0] for item in data_dict['jpegs']]
+    data_dict['num_images'] = len(data_dict['jpegs'])
     data_dict = get_proposal_status(data_dict)
 
     return data_dict
@@ -135,11 +133,12 @@ def get_proposal_status(data_dict):
     return data_dict
 
 
-def get_view_image_dict(proposal, filename):
+def get_view_image_dict(proposal, filename, fits_type='flt'):
     """
     """
 
-    image_dict = initialize_data_dict(proposal)
+    image_dict = initialize_data_dict(proposal, fits_type)
+    image_dict['fits_type'] = fits_type.upper()
     image_dict['filename'] = filename
     image_dict['rootname'] = filename[:-1]
     image_dict = get_metadata_from_database(image_dict, 'image')
@@ -157,22 +156,39 @@ def get_view_image_dict(proposal, filename):
     image_dict['targname'] = image_dict['targnames'][image_dict['index']]
     image_dict['pi_first_name'] = image_dict['pi_firsts'][image_dict['index']]
     image_dict['pi_last_name'] = image_dict['pi_lasts'][image_dict['index']]
-    image_dict['image'] = '/static/img/jpegs/{}/{}_flt.jpg'.format(image_dict['proposal_id'], image_dict['filename'])
-    image_dict['view_url'] = 'archive/{}/{}'.format(image_dict['proposal_id'], image_dict['filename'])
+    image_dict['view_url'] = 'archive/{}/{}/{}'.format(image_dict['proposal_id'], image_dict['filename'], fits_type)
     image_dict['fits_links'] = {}
-    image_dict['proposal_name'] = image_dict['filename'][0:4]
+    image_dict['first'] = image_dict['index'] == 0
+    image_dict['last'] = image_dict['index'] == image_dict['num_images'] - 1
+
+    # Determine path to JPEG
+    jpeg_path = '/static/img/jpegs/{}/{}_{}.jpg'.format(image_dict['proposal_id'], image_dict['filename'], fits_type)
+    jpeg_path_abs = os.path.join(SETTINGS['jpeg_dir'], image_dict['proposal_id'], '{}_{}.jpg'.format(image_dict['filename'], fits_type))
+    if os.path.exists(jpeg_path_abs):
+        image_dict['image'] = jpeg_path
+    else:
+        image_dict['image'] = None
+
+    # Determine next and previous images, if possible
+    if not image_dict['last']:
+        image_dict['next'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] + 1], 'fits_type': fits_type}
+    if not image_dict['first']:
+        image_dict['prev'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] - 1], 'fits_type': fits_type}
+
+    # Determine other available JPEGs for given observation
+    jpeg_types = glob.glob(jpeg_path_abs.replace('{}.jpg'.format(fits_type), '*.jpg'))
+    jpeg_types = [os.path.basename(item).split('_')[-1].split('.')[0] for item in jpeg_types]
+    jpeg_types = [item for item in jpeg_types if item.upper() != image_dict['fits_type']]
+    image_dict['available_jpegs'] = {}
+    for jpeg_type in jpeg_types:
+        image_dict['available_jpegs'][jpeg_type] = image_dict['view_url'].replace(fits_type, jpeg_type)
+
+    # image_dict['proposal_name'] = image_dict['filename'][0:4]
     # image_dict['fits_links']['FLT'] = os.path.join(
     #                                       SETTINGS['filesystem'],
     #                                       image_dict['proposal_name'],
     #                                       image_dict['filename'],
     #                                       '{}_flt.fits'.format(image_dict['filename']))
-    image_dict['first'] = image_dict['index'] == 0
-    image_dict['last'] = image_dict['index'] == image_dict['num_images'] - 1
-
-    if not image_dict['last']:
-        image_dict['next'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] + 1]}
-    if not image_dict['first']:
-        image_dict['prev'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] - 1]}
 
     return image_dict
 
@@ -182,7 +198,7 @@ def get_view_proposal_dict(proposal):
     """
 
     proposal_dict = initialize_data_dict(proposal)
-    proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['flt_jpegs']]
+    proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['jpegs']]
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
     proposal_dict = get_metadata_from_database(proposal_dict, 'proposal')
     proposal_dict = get_proposal_buttons_dict(proposal_dict)

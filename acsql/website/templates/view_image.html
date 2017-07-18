@@ -27,7 +27,13 @@
 
         <!-- Additional information links -->
         <br>
-        View all in <a href="/archive/{{image_dict.proposal_id}}/">proposal</a>; view <a href="{{image_dict.view_url}}/headers/">headers</a>; view in <a href="{{image_dict.view_url}}/js9/">JS9</a>
+        View all in <a href="/archive/{{image_dict.proposal_id}}/">proposal</a>; view <a href="{{image_dict.view_url}}/headers/">headers</a>; view in <a href="{{image_dict.view_url}}/js9/">JS9</a><br>
+        {% if image_dict.available_jpegs %}
+            View JPEG for
+            {% for key, link in image_dict.available_jpegs.items() %}
+                <a href="/archive/{{image_dict.proposal_id}}/{{image_dict.filename}}/{{key}}"> {{key}}</a>
+            {% endfor %}
+        {% endif %}
         </p>
     </div>
     <div class="span3">
@@ -48,12 +54,20 @@
     </div>
 </div>
 
+<!-- Other available JPEGs -->
+
+
 <!-- Image -->
 <div class="row">
     <div class="fleximage">
-        <div id="wrapper" style="width:100%; text-align:center">
-            <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align:center height="75%" width="75%">
-        </div>
+        {% if image_dict.image %}
+            <div id="wrapper" style="width:100%; text-align:center">
+                <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align:center height="75%" width="75%">
+            </div>
+        {% else %}
+            <br><br><br>
+            <center><strong><p>There is no JPEG to display for FITS type {{image_dict.fits_type}}</p></strong></center>
+        {% endif %}
     </div>
 </div>
 
