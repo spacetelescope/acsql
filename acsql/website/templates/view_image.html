@@ -10,7 +10,7 @@
     </div>
 
     <!-- Image metadata -->
-    <div class="span5">
+    <div class="span6">
         <p>
         <b>Proposal <a href={{image_dict.proposal_link}} target="_blank">{{image_dict.proposal_id}}</a>:</b> <i> {{image_dict.proposal_title}}</i><br>
         Image {{image_dict.page}} of {{image_dict.num_images}}<br>
@@ -38,7 +38,7 @@
         <b>Exposure time:</b> {{image_dict.exptime}}<br>
         </p>
     </div>
-    <div class="span4">
+    <div class="span3">
         <p>
         <b>Expflag:</b> {{image_dict.expflag}}, Quality: {{image_dict.quality}}<br>
         <b>Coordinates:</b> {{image_dict.ra}}, {{image_dict.dec}}<br>
@@ -51,12 +51,30 @@
 <!-- Image -->
 <div class="row">
     <div class="fleximage">
-        <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align="middle">
+        <div id="wrapper" style="width:100%; text-align:center">
+            <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align:center height="75%" width="75%">
+        </div>
     </div>
 </div>
 
 <div style="height:1em;"></div>
 
-
+<!-- Enable left and right keystrokes -->
+<script type="text/javascript">
+    {% if not image_dict.last %}
+    $("body").keydown(function(e) {
+      if(e.keyCode == 39) { // right
+        window.location = "{{ url_for('view_image',**image_dict.next) }}";
+      }
+    });
+    {% endif %}
+    {% if not image_dict.first %}
+    $("body").keydown(function(e) {
+      if(e.keyCode == 37) { // left
+        window.location = "{{ url_for('view_image',**image_dict.prev) }}";
+      }
+    });
+    {% endif %}
+</script>
 
 {% endblock %}

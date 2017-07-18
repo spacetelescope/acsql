@@ -166,7 +166,13 @@ def get_view_image_dict(proposal, filename):
     #                                       image_dict['proposal_name'],
     #                                       image_dict['filename'],
     #                                       '{}_flt.fits'.format(image_dict['filename']))
+    image_dict['first'] = image_dict['index'] == 0
+    image_dict['last'] = image_dict['index'] == image_dict['num_images'] - 1
 
+    if not image_dict['last']:
+        image_dict['next'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] + 1]}
+    if not image_dict['first']:
+        image_dict['prev'] = {'proposal': image_dict['proposal_id'], 'filename': image_dict['filenames'][image_dict['index'] - 1]}
 
     return image_dict
 

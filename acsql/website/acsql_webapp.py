@@ -81,12 +81,12 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 
-@app.route('/archive/<proposal>/<rootname>/')
-def view_image(proposal, rootname):
+@app.route('/archive/<proposal>/<filename>/')
+def view_image(proposal, filename):
     """
     """
 
-    image_dict = get_view_image_dict(proposal, rootname)
+    image_dict = get_view_image_dict(proposal, filename)
     return render_template('view_image.html', image_dict=image_dict)
 
 
