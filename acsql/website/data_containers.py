@@ -9,7 +9,20 @@ from acsql.utils.utils import SETTINGS
 
 
 def get_image_lists(data_dict, fits_type):
-    """
+    """Add a list of JPEG and Thumbnail paths to the ``data_dict``
+    dictionary.
+
+    Parameters
+    ----------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
+    fits_type : str
+        The FITS type.  Can either be ``raw``, ``flt``, or ``flc``.
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
     """
 
     jpeg_proposal_path = os.path.join('static/img/jpegs/', data_dict['proposal_id'])
@@ -21,16 +34,22 @@ def get_image_lists(data_dict, fits_type):
     return data_dict
 
 
-def get_metadata_from_database(data_dict, mode):
-    """
+def get_metadata_from_database(data_dict):
+    """Add observation metadata (e.g. ``aperture``, ``exptime``, etc.)
+    to the ``data_dict`` by querying the ``acsql`` database.
+
+    Parameters
+    ----------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
     """
 
     session = getattr(database_interface, 'session')
-
-    if mode == 'proposal':
-        iterable = data_dict['rootnames']
-    elif mode == 'image':
-        iterable = list(data_dict['rootname'])
 
     results = []
     for rootname in data_dict['rootnames']:
@@ -40,10 +59,10 @@ def get_metadata_from_database(data_dict, mode):
 
         table = getattr(database_interface, '{}_raw_0'.format(detector))
         result = session.query(
-            table.aperture, table.exptime, table.filter1, table.filter2, \
-            table.targname, getattr(table, 'date-obs'), \
-            getattr(table, 'time-obs'), table.expstart, table.expflag, \
-            table.quality, table.ra_targ, table.dec_targ, table.pr_inv_f, \
+            table.aperture, table.exptime, table.filter1, table.filter2,
+            table.targname, getattr(table, 'date-obs'),
+            getattr(table, 'time-obs'), table.expstart, table.expflag,
+            table.quality, table.ra_targ, table.dec_targ, table.pr_inv_f,
             table.pr_inv_l).filter(table.rootname == rootname).one()
         result = [item for item in result]
         result.append(detector)
@@ -72,7 +91,22 @@ def get_metadata_from_database(data_dict, mode):
 
 
 def get_proposal_buttons_dict(proposal_dict):
-    """
+    """Add data used for various buttons on the ``/archive/<proposal>``
+    page to the ``proposal_dict``.
+
+    Parameters
+    ----------
+    proposal_dict : dict
+        A dictionary containing data for the given
+        ``/archive/<proposal>`` page, such as ``visits`` and
+        ``targnames``
+
+    Returns
+    -------
+    proposal_dict : dict
+        A dictionary containing data for the given
+        ``/archive/<proposal>`` page, such as ``visits`` and
+        ``targnames``
     """
 
     proposal_dict['buttons'] = {}
@@ -88,7 +122,21 @@ def get_proposal_buttons_dict(proposal_dict):
 
 
 def initialize_data_dict(proposal, fits_type='flt'):
-    """
+    """Create and return a dictionary containing commonly used data
+    amongst ``/archive/<proposal>/`` and
+    ``/archive/<proposal>/<filename>`` webpages.
+
+    Parameters
+    ----------
+    proposal : str
+        The proposal number (e.g. ``12345``).
+    fits_type : str
+        The FITS type.  Can be ``raw``, ``flt``, or ``flc``.
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
     """
 
     data_dict = {}
@@ -103,17 +151,32 @@ def initialize_data_dict(proposal, fits_type='flt'):
 
 
 def get_proposal_status(data_dict):
-    """
+    """Add proposal status information (e.g. ``proposal_title``,
+    ``cycle``, etc.) to the ``data_dict``.
+
+    The proposal status information is scraped from the proposal
+    status webpage.
+
+    Parameters
+    ----------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
     """
 
-    data_dict['status_page'] = ('http://www.stsci.edu/cgi-bin/get-proposal'
-        '-info?id={}&submit=Go&observatory=HST').format(data_dict['proposal_id'])
+    data_dict['status_page'] = (
+        'http://www.stsci.edu/cgi-bin/get-proposal-info?id={}'
+        '&submit=Go&observatory=HST').format(data_dict['proposal_id'])
 
     req = requests.get(data_dict['status_page'], timeout=3)
 
     if req.ok:
 
-        status_string = req.content.decode() # get HTML content of page
+        status_string = req.content.decode()
         data_dict['proposal_title'] = html.unescape(status_string.\
             split('<b>Title:</b> ')[1].\
             split('<br>')[0])
@@ -133,15 +196,42 @@ def get_proposal_status(data_dict):
     return data_dict
 
 
+# def get_view_header_dict(filename, fits_type='flt'):
+#     """
+#     """
+
+#     header_dict = {}
+#     header_dict['filename'] = filename
+#     header_dict['fits_type'] = fits_type.upper
+
+#     return header_dict
+
 def get_view_image_dict(proposal, filename, fits_type='flt'):
-    """
+    """Return a dictionary containing data used for the
+    ``/archive/<proposal>/<filename>/`` webpage.
+
+    Parameters
+    ----------
+    proposal : str
+        The proposal number (e.g. ``12345``).
+    filename : str
+        The 9-character IPPPSSOOT rootname (e.g. ``jcye04zsq``.)
+    fits_type : str
+        The JPEG FITS type to view. Can either be ``raw``, ``flt``, or
+        ``flc``.
+
+    Returns
+    -------
+    image_dict : dict
+        A dictionary containing data used for the
+        ``/archive/<proposal>/<filename>`` webpage.
     """
 
     image_dict = initialize_data_dict(proposal, fits_type)
     image_dict['fits_type'] = fits_type.upper()
     image_dict['filename'] = filename
     image_dict['rootname'] = filename[:-1]
-    image_dict = get_metadata_from_database(image_dict, 'image')
+    image_dict = get_metadata_from_database(image_dict)
     image_dict['index'] = image_dict['filenames'].index(image_dict['filename'])
     image_dict['page'] = image_dict['index'] + 1
     image_dict['expstart'] = image_dict['expstarts'][image_dict['index']]
@@ -194,13 +284,25 @@ def get_view_image_dict(proposal, filename, fits_type='flt'):
 
 
 def get_view_proposal_dict(proposal):
-    """
+    """Return a dictionary containing data used for the
+    ``/archive/<proposal>/` webpage.
+
+    Parameters
+    ----------
+    proposal : str
+        The proposal number (e.g. ``12345``).
+
+    Returns
+    -------
+    proposal_dict : dict
+        A dictionary containing data used for the
+        ``/archive/<proposal>/`` webpage.
     """
 
     proposal_dict = initialize_data_dict(proposal)
     proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['jpegs']]
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
-    proposal_dict = get_metadata_from_database(proposal_dict, 'proposal')
+    proposal_dict = get_metadata_from_database(proposal_dict)
     proposal_dict = get_proposal_buttons_dict(proposal_dict)
     proposal_dict['viewlinks'] = ['/archive/{}/{}/'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
 
