@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="span12">
+        <h3>{{header_dict.filename}} {{header_dict.fits_type}} header</h3>
+        {% if header_dict.header %}
+            {% for ext, head in header_dict.header.items() if ext.startswith('Extension') %}
+                <h4>{{ ext }}</h4>
+                <p>{{ head|safe }}</p>
+            {% endfor %}
+        {% else %}
+            <p>There is no header to display.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

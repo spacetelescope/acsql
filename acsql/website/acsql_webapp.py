@@ -9,6 +9,7 @@ import numpy as np
 from acsql.utils.utils import SETTINGS
 from acsql.website.data_containers import get_view_image_dict
 from acsql.website.data_containers import get_view_proposal_dict
+from acsql.website.query_form import get_query_form
 
 app = Flask(__name__)
 
@@ -34,6 +35,15 @@ def archive():
     proposal_array = np.asarray(proposal_list).reshape(ncols, int(len(proposal_list) / ncols)).T
 
     return render_template('archive.html', proposal_array=proposal_array)
+
+
+@app.route('/database/')
+def database():
+    """
+    """
+
+    query_form = get_query_form()
+    return render_template('database.html', form=query_form)
 
 
 def handle_500(trace):
