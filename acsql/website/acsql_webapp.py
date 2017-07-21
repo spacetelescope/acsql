@@ -1,5 +1,36 @@
 #! /usr/bin/env python
 
+"""This module serves as the ``acsql`` web application, which allows
+users to view image data and interact with the ``acsql`` database.
+
+The module is build using the ``flask`` python web framework.  See
+accompanying ``data_containers``, ``query_form``, and ``form_choices``
+modules for further information.
+
+Authors
+-------
+
+    - Matthew Bourque
+    - Meredith Durbin
+
+Use
+---
+
+    This module is intended to be executed on a web server, but it can
+    also be run locally:
+    ::
+
+        python acsql_webapp.py
+        <go to localhost:5000 in a browser>
+
+Dependencies
+------------
+
+    - acsql
+    - flask
+    - numpy
+"""
+
 import glob
 import os
 
@@ -39,7 +70,13 @@ def archive():
 
 @app.route('/database/')
 def database():
-    """
+    """Returns webpage containing a query form for querying the
+    ``acsql`` database.
+
+    Returns
+    -------
+    template : obj
+        The ``database.html`` webpage.
     """
 
     query_form = get_query_form()

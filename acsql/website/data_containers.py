@@ -1,3 +1,36 @@
+"""Various functions for creating and returning various data to be used
+by the ``acsql`` web application.
+
+This module contains functions to obtains image and proposal metadata
+for use by the ``acsql`` web application.  See the ``acsql_webapp``
+module for further information about the web application.
+
+Authors
+-------
+
+    - Matthew Bourque
+    - Meredith Durbin
+
+Use
+---
+
+    This module is intended to be imported and used by ``acsql_webapp``
+    as such:
+    ::
+
+        from acsql.website.data_containers import get_view_image_dict
+        from acsql.website.data_containers import get_view_proposal_dict
+
+        image_dict = get_view_image_dict(proposal, filename, fits_type)
+        proposal_dict = get_view_proposal_dict(proposal)
+
+Dependencies
+------------
+
+    - acsql
+"""
+
+
 import glob
 import html
 import os
@@ -8,7 +41,7 @@ from acsql.database.database_interface import Master
 from acsql.utils.utils import SETTINGS
 
 
-def get_image_lists(data_dict, fits_type):
+def _get_image_lists(data_dict, fits_type):
     """Add a list of JPEG and Thumbnail paths to the ``data_dict``
     dictionary.
 
@@ -34,7 +67,7 @@ def get_image_lists(data_dict, fits_type):
     return data_dict
 
 
-def get_metadata_from_database(data_dict):
+def _get_metadata_from_database(data_dict):
     """Add observation metadata (e.g. ``aperture``, ``exptime``, etc.)
     to the ``data_dict`` by querying the ``acsql`` database.
 
@@ -90,7 +123,7 @@ def get_metadata_from_database(data_dict):
     return data_dict
 
 
-def get_proposal_buttons_dict(proposal_dict):
+def _get_proposal_buttons_dict(proposal_dict):
     """Add data used for various buttons on the ``/archive/<proposal>``
     page to the ``proposal_dict``.
 
@@ -121,36 +154,7 @@ def get_proposal_buttons_dict(proposal_dict):
     return proposal_dict
 
 
-def initialize_data_dict(proposal, fits_type='flt'):
-    """Create and return a dictionary containing commonly used data
-    amongst ``/archive/<proposal>/`` and
-    ``/archive/<proposal>/<filename>`` webpages.
-
-    Parameters
-    ----------
-    proposal : str
-        The proposal number (e.g. ``12345``).
-    fits_type : str
-        The FITS type.  Can be ``raw``, ``flt``, or ``flc``.
-
-    Returns
-    -------
-    data_dict : dict
-        A dictionary containing data used to render a webpage.
-    """
-
-    data_dict = {}
-    data_dict['proposal_id'] = proposal
-    data_dict = get_image_lists(data_dict, fits_type)
-    data_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in data_dict['jpegs']]
-    data_dict['filenames'] = [os.path.basename(item).split('_')[0] for item in data_dict['jpegs']]
-    data_dict['num_images'] = len(data_dict['jpegs'])
-    data_dict = get_proposal_status(data_dict)
-
-    return data_dict
-
-
-def get_proposal_status(data_dict):
+def _get_proposal_status(data_dict):
     """Add proposal status information (e.g. ``proposal_title``,
     ``cycle``, etc.) to the ``data_dict``.
 
@@ -196,6 +200,35 @@ def get_proposal_status(data_dict):
     return data_dict
 
 
+def _initialize_data_dict(proposal, fits_type='flt'):
+    """Create and return a dictionary containing commonly used data
+    amongst ``/archive/<proposal>/`` and
+    ``/archive/<proposal>/<filename>`` webpages.
+
+    Parameters
+    ----------
+    proposal : str
+        The proposal number (e.g. ``12345``).
+    fits_type : str
+        The FITS type.  Can be ``raw``, ``flt``, or ``flc``.
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary containing data used to render a webpage.
+    """
+
+    data_dict = {}
+    data_dict['proposal_id'] = proposal
+    data_dict = _get_image_lists(data_dict, fits_type)
+    data_dict['rootnames'] = [os.path.basename(item).split('_')[0][:-1] for item in data_dict['jpegs']]
+    data_dict['filenames'] = [os.path.basename(item).split('_')[0] for item in data_dict['jpegs']]
+    data_dict['num_images'] = len(data_dict['jpegs'])
+    data_dict = _get_proposal_status(data_dict)
+
+    return data_dict
+
+
 # def get_view_header_dict(filename, fits_type='flt'):
 #     """
 #     """
@@ -227,11 +260,11 @@ def get_view_image_dict(proposal, filename, fits_type='flt'):
         ``/archive/<proposal>/<filename>`` webpage.
     """
 
-    image_dict = initialize_data_dict(proposal, fits_type)
+    image_dict = _initialize_data_dict(proposal, fits_type)
     image_dict['fits_type'] = fits_type.upper()
     image_dict['filename'] = filename
     image_dict['rootname'] = filename[:-1]
-    image_dict = get_metadata_from_database(image_dict)
+    image_dict = _get_metadata_from_database(image_dict)
     image_dict['index'] = image_dict['filenames'].index(image_dict['filename'])
     image_dict['page'] = image_dict['index'] + 1
     image_dict['expstart'] = image_dict['expstarts'][image_dict['index']]
@@ -299,11 +332,11 @@ def get_view_proposal_dict(proposal):
         ``/archive/<proposal>/`` webpage.
     """
 
-    proposal_dict = initialize_data_dict(proposal)
+    proposal_dict = _initialize_data_dict(proposal)
     proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['jpegs']]
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
-    proposal_dict = get_metadata_from_database(proposal_dict)
-    proposal_dict = get_proposal_buttons_dict(proposal_dict)
+    proposal_dict = _get_metadata_from_database(proposal_dict)
+    proposal_dict = _get_proposal_buttons_dict(proposal_dict)
     proposal_dict['viewlinks'] = ['/archive/{}/{}/'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
 
     return proposal_dict

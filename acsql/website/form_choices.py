@@ -1,3 +1,22 @@
+"""Provides a dictionary containing ``acsql`` database query form data
+for use by the ``acsql`` web application.
+
+Authors
+-------
+
+    - Matthew Bourque
+    - Meredith Durbin
+
+Use
+---
+
+    The dictionary contained in this module is inteded to be imported
+    as such:
+    ::
+
+        from acsql.website.form_choices import FORM_CHOICES
+"""
+
 APERTURES = ['WFC', 'WFC-FIX', 'WFC1', 'WFC1-1K', 'WFC1-2K', 'WFC1-512',
     'WFC1-CTE', 'WFC1-FIX', 'WFC1-IRAMP', 'WFC1-IRAMPQ', 'WFC1-MRAMP',
     'WFC1-MRAMPQ', 'WFC1-POL0UV', 'WFC1-POL0V', 'WFC1-POL120UV', 'WFC1-POL120V',
