@@ -26,9 +26,9 @@ Use
 Dependencies
 ------------
 
-    - acsql
-    - flask
-    - numpy
+    - ``acsql``
+    - ``flask``
+    - ``numpy``
 """
 
 from collections import OrderedDict
@@ -42,6 +42,7 @@ from acsql.utils.utils import SETTINGS
 from acsql.website.data_containers import get_view_image_dict
 from acsql.website.data_containers import get_view_proposal_dict
 from acsql.website.query_form import get_query_form
+from acsql.website.query_lib import generate_csv
 from acsql.website.query_lib import get_query_results
 
 app = Flask(__name__)
@@ -71,6 +72,7 @@ def archive():
 
 
 @app.route('/database/')
+@app.route('/database/results')
 def database():
     """Returns webpage containing a query form for querying the
     ``acsql`` database.
@@ -81,7 +83,8 @@ def database():
         The ``database.html`` webpage.
     """
 
-    query_form = get_query_form()
+    query_form = get_query_form(request.args)
+
     if request.query_string:
         if query_form.validate():
             query_form_dict = request.args.to_dict(flat=False)
@@ -124,11 +127,12 @@ def database():
                     template.headers['Content-Disposition'] = 'attachment; filename=query_results.csv'
 
                 # For Thumbnail output format
-                data_dict = OrderedDict()
-                data_dict['type'] = 'results'
-                data_dict['num_images'] = num_results
-                data_dict['buttons'] = OrderedDict({'detector' : ['WFC', 'HRC', 'SBC']})
-                template = render_template('query_results.html', data_dict=data_dict)
+                if output_format == ['thumbnail']:
+                    data_dict = OrderedDict()
+                    data_dict['type'] = 'results'
+                    data_dict['num_images'] = num_results
+                    data_dict['buttons'] = OrderedDict({'detector': ['WFC', 'HRC', 'SBC']})
+                    template = render_template('query_results.html', data_dict=data_dict)
 
             return template
 

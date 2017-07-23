@@ -27,7 +27,7 @@ Use
 Dependencies
 ------------
 
-    - acsql
+    - ``acsql``
 """
 
 

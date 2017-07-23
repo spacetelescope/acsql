@@ -1,10 +1,40 @@
-"""
+"""Contains various functions to support the ``/database/`` webpage of
+the ``acsql`` web application.
+
+Functions include those that parse, build, validate, and return
+``SQLAlchemy`` ``query`` objects in order to perform a database query
+through the web application.
+
+Authors
+-------
+
+    - Matthew Bourque
+    - Meredith Durbin
+
+Use
+---
+
+    This module is intended to be imported and used by the
+    ``acsql_webapp`` module as such:
+    ::
+
+        from query_lib import generate_csv
+        from query_lib import get_query_results
+
+        generate_csv(output_columns, results)
+        get_query_results(query_form_dict)
+
+Dependencies
+------------
+
+    - ``acsql``
+    - ``sqlalchemy``
 """
 
 from sqlalchemy import create_engine
 from sqlalchemy import literal_column
-from sqlalchemy import sessionmaker
 from sqlalchemy import or_
+from sqlalchemy.orm import sessionmaker
 
 from acsql.database.database_interface import Master
 from acsql.database.database_interface import WFC_raw_0
@@ -13,7 +43,7 @@ from acsql.database.database_interface import SBC_raw_0
 from acsql.utils.utils import SETTINGS
 
 
-def _apply_query_filter(table, key, value, query):
+def _apply_query_filter(table, key, values, query):
     """Apply a filter to the given ``query`` based on the ``table``,
     ``key``, and ``value``.
 
@@ -54,10 +84,10 @@ def _apply_query_filter(table, key, value, query):
         if values['op'] == 'between':
             if len(values) == 3:
                 if float(values['val1'].replace('-', '')) < float(values['val2'].replace('-', '')):
-                    query = query.filter(getattr(table, key).between(values['val1'],values['val2']))
-                elif float(values['val1'].replace('-','')) > float(values['val2'].replace('-','')):
-                    query = query.filter(getattr(table, key).between(values['val2'],values['val1']))
-                elif float(values['val1'].replace('-','')) == float(values['val2'].replace('-','')):
+                    query = query.filter(getattr(table, key).between(values['val1'], values['val2']))
+                elif float(values['val1'].replace('-', '')) > float(values['val2'].replace('-', '')):
+                    query = query.filter(getattr(table, key).between(values['val2'], values['val1']))
+                elif float(values['val1'].replace('-', '')) == float(values['val2'].replace('-', '')):
                     raise ValueError('Values submitted for field "{}" must be different.'.format(key))
                 else:
                     raise ValueError('Invalid values submitted for field "{}".'.format(key))
@@ -91,10 +121,10 @@ def _build_queries(output_columns):
     """
 
     # Determine which columns belong to which tables
-    master_cols = [getattr(Master, col) for fol in output_columns if hasattr(Master, col)]
-    wfc_cols = [getattr(WFC_raw_0, col) for fol in output_columns if hasattr(WFC_raw_0, col)]
-    hrc_cols = [getattr(HRC_raw_0, col) for fol in output_columns if hasattr(HRC_raw_0, col)]
-    sbc_cols = [getattr(SBC_raw_0, col) for fol in output_columns if hasattr(SBC_raw_0, col)]
+    master_cols = [getattr(Master, col) for col in output_columns if hasattr(Master, col)]
+    wfc_cols = [getattr(WFC_raw_0, col) for col in output_columns if hasattr(WFC_raw_0, col)]
+    hrc_cols = [getattr(HRC_raw_0, col) for col in output_columns if hasattr(HRC_raw_0, col)]
+    sbc_cols = [getattr(SBC_raw_0, col) for col in output_columns if hasattr(SBC_raw_0, col)]
 
     # Determine which columns are unique to a specific table
     wfc_only = [col for col in output_columns if hasattr(WFC_raw_0, col)
@@ -173,7 +203,7 @@ def _convert_query_form_dict(query_form_dict):
     operator_keys = ['date_obs', 'exptime']
 
     # Remove blank entries from form data
-    query_form_dict = {key : value for key, value in list(query_form_dict.items()) if value != ['']}
+    query_form_dict = {key: value for key, value in list(query_form_dict.items()) if value != ['']}
 
     # Combine data returned from fields with operator dropdowns
     for operator_key in operator_keys:
@@ -213,7 +243,23 @@ def generate_csv(output_columns, results):
 
 
 def get_query_results(query_form_dict):
-    """
+    """Returns a dictionary with the results of the requested query
+    along with some additional metadata.  Calls on several internal
+    functions to build and perform the query in order to abstract
+    out its complexity.
+
+    Parameters
+    ----------
+    query_form_dict : dict
+        A dictionary containing information about the requested query,
+        such as the ``output_format``, ``output_columns`` and the
+        requested values.
+
+    Returns
+    -------
+    query_results_dict : dict
+        A dictionary containing the query results as well as some
+        metadata such as ``output_format`` and number of results.
     """
 
     # Determine output format
@@ -338,5 +384,7 @@ def _merge_query(wfc_query, hrc_query, sbc_query):
     elif not wfc_query and not hrc_query and sbc_query:
         query = sbc_query
 
-    return query
+    else:
+        query = None
 
+    return query

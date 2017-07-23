@@ -24,9 +24,9 @@ Use
 Dependencies
 ------------
 
-    - acsql
-    - wtforms
-    - wtforms_components
+    - ``acsql``
+    - ``wtforms``
+    - ``wtforms_components``
 """
 
 from wtforms import DateField
@@ -230,9 +230,14 @@ class QueryForm(Form):
                     default='thumbnails', description='span3')
 
 
-def get_query_form():
+def get_query_form(Form):
     """Return the ``QueryForm`` object that contains query form
     components
+
+    Parameters
+    ----------
+    Form : obj
+        A request form.
 
     Returns
     -------
@@ -241,6 +246,6 @@ def get_query_form():
         to build the ACS Database query form.
     """
 
-    query_form = QueryForm()
+    query_form = QueryForm(Form)
 
     return query_form
