@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="span12">
+        <h4>There was a problem with your request. Please try again.</h4>
+    </div>
+    <div class="span12">
+
+        {% if msg %}
+            {{ msg }}
+        {% else %}
+        <ul>
+            {% for field, errors in form.errors.items() %}
+                <li>
+                {% if form[field].type == 'FormField' %}
+                        {{ form[field].label.text }}:
+                        {% for err in errors.values() %}
+                            {{ ', '.join(err) }}
+                        {% endfor %}
+                {% else %}
+                        {{ form[field].label.text }}: {{ ', '.join(errors) }}
+                {% endif %}
+                </li>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

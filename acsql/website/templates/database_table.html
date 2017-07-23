@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.css">
+<link rel="stylesheet" href="/../static/css/database.css">
+<link rel="stylesheet" href="/../static/css/loader.css">
+
+<style type="text/css">
+div#content { display: none; }
+div#loading { text-align:center; z-index: 1000; }
+</style>
+
+<div class="row">
+
+        <!-- Print how may results there are -->
+        {% if results %}
+        <div class="span12">
+            {% if num_results == 0 %}
+                <h4>The query returned no results.</h4>
+            {% elif num_results == 1 %}
+                <h4>The query returned 1 result.</h4>
+            {% else %}
+                <h4>The query returned {{ num_results }} results.</h4>
+            {% endif %}
+
+            <!-- If there are results to show -->
+            {% if num_results > 0 %}
+
+                <!-- Loading animation -->
+                <div id="loading">
+                    <div class="cssload-loader-inner" style="height:100px;margin:0 auto;">
+                        <div class="cssload-cssload-loader-line-wrap-wrap">
+                            <div class="cssload-loader-line-wrap"></div>
+                        </div>
+                        <div class="cssload-cssload-loader-line-wrap-wrap">
+                            <div class="cssload-loader-line-wrap"></div>
+                        </div>
+                        <div class="cssload-cssload-loader-line-wrap-wrap">
+                            <div class="cssload-loader-line-wrap"></div>
+                        </div>
+                        <div class="cssload-cssload-loader-line-wrap-wrap">
+                            <div class="cssload-loader-line-wrap"></div>
+                        </div>
+                        <div class="cssload-cssload-loader-line-wrap-wrap">
+                            <div class="cssload-loader-line-wrap"></div>
+                        </div>
+                    </div>
+                    <br>
+                    Loading table...
+                </div>
+
+                <!-- HTML table -->
+                <div id="content">
+                    <hr>
+                    <table class="table hover" id="results">
+                        <thead>
+                            {% for col in output_columns %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </thead>
+                        <tbody>
+                        {% for line in results %}
+                          <tr>
+                            {% for value in line %}
+                              <td>{{ value }}</td>
+                            {% endfor %}
+                          </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+</div>
+
+<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#results').DataTable( {
+        "lengthMenu": [[10, 25, 50, 100, 500, 1000, -1], [10, 25, 50, 100, 500, 1000, "All"]],
+        stateSave: true,
+        "language": {
+            "lengthMenu": "Display _MENU_ results per page",
+            "zeroRecords": "Nothing found",
+            "info": "Showing page _PAGE_ of _PAGES_",
+            "infoEmpty": "No results available",
+            "infoFiltered": "(filtered from _MAX_ total results)"
+        }
+    } );
+});
+
+function preloader(){
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("content").style.display = "block";
+}
+window.onload = preloader;
+
+</script>
+
+{% endblock %}
