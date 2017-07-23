@@ -1,7 +1,38 @@
+"""Contains class objects for building a query form for querying the
+``acsql`` database through the ``acsql`` web application.
+
+Many of the class objects are subclasses or extensions from components
+provided by the ``wtforms`` library.  Hard coded data such as form
+options are imported from the ``form_options`` module.
+
+Authors
+-------
+
+    - Matthew Bourque
+    - Meredith Durbin
+
+Use
+---
+
+    This module is inteded to be imported and used by the
+    ``acsql_webapp`` module as such:
+    ::
+
+        from acsql.website.query_form import get_query_form
+        query_form = get_query_form()
+
+Dependencies
+------------
+
+    - acsql
+    - wtforms
+    - wtforms_components
+"""
+
 from wtforms import widgets, TextField, validators, SelectMultipleField, Form, FormField, SelectField, DateField, DecimalField, RadioField
 from wtforms_components.fields import IntegerField
 
-from acsql.website.form_choices import FORM_CHOICES
+from acsql.website.form_options import FORM_OPTIONS
 
 
 operator_form = SelectField('Operator',
@@ -11,10 +42,13 @@ operator_form = SelectField('Operator',
 
 
 class CheckboxField(SelectMultipleField):
-    """
-    Like a SelectField, except displays a list of checkbox buttons.
-    Iterating the field will produce subfields (each containing a label as
-    well) in order to allow custom rendering of the individual radio fields.
+    """Like a ``SelectField``, except displays a list of checkbox
+    buttons.
+
+    Parameters
+    ----------
+    SelectMultipleField : obj
+        The ``SelectMultipleField`` object from ``wtforms``
     """
 
     widget = widgets.ListWidget(prefix_label=False)
@@ -22,48 +56,99 @@ class CheckboxField(SelectMultipleField):
 
 
 class DateForm(Form):
-  op = operator_form
-  val1 = DateField('Date Observed',
+    """Creates a ``DateForm`` object that allows for date input in a
+    form field.
+
+    Parameters
+    ----------
+    Form : obj
+        The ``Form`` object from ``wtforms``.
+    """
+
+    op = operator_form
+    val1 = DateField('Date Observed',
          [validators.Optional()],
          description='YYYY-MM-DD',
          format='%Y-%m-%d')
-  val2 = DateField('dateobs2',
+    val2 = DateField('dateobs2',
          [validators.Optional()],
          description='YYYY-MM-DD',
          format='%Y-%m-%d')
 
 
 class ExptimeForm(Form):
-  op = operator_form
-  val1 = DecimalField('Exposure Time', [validators.Optional()])
-  val2 = DecimalField('exptime2', [validators.Optional()])
+    """Creates a ``ExptimeForm`` object that allows for ``exptime``
+    input in a form field.
+
+    Parameters
+    ----------
+    Form : obj
+        The ``Form`` object from ``wtforms``.
+    """
+    op = operator_form
+    val1 = DecimalField('Exposure Time', [validators.Optional()])
+    val2 = DecimalField('exptime2', [validators.Optional()])
 
 
 class MultiCheckboxField(SelectMultipleField):
-    """
-    A multiple-select, except displays a list of checkboxes.
-    Iterating the field will produce subfields, allowing custom rendering of
-    the enclosed checkbox fields.
+    """A multiple-select, except displays a list of checkboxes.
+
+    Parameters
+    ----------
+    SelectMultipleField : obj
+        The ``SelectMultipleField`` object from ``wtforms``
     """
 
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
 
 
-class RequiredIf(validators.Required):
-  """
-  Custom validator to enforce requires only if another field matches a
-  specified value. the `negate` allows for inverting the result.
-  """
-  def __init__(self, other_fieldname, value, negate, *args, **kwargs):
-      self.other_fieldname = other_fieldname
-      self.negate = negate
-      self.value = value
-      super(RequiredIf, self).__init__(*args, **kwargs)
+def is_field_value(form, fieldname, value, negate=False):
+    """Helper function to check if the given field in the given form is
+    of a specified value.
 
-  def __call__(self, form, field):
-      if is_field_value(form, self.other_fieldname, self.value, self.negate):
-          super(RequiredIf, self).__call__(form, field)
+    Parameters
+    ----------
+    form: obj
+        The form to test on
+    fieldname : str
+        The fieldname to test value against. If not found an Exception
+        is raised.
+    value : str
+        Value to test for.
+    negate : boolean
+        True/False to invert the result.
+    """
+
+    field = form._fields.get(fieldname)
+    if field is None:
+        raise Exception('Invalid field "%s"' % fieldname)
+    test = value == field.data
+    test = not test if negate else test
+
+    return test
+
+
+class RequiredIf(validators.Required):
+    """Custom validator to enforce requires only if another field
+    matches a specified value. the ``negate`` allows for inverting
+    the result.
+
+    Parameters
+    ----------
+    validators.Required : obj
+        The ``validators.Required`` object from ``wtforms``.
+    """
+
+    def __init__(self, other_fieldname, value, negate, *args, **kwargs):
+        self.other_fieldname = other_fieldname
+        self.negate = negate
+        self.value = value
+        super(RequiredIf, self).__init__(*args, **kwargs)
+
+    def __call__(self, form, field):
+        if is_field_value(form, self.other_fieldname, self.value, self.negate):
+            super(RequiredIf, self).__call__(form, field)
 
 
 class QueryForm(Form):
@@ -71,6 +156,8 @@ class QueryForm(Form):
 
     Parameters
     ----------
+    Form : obj
+        The ``Form`` object from ``wtforms``
     """
 
     rootname = TextField('Rootname',
@@ -93,30 +180,30 @@ class QueryForm(Form):
     proposal_type = CheckboxField('Proposal Type',
                     [validators.Optional()],
                     description='span3',
-                    choices=FORM_CHOICES['proposal_type'])
+                    choices=FORM_OPTIONS['proposal_type'])
     detector = CheckboxField('Detector',
                [validators.Optional()],
                description='span3',
-               choices=FORM_CHOICES['detector'])
+               choices=FORM_OPTIONS['detector'])
     obstype = CheckboxField('Observation Type',
               [validators.Optional()],
               description='span3',
-              choices=FORM_CHOICES['obstype'])
+              choices=FORM_OPTIONS['obstype'])
     aperture = SelectMultipleField('Aperture',
                [validators.Optional()],
-               choices=FORM_CHOICES['aperture'],
+               choices=FORM_OPTIONS['aperture'],
                description='span3')
     filter1 = SelectMultipleField('Filter1',
               [validators.Optional()],
               description='span3',
-              choices=FORM_CHOICES['filter1'])
+              choices=FORM_OPTIONS['filter1'])
     filter2 = SelectMultipleField('Filter2',
               [validators.Optional()],
               description='span3',
-              choices=FORM_CHOICES['filter2'])
+              choices=FORM_OPTIONS['filter2'])
     imagetyp = SelectMultipleField('Image Type',
                [validators.Optional()],
-               choices=FORM_CHOICES['imagetyp'],
+               choices=FORM_OPTIONS['imagetyp'],
                description='span3')
     pr_inv_l = TextField('PI Last Name',
                [validators.Optional()],
@@ -127,10 +214,10 @@ class QueryForm(Form):
     output_columns = MultiCheckboxField('Output Columns',
                      [RequiredIf('output_format', 'thumbnails', True,
                      message='Please select at least one output column.')],
-                     choices=FORM_CHOICES['output_columns'])
+                     choices=FORM_OPTIONS['output_columns'])
     output_format = RadioField('Output Format',
                     [validators.Required(message='Please select an output format.')],
-                    choices=FORM_CHOICES['output_format'],
+                    choices=FORM_OPTIONS['output_format'],
                     default='thumbnails', description='span3')
 
 

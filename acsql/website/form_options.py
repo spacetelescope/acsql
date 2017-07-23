@@ -14,7 +14,7 @@ Use
     as such:
     ::
 
-        from acsql.website.form_choices import FORM_CHOICES
+        from acsql.website.form_options import FORM_OPTIONS
 """
 
 APERTURES = ['WFC', 'WFC-FIX', 'WFC1', 'WFC1-1K', 'WFC1-2K', 'WFC1-512',
@@ -38,20 +38,26 @@ FILTER2S = ['F220W', 'F250W', 'F330W', 'F344N', 'F435W', 'F660N', 'F814W',
 IMAGETYPS = ['BIAS', 'DARK', 'FLAT', 'EXT']
 OBSTYPES = ['IMAGING', 'SPECTROSCOPC', 'CORONOGRAPHIC', 'INTERNAL']
 OUTPUT_COLUMNS = [('rootname','Rootname'), ('detector','Detector'),
-    ('proposal_type','Proposal Type')]
+    ('proposal_type','Proposal Type'), ('pr_inv_l','PI Last Name'),
+    ('pr_inv_f','PI First Name'), ('proposid','Proposal ID'), ('filter1','Filter1'),
+    ('filter2','Filter2'), ('aperture','Aperture'), ('expstart','Expstart'),
+    ('date-obs','Date of Observation'), ('time-obs','Time of Observation'),
+    ('targname','Target Name'), ('ra_targ','Target RA'), ('dec_targ','Target Dec'),
+    ('obstype','Observation Type'), ('obsmode','Observation Mode'),
+    ('subarray','Subarray'), ('imagetyp', 'Image Type'), ('asn_id','Association ID')]
 OUTPUT_FORMAT = [('table','HTML table'), ('csv','CSV'), ('thumbnails','Thumbnails')]
 PROPOSAL_TYPES = ['GO', 'GTO/ACS', 'CAL/ACS', 'SM3/ACS', 'SM3/ERO', 'SNAP',
     'GO/PAR', 'GO/DD', 'GTO/COS', 'CAL/OTA', 'ENG/ACS', 'NASA', 'SM4/ACS',
     'SM4/ERO', 'SM4/COS', 'CAL/WFC3', 'CAL/STIS']
 
 
-FORM_CHOICES = {}
-FORM_CHOICES['aperture'] = [(aperture, aperture) for aperture in APERTURES]
-FORM_CHOICES['detector'] = [(detector, detector) for detector in DETECTORS]
-FORM_CHOICES['filter1'] = [(filter1, filter1) for filter1 in FILTER1S]
-FORM_CHOICES['filter2'] = [(filter2, filter2) for filter2 in FILTER2S]
-FORM_CHOICES['imagetyp'] = [(imagetyp, imagetyp) for imagetyp in IMAGETYPS]
-FORM_CHOICES['obstype'] = [(obstype, obstype) for obstype in OBSTYPES]
-FORM_CHOICES['output_columns'] = OUTPUT_COLUMNS
-FORM_CHOICES['output_format'] = OUTPUT_FORMAT
-FORM_CHOICES['proposal_type'] = [(prop_type, prop_type) for prop_type in PROPOSAL_TYPES]
+FORM_OPTIONS = {}
+FORM_OPTIONS['aperture'] = [(aperture, aperture) for aperture in APERTURES]
+FORM_OPTIONS['detector'] = [(detector, detector) for detector in DETECTORS]
+FORM_OPTIONS['filter1'] = [(filter1, filter1) for filter1 in FILTER1S]
+FORM_OPTIONS['filter2'] = [(filter2, filter2) for filter2 in FILTER2S]
+FORM_OPTIONS['imagetyp'] = [(imagetyp, imagetyp) for imagetyp in IMAGETYPS]
+FORM_OPTIONS['obstype'] = [(obstype, obstype) for obstype in OBSTYPES]
+FORM_OPTIONS['output_columns'] = OUTPUT_COLUMNS
+FORM_OPTIONS['output_format'] = OUTPUT_FORMAT
+FORM_OPTIONS['proposal_type'] = [(prop_type, prop_type) for prop_type in PROPOSAL_TYPES]
