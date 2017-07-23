@@ -34,13 +34,14 @@ Dependencies
 import glob
 import os
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import numpy as np
 
 from acsql.utils.utils import SETTINGS
 from acsql.website.data_containers import get_view_image_dict
 from acsql.website.data_containers import get_view_proposal_dict
 from acsql.website.query_form import get_query_form
+from acsql.website.query_lib import get_query_results
 
 app = Flask(__name__)
 
@@ -83,11 +84,46 @@ def database():
     if request.query_string:
         if form.validate():
             query_form_dict = request.args.to_dict(flat=False)
-            print(query_form_dict)
-            db_output = get_db_output(query_form_dict)
-            if db_output.num_results is None:
-                template = render_template('database_error.html', form=query_form, msg=db_output.builder_all)
-            # elif db_output.num_results == 0:
+            query_results_dict = get_query_results(query_form_dict)
+
+            results = query_results_dict['query_results']
+            num_results = query_results_dict['num_results']
+            output_format = query_results_dict['output_format']
+            output_columns = query_results_dict['output_columns']
+
+            # If something went wrong with the query
+            if num_results is None:
+                template = render_template(
+                    'database_error.html',
+                    form=query_form,
+                    msg=num_results)
+
+            # If the query returned no results
+            elif num_results == 0:
+                results = True
+                template = render_template(
+                    'database_table.html',
+                    results=results,
+                    num_results=num_results)
+
+            # If the query returned results
+            else:
+
+                # For HTML table output format
+                if output_format == ['table']:
+                    template = render_template(
+                        'database_table.html',
+                        results=results,
+                        num_results=num_results,
+                        output_columns=output_columns)
+
+                # For CSV output format
+                if output_format == ['csv']:
+                    output = Response(generate_csv(output_columns, results), mimetype='text/csv')
+                    output.headers['Content-Disposition'] = 'attachment; filename=query_results.csv'
+
+                # For Thumbnail output format
+
 
 
 
