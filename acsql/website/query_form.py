@@ -29,7 +29,16 @@ Dependencies
     - wtforms_components
 """
 
-from wtforms import widgets, TextField, validators, SelectMultipleField, Form, FormField, SelectField, DateField, DecimalField, RadioField
+from wtforms import DateField
+from wtforms import DecimalField
+from wtforms import Form
+from wtforms import FormField
+from wtforms import RadioField
+from wtforms import SelectField
+from wtforms import SelectMultipleField
+from wtforms import TextField
+from wtforms import validators
+from wtforms import widgets
 from wtforms_components.fields import IntegerField
 
 from acsql.website.form_options import FORM_OPTIONS

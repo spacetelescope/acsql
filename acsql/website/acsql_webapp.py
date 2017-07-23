@@ -34,7 +34,7 @@ Dependencies
 import glob
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import numpy as np
 
 from acsql.utils.utils import SETTINGS
@@ -80,6 +80,17 @@ def database():
     """
 
     query_form = get_query_form()
+    if request.query_string:
+        if form.validate():
+            query_form_dict = request.args.to_dict(flat=False)
+            print(query_form_dict)
+            db_output = get_db_output(query_form_dict)
+            if db_output.num_results is None:
+                template = render_template('database_error.html', form=query_form, msg=db_output.builder_all)
+            # elif db_output.num_results == 0:
+
+
+
     return render_template('database.html', form=query_form)
 
 
