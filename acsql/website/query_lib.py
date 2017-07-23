@@ -191,6 +191,27 @@ def _convert_query_form_dict(query_form_dict):
     return query_form_dict
 
 
+def generate_csv(output_columns, results):
+    """Create a CSV file of the database query ouput.
+
+    Parameters
+    ----------
+    output_columns : list
+        A list of columns desired for the output file.
+    results : list
+        A list of results from the database query
+    """
+
+    header = ','.join(output_columns) + '\n'
+    yield header
+
+    for result in results:
+        if len(result) == 1:
+            yield str(result[0]) + '\n'
+        else:
+            yield ','.join(map(str, result)) + '\n'
+
+
 def get_query_results(query_form_dict):
     """
     """

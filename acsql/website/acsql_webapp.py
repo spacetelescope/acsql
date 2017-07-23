@@ -31,6 +31,7 @@ Dependencies
     - numpy
 """
 
+from collections import OrderedDict
 import glob
 import os
 
@@ -82,7 +83,7 @@ def database():
 
     query_form = get_query_form()
     if request.query_string:
-        if form.validate():
+        if query_form.validate():
             query_form_dict = request.args.to_dict(flat=False)
             query_results_dict = get_query_results(query_form_dict)
 
@@ -119,15 +120,24 @@ def database():
 
                 # For CSV output format
                 if output_format == ['csv']:
-                    output = Response(generate_csv(output_columns, results), mimetype='text/csv')
-                    output.headers['Content-Disposition'] = 'attachment; filename=query_results.csv'
+                    template = Response(generate_csv(output_columns, results), mimetype='text/csv')
+                    template.headers['Content-Disposition'] = 'attachment; filename=query_results.csv'
 
                 # For Thumbnail output format
+                data_dict = OrderedDict()
+                data_dict['type'] = 'results'
+                data_dict['num_images'] = num_results
+                data_dict['buttons'] = OrderedDict({'detector' : ['WFC', 'HRC', 'SBC']})
+                template = render_template('query_results.html', data_dict=data_dict)
 
+            return template
 
+        # Form was not validated
+        else:
+            return render_template('database_error.html', form=query_form)
 
-
-    return render_template('database.html', form=query_form)
+    else:
+        return render_template('database.html', form=query_form)
 
 
 def handle_500(trace):
