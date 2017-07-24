@@ -1,6 +1,9 @@
 astropy
+flask
 numpy
 numpydoc
-sqlalchemy
 pymysql
+sqlalchemy
+wtforms
+wtforms_components
 -e git://github.com/spacetelescope/stak.git#egg=stak
