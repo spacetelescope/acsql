@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="/../static/css/database.css">
+
+<div class="row">
+    <div class="span12">
+        <h3>ACS Database Query Form</h3>
+        <p>This form enables users to query the acsql database of all ACS images.
+           Only a subset of the full database is represented here; if the options available do not meet your needs,
+           you may enter a hard-coded MySQL command below.
+        </p>
+    </div>
+
+    {% from "_formhelpers.html" import render_field, render_formfield %}
+
+    <form id="queryform" method=get action='results' target="_blank">
+
+        {% for field in form %}
+            {% if field.type == 'FormField' %}
+                {{ render_formfield(field) }}
+            {% else %}
+                {{ render_field(field) }}
+            {% endif %}
+        {% endfor %}
+
+        <div class="span12" style="margin-top:2em;">
+            <center>
+                <button type="submit" value="Submit" class="btn btn-lg btn-primary">Submit</button>&nbsp;&nbsp;&nbsp;
+                <button type="reset" value="Reset" class="btn btn-lg btn-danger">Reset</button>
+            </center>
+        </div>
+    </form>
+</div>
+
+{% for field in form %}
+    {% if field.type == 'MultiCheckboxField' %}
+        <script>
+            $('#check_all_{{field.name}}').click(function() {
+                $('input[name={{field.name}}]').prop('checked', true);
+            });
+            $('#uncheck_all_{{field.name}}').click(function() {
+                $('input[name={{field.name}}]').prop('checked', false);
+            });
+        </script>
+    {% elif field.type == 'FormField' %}
+        <script>
+            $('#{{field.name}}-op').change(function(){
+                if ($(this).val() == 'between') {
+                    $('#{{field.name}}-val2').show();
+                } else {
+                    $('#{{field.name}}-val2').hide();
+                }
+            });
+        </script>
+    {% endif %}
+{% endfor %}
+{% endblock %}

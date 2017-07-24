@@ -34,7 +34,7 @@ import glob
 import os
 
 import numpy as np
-from stak import Hselect
+#from stak import Hselect
 
 from acsql.utils import utils
 from acsql.utils.utils import SETTINGS

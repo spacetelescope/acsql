@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.css">
+
+<div class="row">
+    <div class="span6">
+        <h2>Database</h2>
+        <p>Query the acsql Database</p>
+        <p><a class="btn" href="/database/">Query form &raquo;</a></p>
+    </div>
+    <div class="span6">
+        <h2>Archive</h2>
+        <p>Links to public ACS archival data.</p>
+        <p><a class="btn" href="/archive/">Archive &raquo;</a>&nbsp;</p>
+    </div>
+</div>
+
+<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/2/dataTables.bootstrap.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#scriptstatus').DataTable( {
+        "paging":   false,
+        "bFilter": false,
+        stateSave: true
+    } );
+});
+</script>
+{% endblock%}

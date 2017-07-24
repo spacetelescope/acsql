@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Image info -->
+<div class="row">
+
+    <!-- Filename title -->
+    <div class="span12">
+        <h3>{{image_dict.filename}}</h3>
+    </div>
+
+    <!-- Image metadata -->
+    <div class="span6">
+        <p>
+        <b>Proposal {{image_dict.proposal_id}}</a>:</b> <i> {{image_dict.proposal_title}}</i><br>
+        Image {{image_dict.page}} of {{image_dict.num_images}}<br>
+
+        <!-- FITS download links -->
+        {% if (not image_dict.fits_links) or (image_dict.fits_links|length == 0) %}
+            No FITS downloads available yet
+        {% else %}
+            Downloads:
+            {% for key, link in image_dict.fits_links.items() %}
+                <a href={{link}} target="_blank" download>{{key}}</a>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Additional information links -->
+        <br>
+        View all in <a href="/archive/{{image_dict.proposal_id}}/">proposal</a>; view <a href="{{image_dict.view_url}}/headers/">headers</a>; view in <a href="{{image_dict.view_url}}/js9/">JS9</a><br>
+        {% if image_dict.available_jpegs %}
+            View JPEG for
+            {% for key, link in image_dict.available_jpegs.items() %}
+                <a href="/archive/{{image_dict.proposal_id}}/{{image_dict.filename}}/{{key}}"> {{key}}</a>
+            {% endfor %}
+        {% endif %}
+        </p>
+    </div>
+    <div class="span3">
+        <p>
+        <b>Expstart:</b> {{image_dict.expstart}}<br>
+        <b>Filter:</b> {{image_dict.filter1}}/{{image_dict.filter2}}<br>
+        <b>Aperture:</b> {{image_dict.aperture}}<br>
+        <b>Exposure time:</b> {{image_dict.exptime}}<br>
+        </p>
+    </div>
+    <div class="span3">
+        <p>
+        <b>Expflag:</b> {{image_dict.expflag}}, Quality: {{image_dict.quality}}<br>
+        <b>Coordinates:</b> {{image_dict.ra}}, {{image_dict.dec}}<br>
+        <b>Target:</b> {{image_dict.targname}}<br>
+        <b>PI:</b> {{image_dict.pi_first_name}} {{image_dict.pi_last_name}}<br>
+        </p>
+    </div>
+</div>
+
+<!-- Other available JPEGs -->
+
+
+<!-- Image -->
+<div class="row">
+    <div class="fleximage">
+        {% if image_dict.image %}
+            <div id="wrapper" style="width:100%; text-align:center">
+                <img class="img-responsive" src={{image_dict.image}} alt={{image_dict.image}} align:center height="75%" width="75%">
+            </div>
+        {% else %}
+            <br><br><br>
+            <center><strong><p>There is no JPEG to display for FITS type {{image_dict.fits_type}}</p></strong></center>
+        {% endif %}
+    </div>
+</div>
+
+<div style="height:1em;"></div>
+
+<!-- Enable left and right keystrokes -->
+<script type="text/javascript">
+    {% if not image_dict.last %}
+    $("body").keydown(function(e) {
+      if(e.keyCode == 39) { // right
+        window.location = "{{ url_for('view_image',**image_dict.next) }}";
+      }
+    });
+    {% endif %}
+    {% if not image_dict.first %}
+    $("body").keydown(function(e) {
+      if(e.keyCode == 37) { // left
+        window.location = "{{ url_for('view_image',**image_dict.prev) }}";
+      }
+    });
+    {% endif %}
+</script>
+
+{% endblock %}

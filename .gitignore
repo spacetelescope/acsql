@@ -90,3 +90,5 @@ ENV/
 
 # Repository specific
 *.fits
+acsql/website/static/img/jpegs
+acsql/website/static/img/thumbnails

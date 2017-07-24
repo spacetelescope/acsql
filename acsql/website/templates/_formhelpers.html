@@ -1,0 +1,45 @@
+{% macro render_field(field) %}
+{% if field.type == 'MultiCheckboxField' %}
+<div class="span12">
+  <h5>{{ field.label.text }}</h5>
+  {{ field(id=field.name, **kwargs)|safe }}
+</div>
+{% if field.label.text.endswith('s') %}
+<div class="span12">
+      <button type="button" id="check_all_{{field.name}}" class="btn">Select all {{field.label.text.lower()}}</button>
+      <button type="button" id="uncheck_all_{{field.name}}" class="btn">Deselect all {{field.label.text.lower()}}</button>
+{% else %}
+<div class="span12">
+      <button type="button" id="check_all_{{field.name}}" class="btn">Select all {{field.label.text.lower()}}s</button>
+      <button type="button" id="uncheck_all_{{field.name}}" class="btn">Deselect all {{field.label.text.lower()}}s</button>
+{% endif %}
+
+{% elif field.type == 'SelectMultipleField' %}
+<div class="{{ field.description[-5:] }} formfield">
+  <h5>{{ field.label.text }}</h5>
+  {{ field(style="width:100%;", placeholder=field.description[:-6], **kwargs)|safe }}
+
+{% else %}
+<div class="{{ field.description[-5:] }} formfield">
+  <h5>{{ field.label.text }}</h5>
+  {{ field(style="width:calc(100% - 1em);width:-moz-calc(100% - 1em);
+   width:-webkit-calc(100% - 1em);width:-o-calc(100% - 1em);width:-ms-calc(100% - 1em);",
+   placeholder=field.description[:-6], **kwargs)|safe }}
+{% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_formfield(field) %}
+<div class="{{ field.description[-5:] }} formfield">
+  <h5>{{ field.label.text }}</h5>
+  {% for subfield in field %}
+    {% if subfield.name.endswith('op') %}
+      {{ subfield(style="width:4em;display:inline;", **kwargs)|safe }}&nbsp;
+    {% elif subfield.name.endswith('val1') %}
+      {{ subfield(style="width:calc(100% - 5.75em);display:inline;", placeholder=subfield.description, **kwargs)|safe }}
+    {% elif subfield.name.endswith('val2') %}
+      {{ subfield(style="width:calc(100% - 5.75em);display:inline;float:right;margin-right:3px;display:none;", placeholder=subfield.description, **kwargs)|safe }}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endmacro %}
