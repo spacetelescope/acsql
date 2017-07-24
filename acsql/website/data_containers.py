@@ -123,35 +123,35 @@ def _get_metadata_from_database(data_dict):
     return data_dict
 
 
-def _get_proposal_buttons_dict(proposal_dict):
+def _get_buttons_dict(data_dict):
     """Add data used for various buttons on the ``/archive/<proposal>``
-    page to the ``proposal_dict``.
+    page or ``/database/results/`` page to the ``data_dict``.
 
     Parameters
     ----------
-    proposal_dict : dict
+    data_dict : dict
         A dictionary containing data for the given
-        ``/archive/<proposal>`` page, such as ``visits`` and
-        ``targnames``
+        ``/archive/<proposal>`` or ``/database/results/`` page, such as
+        ``visits`` and ``targnames``
 
     Returns
     -------
-    proposal_dict : dict
+    data_dict : dict
         A dictionary containing data for the given
-        ``/archive/<proposal>`` page, such as ``visits`` and
-        ``targnames``
+        ``/archive/<proposal>`` or ``/database/results/`` page, such as
+        ``visits`` and ``targnames``
     """
 
-    proposal_dict['buttons'] = {}
-    proposal_dict['buttons']['detector'] = sorted(set(proposal_dict['detectors']))
-    proposal_dict['buttons']['visit'] = sorted(set(proposal_dict['visits']))
-    proposal_dict['buttons']['target'] = sorted(set(proposal_dict['targnames']))
-    proposal_dict['buttons']['filter'] = sorted(set([
+    data_dict['buttons'] = {}
+    data_dict['buttons']['detector'] = sorted(set(data_dict['detectors']))
+    data_dict['buttons']['visit'] = sorted(set(data_dict['visits']))
+    data_dict['buttons']['target'] = sorted(set(data_dict['targnames']))
+    data_dict['buttons']['filter'] = sorted(set([
         '{}/{}'.format(filter1, filter2)
         for filter1, filter2
-        in zip(proposal_dict['filter1s'], proposal_dict['filter2s'])]))
+        in zip(data_dict['filter1s'], data_dict['filter2s'])]))
 
-    return proposal_dict
+    return data_dict
 
 
 def _get_proposal_status(data_dict):
@@ -306,6 +306,7 @@ def get_view_image_dict(proposal, filename, fits_type='flt'):
     for jpeg_type in jpeg_types:
         image_dict['available_jpegs'][jpeg_type] = image_dict['view_url'].replace(fits_type, jpeg_type)
 
+    # For downloading the files
     # image_dict['proposal_name'] = image_dict['filename'][0:4]
     # image_dict['fits_links']['FLT'] = os.path.join(
     #                                       SETTINGS['filesystem'],
@@ -336,7 +337,48 @@ def get_view_proposal_dict(proposal):
     proposal_dict['visits'] = [os.path.basename(item).split('_')[0][4:6].upper() for item in proposal_dict['jpegs']]
     proposal_dict['num_visits'] = len(set(proposal_dict['visits']))
     proposal_dict = _get_metadata_from_database(proposal_dict)
-    proposal_dict = _get_proposal_buttons_dict(proposal_dict)
+    proposal_dict = _get_buttons_dict(proposal_dict)
     proposal_dict['viewlinks'] = ['/archive/{}/{}/'.format(proposal_dict['proposal_id'], filename) for filename in proposal_dict['filenames']]
 
     return proposal_dict
+
+
+def get_view_query_results_dict(query_results_dict):
+    """Return a dictionary containing data used for the
+    ``/database/results/`` webpage.
+
+    Parameters
+    ----------
+    query_results_dict : dict
+        A dictionary containing the results of the query performed
+        through the ``/database/`` webpage, along with some additional
+        metadata.
+
+    Returns
+    -------
+    thumbnail_dict : dict
+        A dictionary containing data used for the ``/database/results/``
+        webpage.
+    """
+
+    query_results = query_results_dict['query_results']
+
+    thumbnail_dict = {}
+    thumbnail_dict['num_images'] = query_results_dict['num_results']
+    thumbnail_dict['rootnames'] = [item[3] for item in query_results]
+    thumbnail_dict['filenames'] = [item[4].split('_')[0] for item in query_results]
+    thumbnail_dict['detectors'] = [item[5] for item in query_results]
+    thumbnail_dict['expstarts'] = [item[6] for item in query_results]
+    thumbnail_dict['filter1s'] = [item[7] for item in query_results]
+    thumbnail_dict['filter2s'] = [item[8] for item in query_results]
+    thumbnail_dict['exptimes'] = [item[9] for item in query_results]
+    thumbnail_dict['targnames'] = [item[10] for item in query_results]
+    thumbnail_dict['proposal_ids'] = [item[11] for item in query_results]
+    thumbnail_dict['visits'] = [item[4:6] for item in thumbnail_dict['rootnames']]
+    thumbnail_dict = _get_buttons_dict(thumbnail_dict)
+    thumbnail_dict['thumbs'] = ['static/img/thumbnails/{}/{}_flt.thumb'.format(proposid, filename)
+        for proposid, filename in zip(thumbnail_dict['proposal_ids'], thumbnail_dict['filenames'])]
+    thumbnail_dict['viewlinks'] = ['/archive/{}/{}/'.format(proposid, filename)
+        for proposid, filename in zip(thumbnail_dict['proposal_ids'], thumbnail_dict['filenames'])]
+
+    return thumbnail_dict

@@ -41,6 +41,7 @@ import numpy as np
 from acsql.utils.utils import SETTINGS
 from acsql.website.data_containers import get_view_image_dict
 from acsql.website.data_containers import get_view_proposal_dict
+from acsql.website.data_containers import get_view_query_results_dict
 from acsql.website.query_form import get_query_form
 from acsql.website.query_lib import generate_csv
 from acsql.website.query_lib import get_query_results
@@ -122,17 +123,17 @@ def database():
                         output_columns=output_columns)
 
                 # For CSV output format
-                if output_format == ['csv']:
+                elif output_format == ['csv']:
                     template = Response(generate_csv(output_columns, results), mimetype='text/csv')
                     template.headers['Content-Disposition'] = 'attachment; filename=query_results.csv'
 
                 # For Thumbnail output format
-                if output_format == ['thumbnail']:
-                    data_dict = OrderedDict()
-                    data_dict['type'] = 'results'
-                    data_dict['num_images'] = num_results
-                    data_dict['buttons'] = OrderedDict({'detector': ['WFC', 'HRC', 'SBC']})
-                    template = render_template('query_results.html', data_dict=data_dict)
+                elif output_format == ['thumbnails']:
+                    thumbnail_dict = get_view_query_results_dict(query_results_dict)
+                    template = render_template('view_query_results.html', thumbnail_dict=thumbnail_dict)
+
+                else:
+                    template = render_template('database_error.html', form=query_form)
 
             return template
 

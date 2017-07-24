@@ -265,9 +265,9 @@ def get_query_results(query_form_dict):
     # Determine output format
     output_format = query_form_dict.pop('output_format')
     if output_format == ['thumbnails']:
-        output_columns = ['rootname', 'detector', 'proposal_type',
-                          'expstart', 'filter1', 'filter2',
-                          'exptime', 'targname']
+        output_columns = ['rootname', 'filename', 'detector',
+                          'proposal_type', 'expstart', 'filter1',
+                          'filter2', 'exptime', 'targname', 'proposid']
         if 'output_columns' in query_form_dict:
             query_form_dict.pop('output_format', None)
     else:
