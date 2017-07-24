@@ -3,8 +3,8 @@ flask
 numpy
 numpydoc
 pymysql
+pyyaml
 sqlalchemy
 wtforms
 wtforms_components
-yaml
 -e git://github.com/spacetelescope/stak.git#egg=stak
