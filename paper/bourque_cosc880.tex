@@ -1,8 +1,11 @@
-
 %% bourque_cosc880.tex
 %% Matthew Bourque
 
 \documentclass[10pt,journal,compsoc]{IEEEtran}
+
+% imports
+\usepackage{hyperref}
+\usepackage{listings}
 
 % *** CITATION RELATED PACKAGES ***
 \ifCLASSOPTIONcompsoc
@@ -21,13 +24,12 @@
 \title{The Advanced Camera for Surveys Quicklook Project}
 
 % Authors
-\author{Matthew~Bourque, Alex~Viana, Meredith~Durbin
-\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem M. Bourque, A. Viana, and
+\author{Matthew~Bourque, Sara~Ogaz, Alex~Viana, Meredith~Durbin
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem M. Bourque, S. Ogaz, A. Viana, and
 M. Durbin were with the Space Telescope Science Institute, Baltimore, MD, 21218.
 \protect\\
-E-mail: bourque@stsci.edu
-\IEEEcompsocthanksitem A. Viana with Anonymous University.}
-\thanks{Manuscript received Month DD, YYYY; revised August 26, 2015.}}
+E-mail: bourque@stsci.edu}
+\thanks{Manuscript received Month DD, YYYY}}
 
 % Abstract
 \IEEEtitleabstractindextext{%
@@ -44,16 +46,144 @@ The abstract goes here.
 
 % Introduction
 \IEEEraisesectionheading{\section{Introduction}\label{sec:introduction}}
-\IEEEPARstart This demo file is intended to serve as a ``starter file''
-for IEEE Computer Society journal papers produced under \LaTeX\ using
-IEEEtran.cls version 1.8b and later.
-I wish you the best of success.
+\IEEEPARstart The Advanced Camera for Surveys (ACS) is a third-generation imaging
+instrument on board the Hubble Space Telescope (HST), installed in 2002 during
+Servicing Mission 3B. It is comprised of three detectors: (1) the Wide Field Camera
+(WFC), which is designed for wide-field imaging and spectroscopy in visible to
+near-infrared wavelengths, (2) the High Resolution Channel, which is designed for
+high resolution near-ultraviolet to near-infrared wavelength images and coronography,
+and (3) the Solar Blind Channel (SBC), desingned for far-ultraviolet imaging and
+spectroscopy.  ACS expererienced an electronics failure in 2007 that affected
+the WFC and HRC detectors, until 2009 when astronauts succesfully restored the WFC
+detector during Servicing Mission 4; the HRC still remains unoperational.
 
-\subsection{Subsection Heading Here}
-Subsection text here.
+Besides these few hiccups, the ACS instrument has been steadily acquiring astronomical
+images over its 15 on-orbit lifetime.  Figure 1 shows rough estimates of the number of
+observations over time for each of the three detectors.  To date, there have been
+approximately N of observations total.  Further information about the ACS instrument
+including its history, configuration, performance, and scientific capability can be
+found in the ACS Instrument Handbook (Avila et al., 2017).
 
-\subsubsection{Subsubsection Heading Here}
-Subsubsection text here.
+ACS data, along with all other data from the other HST instruments past and present
+(e.g. The Wide Field Camera 3 (WFC3), The Cosmic Origins Spectrography (COS), etc.),
+are primarily stored and publicly-available in the Barbara A. Mikulski Archive for
+Space Telescopes (MAST)\footnote{named after the U.S. Senator from Maryland who has
+been a pivitol political driving force behind the manned servicing missions, the
+Hubble Space Telescope, and the forthcoming James Webb Space Telescope} (Barbara, 2017).
+Through MAST, users can request and retreive data for any publicly-available dataset
+via \texttt{ftp}, \texttt{sftp}, or DVD by mail.  The ACS data, like most all other
+astronomical data, are stored in the Flexible Image Transport System (FITS) filetype
+(FITS, 2008).  This filetype has several unique characteristics, as will be
+discuessed in section N.
+
+% Figure for ACS observations over time
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{myfigure}
+% where an .eps filename suffix will be assumed under latex,
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+%\caption{Simulation results for the network.}
+%\label{fig_sim}
+%\end{figure}
+
+The ACS Quicklook Project is a \texttt{python}-based application for discovering,
+viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
+(1) A filesystem that stores ACS instrument data files and "Quicklook" JPEGs in an
+organized Network File System (NFS), (2) A \texttt{MySQL} database that stores image
+metadata of each observation, (3) A \texttt{python}/\texttt{Flask}-based web application
+for interacting with the filesystem and database, and (4) A \texttt{python} code library
+(named \texttt{acsql}) that contains code for connecting to the database, ingesting new
+data, logging production code execution, and building/maintaining the database and web
+application.  Each of these subsystems are explained in further detail in the Methodology
+section of this paper.
+
+This paper aims to outline and detail the ACS Quicklook project as part of the Towson
+University Computer Science Masters Program Graduate Project.  The remaining subsections
+in this chapter discuss the motivation and use cases for this application, as well as
+details on the underlying data structure on top of which this project was built.  Chapter
+2 discusses related work to this project and how the ACS Quicklook project differs from
+existing similar applications.  Chapter 3 details the implementations of each of the
+ACS Quicklook subsystems.  Chapter 4 outlines the results of the project, namely the
+project deliverables.  Lastly, chapters 5 and 6 conclude the paper with a discussion
+of possible extensions and modifications to the application.
+
+It should be noted that the work that went into this project by the authors was
+accomplished on behalf of the Space Telescope Science Institute (STScI) located in
+Baltimore, Maryland.  STScI is the home institution for instrument, data, and user
+support of HST, the forthcoming James Webb Space Telescope
+(JWST), and MAST.  STScI is part of the Association of Universities for Research in
+Astronomy (AURA).
+
+\subsection{Motivation}
+
+The motivation for the ACS Quicklook system is driven by several shortcomings of the
+HST file and data structure as well as the current capabilities of MAST from a specific
+user perspective (inteded users and their use cases are discussed in section N).
+These shortcomings include:
+
+\subsection{Use Cases}
+The intended user of ACS Quicklook are ACS instrument scientists, analysts,
+or scientific users who wish to perform one or more of the following use cases:
+
+\subsection{Data Structure}
+
+\subsubsection{FITS file structure}
+
+\subsubsection{FITS file headers}
+
+\subsubsection{FITS filetypes for ACS}
+
+\subsection{Key Metadata}
+
+
+
+% Topics to discuss:
+
+% 1. History of ACS
+% 2. Motivation and users
+% 3. Data Structure: FITS file and file extensions
+% 4. Data Structure: FITS headers
+% 5. Data Sturcture: FITS filetypes
+% 6. Key Metadata
+% 7. What this paper discusses
+
+
+% Related Work
+\section{Related Work}\label{sec:related_work}
+
+Topics to discuss:
+
+1. The MAST archive
+2. The MAST portal
+3. The WFC3/Quicklook project
+4. Other Astronomy Institutions
+5. How ACS/Quicklook is different
+
+% Methodology
+\section{Methodology}\label{sec:methodology}
+Topics to discuss:
+
+1. Version control
+2. Programming and Documentation Standards
+3. Filesystem: The MAST public Cache
+4. Filesystem: Archive of JPEGs and Thumbnails
+5. Database: Relational Schema
+6. Database: MySQL + SQLAlchemy
+7. Database: ORMs
+8. Data ingestion software
+9. Website:
+
+% Results
+\section{Results}\label{sec:results}
+
+Topics to discuss:
+1. GitHub repository
+2. ReadTheDocs documentation repository
+3. Quantification of Database records
+4. Quantification of Code repository
+5. Website location
+
 
 %
 %\begin{figure}[!t]
@@ -107,9 +237,15 @@ Subsubsection text here.
 
 
 % Conclusion
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
 The conclusion goes here.
 
+% Discussion
+\section{Discussion}\label{sec:discussion}
+Topics to discuss:
+
+1. Possible simplification based on MAST archive
+2. Possible extensions to other insturments
 
 % Appendices
 \appendices
@@ -141,9 +277,17 @@ Appendix two text goes here.
 % Referecnes
 \begin{thebibliography}{1}
 
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+\bibitem{IEEEhowto:avila}
+Avila, R., et al., \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:fits}
+\emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
+International Astronomical Union FITS Working Group, available at
+\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+
+\bibitem{IEEEhowto:mast}
+\emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
+available at \url{https://archive.stsci.edu/}.
 
 \end{thebibliography}
 
