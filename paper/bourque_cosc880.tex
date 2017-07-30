@@ -4,6 +4,7 @@
 \documentclass[10pt,journal,compsoc]{IEEEtran}
 
 % imports
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
 
@@ -21,10 +22,15 @@
 \begin{document}
 
 % Title
-\title{The Advanced Camera for Surveys Quicklook Project}
+\title{The Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS) Quicklook Project}
 
 % Authors
-\author{Matthew~Bourque, Sara~Ogaz, Alex~Viana, Meredith~Durbin
+\author{Matthew~Bourque[1], Sara~Ogaz[1], Alex~Viana[2], Meredith~Durbin[3], Norman Grogin[1]\\
+\begin{flushleft}
+{\scriptsize [1] Space Telescope Science Institute, Baltimore, Maryland 21218. email: bourque@stsci.edu, ogaz@stsci.edu, grogin@stsci.edu}\\
+{\scriptsize [2] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
+{\scriptsize [3] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}
+\end{flushleft}
 \IEEEcompsocitemizethanks{\IEEEcompsocthanksitem M. Bourque, S. Ogaz, A. Viana, and
 M. Durbin were with the Space Telescope Science Institute, Baltimore, MD, 21218.
 \protect\\
@@ -34,7 +40,7 @@ E-mail: bourque@stsci.edu}
 % Abstract
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-The abstract goes here.
+What is an abstract, really?
 \end{abstract}}
 
 
@@ -64,6 +70,14 @@ approximately N of observations total.  Further information about the ACS instru
 including its history, configuration, performance, and scientific capability can be
 found in the ACS Instrument Handbook (Avila et al., 2017).
 
+% Figure for ACS observations over time
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/num_obs.png}
+\caption{The number of observations over time for each of the three detectors on ACS.}
+\label{fig1}
+\end{figure}
+
 ACS data, along with all other data from the other HST instruments past and present
 (e.g. The Wide Field Camera 3 (WFC3), The Cosmic Origins Spectrography (COS), etc.),
 are primarily stored and publicly-available in the Barbara A. Mikulski Archive for
@@ -71,21 +85,12 @@ Space Telescopes (MAST)\footnote{named after the U.S. Senator from Maryland who 
 been a pivitol political driving force behind the manned servicing missions, the
 Hubble Space Telescope, and the forthcoming James Webb Space Telescope} (Barbara, 2017).
 Through MAST, users can request and retreive data for any publicly-available dataset
-via \texttt{ftp}, \texttt{sftp}, or DVD by mail.  The ACS data, like most all other
+via \texttt{ftp}, \texttt{sftp}, or DVD by mail\footnote{Not all HST data are publicly
+available; most HST data of scientific targets are considered proprietary for up to
+one calendar year, after which they are publicly released.}.  The ACS data, like most all other
 astronomical data, are stored in the Flexible Image Transport System (FITS) filetype
 (FITS, 2008).  This filetype has several unique characteristics, as will be
 discuessed in section N.
-
-% Figure for ACS observations over time
-%\begin{figure}[!t]
-%\centering
-%\includegraphics[width=2.5in]{myfigure}
-% where an .eps filename suffix will be assumed under latex,
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
-%\caption{Simulation results for the network.}
-%\label{fig_sim}
-%\end{figure}
 
 The ACS Quicklook Project is a \texttt{python}-based application for discovering,
 viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
@@ -118,19 +123,52 @@ Astronomy (AURA).
 \subsection{Motivation}
 
 The motivation for the ACS Quicklook system is driven by several shortcomings of the
-HST file and data structure as well as the current capabilities of MAST from a specific
-user perspective (inteded users and their use cases are discussed in section N).
-These shortcomings include:
+FITS file structure as well as the current capabilities of MAST from a specific
+user perspective (inteded users and their use cases are discussed in section 1.2).
+Some of these shortcomings are described below along with the intended way the
+ACS Quicklook application will address them.
+
+\textit{Data retreival letency:} Currently, users who wish to retreive data from
+the MAST archive must submit a retreival request via the MAST online interface.
+Once the retreival request is processed (usually automatically unless it is a
+request of a large number of datasets), the data are either transfered to the user
+directly via \texttt{sftp}, transfered to a "staging area" in which the user can
+log into and copy the data via \texttt{ftp} at their leisure, or sent by mail via
+DVD, depending on which option the user selects.  In the case of any one of these
+options, the time between a download request and the the time in which the user
+has fully retreived the data is a non-significant amount of time.  In the fastest
+scenario of the \texttt{sftp} option, a typical request can take minutes to hours
+to be completed.  The ACS Quicklook system attempts to circumnavigate this retreival
+process by making the full data products instantly available via read-only access of
+the filesystem subystem, as well as a subset of the data products (and corresponding
+metadata) instantly available to view through the web application.
+
+\textit{File I/O:} Users who
+
+\textit{Data redundancy:} Something.
+
+\textit{Data discovery:} Something
+
 
 \subsection{Use Cases}
 The intended user of ACS Quicklook are ACS instrument scientists, analysts,
 or scientific users who wish to perform one or more of the following use cases:
+
+1. View
 
 \subsection{Data Structure}
 
 \subsubsection{FITS file structure}
 
 \subsubsection{FITS file headers}
+
+% Figure for header example
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/header_example.png}
+\caption{An example header.}
+\label{fig1}
+\end{figure}
 
 \subsubsection{FITS filetypes for ACS}
 
@@ -173,6 +211,14 @@ Topics to discuss:
 7. Database: ORMs
 8. Data ingestion software
 9. Website:
+
+% Figure for acsql database schema
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/schema.png}
+\caption{The relational database schema for the \texttt{acsql} database.}
+\label{fig1}
+\end{figure}
 
 % Results
 \section{Results}\label{sec:results}
