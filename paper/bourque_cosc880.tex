@@ -4,6 +4,8 @@
 \documentclass[10pt,journal,compsoc]{IEEEtran}
 
 % imports
+\usepackage{color}
+\usepackage{colortbl}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
@@ -17,6 +19,9 @@
 
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
+
+% Colors
+\definecolor{gray}{gray}{0.85}
 
 
 \begin{document}
@@ -52,7 +57,7 @@ What is an abstract, really?
 
 % Introduction
 \IEEEraisesectionheading{\section{Introduction}\label{sec:introduction}}
-\IEEEPARstart The Advanced Camera for Surveys (ACS) is a third-generation imaging
+The Advanced Camera for Surveys (ACS) is a third-generation imaging
 instrument on board the Hubble Space Telescope (HST), installed in 2002 during
 Servicing Mission 3B. It is comprised of three detectors: (1) the Wide Field Camera
 (WFC), which is designed for wide-field imaging and spectroscopy in visible to
@@ -64,9 +69,9 @@ the WFC and HRC detectors, until 2009 when astronauts succesfully restored the W
 detector during Servicing Mission 4; the HRC still remains unoperational.
 
 Besides these few hiccups, the ACS instrument has been steadily acquiring astronomical
-images over its 15 on-orbit lifetime.  Figure 1 shows rough estimates of the number of
+images over its 15 on-orbit lifetime.  Figure 1 shows an estimates of the number of
 observations over time for each of the three detectors.  To date, there have been
-approximately N of observations total.  Further information about the ACS instrument
+nearly 200,000 of observations total.  Further information about the ACS instrument
 including its history, configuration, performance, and scientific capability can be
 found in the ACS Instrument Handbook (Avila et al., 2017).
 
@@ -126,7 +131,7 @@ The motivation for the ACS Quicklook system is driven by several shortcomings of
 FITS file structure as well as the current capabilities of MAST from a specific
 user perspective (inteded users and their use cases are discussed in section 1.2).
 Some of these shortcomings are described below along with the intended way the
-ACS Quicklook application will address them.
+ACS Quicklook application will address them.\newline
 
 \textit{Data retreival letency:} Currently, users who wish to retreive data from
 the MAST archive must submit a retreival request via the MAST online interface.
@@ -158,7 +163,104 @@ or scientific users who wish to perform one or more of the following use cases:
 
 \subsection{Data Structure}
 
+The design of the ACS Quicklook application, especially the database, is heavily
+dependant on the underlying data structure of ACS FITS files.  As such, it is
+important for the reader to understand this data structure and thus the next four
+sections are dedicated to giving an overview on the subject.
+
+\subsubsection{Filenames}
+
+Each ACS data file is named in a consistent fashion:\newline
+
+\noindent\texttt{$<$rootname$>$\_$<$filetype$>$.fits}\newline
+
+\noindent where each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric
+characters, and \texttt{$<$filetype$>$} is one of several three-character filetype options
+(discussed in proceeding section N).  For example, one ACS observation has the rootname
+\texttt{j6mf16lhq\_raw.fits} (Principle Investigator Gary Bernstein, observation
+date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname}
+has meaning, and is discussed in section 5.2 of the Introduction to the HST
+Data Handbooks (Smith et al., 2011).  The \texttt{.fits} extension at the end
+of the filename signifies that the file is of FITS format.
+
 \subsubsection{FITS file structure}
+
+Each ACS FITS file consists of several ``Extensions'', with each extension serving a purpose
+to describe a particular aspect of the observation.  Each extension consists of two parts: (1)
+an extension ``header'', which contain key/value pairs describing image metadata (for example,
+\texttt{DATE-OBS = '2016-09-22'} indicates that the observation date was \texttt{2016-09-22})
+(discussed in the next section), and (2) the extension data, which may be a binary table or,
+more commonly, a multi-dimensional array of detector pixel values.
+
+The type of extension data can also vary.  The most common extension data types are (1) `science'
+(\texttt{SCI}), in which the extension data describe a scientific observation, (2) `error'
+(\texttt{ERR}), in which the extension data describe the uncertainty in the pixel values of the
+\texttt{SCI} data, and (3) `data quality' (\texttt{DQ}), in which the extension data describe
+the quality of the pixel values for the detector (for example, they may indicate that certain
+pixels were affected by cosmic rays durring the observation).  Typically, for a given file,
+the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension,
+and the 3rd extension is the \texttt{DQ} extension.  Furthermore, the 0th extension typically has
+no extension data and only an extension header that contains metadata that is common to all
+extensions.  This is referred to as the `Primary Header'.
+
+Tables 1-3 describe the different extensions of ACS FITS files for each of the three ACS
+detectors.  Note that there are two sets of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for
+WFC since WFC is comprised of two separate CCD chips.
+
+% Table for WFC extenions
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.5}
+\caption{ACS/WFC FITS file extensions}
+\label{wfc_extensions}
+\centering
+\begin{tabular}{|c|l|c|c|}
+\hline
+\rowcolor{gray} Extension & \multicolumn{1}{p{2cm}|}{\centering Purpose} & \multicolumn{1}{p{1.5cm}|}{\centering Image Dimensions \\ (pixels)} & Data Type \\
+\hline
+0 & Primary header & -- & String \\
+\hline
+1 & SCI, Chip 2 & (4096, 2048) & Float \\
+\hline
+2 & ERR, Chip 2 & (4096, 2048) & Float \\
+\hline
+3 & DQ, Chip 2 & (4096, 2048) & Integer \\
+\hline
+4 & SCI, Chip 1 & (4096, 2048) & Float \\
+\hline
+5 & ERR, Chip 1 & (4096, 2048) & Float \\
+\hline
+6 & DQ, Chip 1 & (4096, 2048) & Integer \\
+\hline
+\end{tabular}
+\end{table}
+
+% Table for HRC and SBC extenions
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.5}
+\caption{ACS/HRC and ACS/SBC FITS file extensions}
+\label{hrc_sbc_extensions}
+\centering
+\begin{tabular}{|c|l|c|c|}
+\hline
+\rowcolor{gray} Extension & \multicolumn{1}{p{2cm}|}{\centering Purpose} & \multicolumn{1}{p{1.5cm}|}{\centering Image Dimensions \\ (pixels)} & Data Type \\
+\hline
+0 & Primary header & -- & String \\
+\hline
+1 & SCI & (1024, 1024) & Float \\
+\hline
+2 & ERR & (1024, 1024) & Float \\
+\hline
+3 & DQ & (1024, 1024) & Integer \\
+\hline
+\end{tabular}
+\end{table}
+
+
+Over the years, there have been several tools written in various programming languages to
+read in FITS files and automatically convert their extension data to multi-dimensional array
+data types and their extension headers to dictionary data types.  For this project, the
+\texttt{astropy.fits} \texttt{python} library is used extensivly to read and interact with
+ACS FITS files (Robitaille et al., 2013).
 
 \subsubsection{FITS file headers}
 
@@ -230,17 +332,6 @@ Topics to discuss:
 4. Quantification of Code repository
 5. Website location
 
-
-%
-%\begin{figure}[!t]
-%\centering
-%\includegraphics[width=2.5in]{myfigure}
-% where an .eps filename suffix will be assumed under latex,
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
-%\caption{Simulation results for the network.}
-%\label{fig_sim}
-%\end{figure}
 
 
 % An example of a double column floating figure using two subfigures.
@@ -324,12 +415,19 @@ Appendix two text goes here.
 \begin{thebibliography}{1}
 
 \bibitem{IEEEhowto:avila}
-Avila, R., et al., \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
+Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
 
 \bibitem{IEEEhowto:fits}
 \emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
 International Astronomical Union FITS Working Group, available at
 \url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+
+\bibitem{IEEEhowto:robitaille}
+Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
+Astronomy \& Astrophysics, 558, A33.
+
+\bibitem{IEEEhowto:smith}
+Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
 
 \bibitem{IEEEhowto:mast}
 \emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
