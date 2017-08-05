@@ -284,26 +284,56 @@ There are several metadata key/value pairs that are particulary important for th
 ACS Quicklook application, specifically the web application.  For some reference,
 and context, these metadata are briefly described below.  Note that the \texttt{rootname}
 and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are
-metadata that were explicitly added to the database schema.
+metadata that were explicitly added to the database schema.\newline
 
-TARGNAME
-PROPOSID
-DATE-OBS
-EXPTIME
-EXPSTART
-APERTURE
-DETECTOR
-OBSTYPE
-FILTER1
-FILTER2
-TIME-OBS
-SUBARRAY
-RA
-DEC
-EXPFLAG
-IMAGETYP
-rootname
-proposal$\_$type
+\textit{APERTURE} - The portion of the \texttt{WFC}, \texttt{HRC}, or \texttt{SBC} detector that
+that was used during an observation.  Can either be the entire detector (called a ``full-frame
+image'') (e.g. \texttt{WFC}), or a subsection of the detector (called a ``subarray'') (e.g.
+\texttt{WFC1-1K}).\\
+
+\textit{DATE-OBS} - The date of the observation in the format \texttt{YYYY-MM-DD}, measured in
+Universal Time (e.g. \texttt{'2017-08-05'}).\\
+
+\textit{DEC$\_$TARG} - The declination of the target (i.e. the angular distance the target north or south
+of the celestial equator) (e.g. \texttt{41.2842}).\\
+
+\textit{DETECTOR} - The detector used for the observation.  Can either be \texttt{WFC}, \texttt{HRC},
+or \texttt{SBC}.\\
+
+\textit{EXPFLAG} - Indicates if an observation was interrupted (e.g. \texttt{INTERRUPTED}) or not
+(e.g \texttt{NORMAL}).\\
+
+\textit{EXPSTART} - The exposure start time of the observation, in units of Modified Julian Date
+(e.g. \texttt{52473.8}).\\
+
+\textit{EXPTIME} - The exposure duration of the observation, in units of seconds (e.g. \texttt{1000.0}).\\
+
+\textit{FILTER1} - The selected element from the \texttt{ACS} filter wheel \# 1 (e.g. \texttt{F606W}).\\
+
+\textit{FILTER2} - The selected element from the \texttt{ACS} filter wheel \# 1 (e.g. \texttt{F814W}).\\
+
+\textit{IMAGETYP} - The type of exposure for the observation (e.g. \texttt{BIAS}, \texttt{EXT}, etc.).\\
+
+\textit{OBSTYPE} - The type of observation, either \texttt{IMAGING}, \texttt{SPECTROSCOPIC},
+\texttt{CORONOGRAPHIC}, or \texttt{INTERNAL}.\\
+
+\textit{proposal$\_$type} - The type of proposal that the observation belongs to, such as Calibration
+(i.e. \texttt{CAL}) or General Observer (i.e. \texttt{GO}).\\
+
+\textit{PROPOSID} - The proposal number that the observation belongs to (e.g. \texttt{10695}).\\
+
+\textit{RA$\_$TARG} - The right ascension of the target (i.e. the angular distance of the target east and west
+on the celestial sphere) (e.g. \texttt{49.5375}).\\
+
+\textit{rootname} - The 8-character unique rootname of the observation (e.g. \texttt{j59l5401}).\\
+
+\textit{SUBARRAY} - A boolean flag that indicates if the observation is a full-frame \texttt{APERTURE}
+(i.e. \texttt{0}) or a subarray \texttt{APERTURE} (i.e. \texttt{1}).\\
+
+\textit{TARGNAME} - The name of the target (e.g. \texttt{M87}, \texttt{NGC-4536}, \texttt{ANDROMEDA-I}, etc.).\\
+
+\textit{TIME-OBS} - The time of the start of the observation in the format \texttt{HH:MM:SS}, measured in
+Universal Time (e.g. \texttt{14:21:56}).\\
 
 
 \subsection{Motivation}
