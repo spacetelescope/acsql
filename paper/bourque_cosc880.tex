@@ -95,7 +95,7 @@ available; most HST data of scientific targets are considered proprietary for up
 one calendar year, after which they are publicly released.}.  The ACS data, like most all other
 astronomical data, are stored in the Flexible Image Transport System (FITS) filetype
 (FITS, 2008).  This filetype has several unique characteristics, as will be
-discuessed in section N.
+discuessed in section 1.1.
 
 The ACS Quicklook Project is a \texttt{python}-based application for discovering,
 viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
@@ -125,41 +125,6 @@ support of HST, the forthcoming James Webb Space Telescope
 (JWST), and MAST.  STScI is part of the Association of Universities for Research in
 Astronomy (AURA).
 
-\subsection{Motivation}
-
-The motivation for the ACS Quicklook system is driven by several shortcomings of the
-FITS file structure as well as the current capabilities of MAST from a specific
-user perspective (inteded users and their use cases are discussed in section 1.2).
-Some of these shortcomings are described below along with the intended way the
-ACS Quicklook application will address them.\newline
-
-\textit{Data retreival letency:} Currently, users who wish to retreive data from
-the MAST archive must submit a retreival request via the MAST online interface.
-Once the retreival request is processed (usually automatically unless it is a
-request of a large number of datasets), the data are either transfered to the user
-directly via \texttt{sftp}, transfered to a "staging area" in which the user can
-log into and copy the data via \texttt{ftp} at their leisure, or sent by mail via
-DVD, depending on which option the user selects.  In the case of any one of these
-options, the time between a download request and the the time in which the user
-has fully retreived the data is a non-significant amount of time.  In the fastest
-scenario of the \texttt{sftp} option, a typical request can take minutes to hours
-to be completed.  The ACS Quicklook system attempts to circumnavigate this retreival
-process by making the full data products instantly available via read-only access of
-the filesystem subystem, as well as a subset of the data products (and corresponding
-metadata) instantly available to view through the web application.
-
-\textit{File I/O:} Users who
-
-\textit{Data redundancy:} Something.
-
-\textit{Data discovery:} Something
-
-
-\subsection{Use Cases}
-The intended user of ACS Quicklook are ACS instrument scientists, analysts,
-or scientific users who wish to perform one or more of the following use cases:
-
-1. View
 
 \subsection{Data Structure}
 
@@ -172,11 +137,11 @@ sections are dedicated to giving an overview on the subject.
 
 Each ACS data file is named in a consistent fashion:\newline
 
-\noindent\texttt{$<$rootname$>$\_$<$filetype$>$.fits}\newline
+\texttt{$<$rootname$>$\_$<$filetype$>$.fits}\newline
 
 \noindent where each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric
 characters, and \texttt{$<$filetype$>$} is one of several three-character filetype options
-(discussed in proceeding section N).  For example, one ACS observation has the rootname
+(discussed in proceeding section 1.1.4).  For example, one ACS observation has the rootname
 \texttt{j6mf16lhq\_raw.fits} (Principle Investigator Gary Bernstein, observation
 date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname}
 has meaning, and is discussed in section 5.2 of the Introduction to the HST
@@ -262,7 +227,16 @@ data types and their extension headers to dictionary data types.  For this proje
 \texttt{astropy.fits} \texttt{python} library is used extensivly to read and interact with
 ACS FITS files (Robitaille et al., 2013).
 
-\subsubsection{FITS file headers}
+\subsubsection{FITS file extension headers}
+
+As mentioned in the previous section, each FITS extension contains a ``header'', which
+contains key/value pairs of metadata associated with the extension data.  Such metadata
+includes various data that describes the astronomical observation (e.g. target name,
+exposure time, principle investigator name, etc.), telemetry of ACS or HST in general
+at the time of observation (e.g. temperature of the ACS instrument, orientation of the
+telescope pointing, position of the telescope relative to Earth, etc.) or the FITS file
+itself (e.g. the number of extensions, file creation date, etc.). A subsection of an
+example header is shown in Figure 2.
 
 % Figure for header example
 \begin{figure}[!t]
@@ -272,21 +246,101 @@ ACS FITS files (Robitaille et al., 2013).
 \label{fig1}
 \end{figure}
 
+Extension headers may contain a large number of keyword/value pairs.  Some extension
+headers contain upwards of 300 keywords, while others may contain only $\sim$40 keywords.
+
 \subsubsection{FITS filetypes for ACS}
+
+As discusses in section 1.1.1, each ACS observation may result in several FITS filetypes.
+Each filetype describes the observation in a different way.  The set of available
+filetypes for a given observation is dependent on the characteristics of the observation,
+the details of which are beyond the scope of this paper.  Also beyond the scope of this
+paper are the vast details that surround each filetype; each one has a different scientific
+application that is not important to understanding the ACS Quicklook project.  However,
+to provide at least some context, below we give a brief description of each possible
+filetype that a given observation may contain:
+
+\begin{itemize}
+  \item \textbf{raw} - The raw, uncalibrated data that comes directly from HST
+  \item \textbf{flt} - nominally calibrated data
+  \item \textbf{flc} - nominally calibrated data plus corrected for Charge Transfer Efficieny (CTE) deficits.
+  \item \textbf{drz} - Geometric distortion-corrected data
+  \item \textbf{drc} - Geometric distrotion-corrected plus CTE corrected data
+  \item \textbf{spt} - Telescope telemetry data
+  \item \textbf{jit} - Telescope pointing data
+  \item \textbf{jif} - Telescope drifting data
+  \item \textbf{crj} - Cosmic ray rejected data
+  \item \textbf{crc} - Cosmic ray rejected plus CTE corrected data
+  \item \textbf{asn} - Observation association table.
+\end{itemize}
+
+As noted earlier, a given observation may not result in the set of all possible filetypes.
+For example, the observation \texttt{j6mf16lhq} only has the filetypes \texttt{raw},
+\texttt{flt}, \texttt{jit}, \texttt{jif}, and \texttt{spt}.
 
 \subsection{Key Metadata}
 
+There are several metadata key/value pairs that are particulary important for the
+ACS Quicklook application, specifically the web application.  For some reference,
+and context, these metadata are briefly described below.  Note that the \texttt{rootname}
+and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are
+metadata that were explicitly added to the database schema.
+
+TARGNAME
+PROPOSID
+DATE-OBS
+EXPTIME
+EXPSTART
+APERTURE
+DETECTOR
+OBSTYPE
+FILTER1
+FILTER2
+TIME-OBS
+SUBARRAY
+RA
+DEC
+EXPFLAG
+IMAGETYP
+rootname
+proposal$\_$type
 
 
-% Topics to discuss:
+\subsection{Motivation}
 
-% 1. History of ACS
-% 2. Motivation and users
-% 3. Data Structure: FITS file and file extensions
-% 4. Data Structure: FITS headers
-% 5. Data Sturcture: FITS filetypes
-% 6. Key Metadata
-% 7. What this paper discusses
+The motivation for the ACS Quicklook system is driven by several shortcomings of the
+FITS file structure as well as the current capabilities of MAST from a specific
+user perspective (inteded users and their use cases are discussed in section 1.2).
+Some of these shortcomings are described below along with the intended way the
+ACS Quicklook application will address them.\newline
+
+\textit{Data retreival letency:} Currently, users who wish to retreive data from
+the MAST archive must submit a retreival request via the MAST online interface.
+Once the retreival request is processed (usually automatically unless it is a
+request of a large number of datasets), the data are either transfered to the user
+directly via \texttt{sftp}, transfered to a "staging area" in which the user can
+log into and copy the data via \texttt{ftp} at their leisure, or sent by mail via
+DVD, depending on which option the user selects.  In the case of any one of these
+options, the time between a download request and the the time in which the user
+has fully retreived the data is a non-significant amount of time.  In the fastest
+scenario of the \texttt{sftp} option, a typical request can take minutes to hours
+to be completed.  The ACS Quicklook system attempts to circumnavigate this retreival
+process by making the full data products instantly available via read-only access of
+the filesystem subystem, as well as a subset of the data products (and corresponding
+metadata) instantly available to view through the web application.
+
+\textit{File I/O:} Users who
+
+\textit{Data redundancy:} Something.
+
+\textit{Data discovery:} Something
+
+
+\subsection{Use Cases}
+The intended user of ACS Quicklook are ACS instrument scientists, analysts,
+or scientific users who wish to perform one or more of the following use cases:
+
+1. View
 
 
 % Related Work
@@ -302,17 +356,99 @@ Topics to discuss:
 
 % Methodology
 \section{Methodology}\label{sec:methodology}
-Topics to discuss:
 
-1. Version control
-2. Programming and Documentation Standards
-3. Filesystem: The MAST public Cache
-4. Filesystem: Archive of JPEGs and Thumbnails
-5. Database: Relational Schema
-6. Database: MySQL + SQLAlchemy
-7. Database: ORMs
-8. Data ingestion software
-9. Website:
+In this chapter, we disucss the methods by which we implemented the various subsystems
+of the ACS Quicklook system.  Additionally, we discuss the programming standards and
+standard workflows that were employed to promote code quality such as readability,
+maintainability, extensibility, etc; we believe that this aspect of the project is
+at least equaly important to the system as its individual components.
+
+\subsection{Version control}
+
+All code associated with this project (including this paper iteself) is version
+controlled using the \texttt{git} Version Control System (VCS) (git, 2017).
+The \texttt{git} repository for the project is named \texttt{acsql}.
+The \texttt{git} repository is also hosted on \texttt{GitHub}, a repository
+hosting service (GitHub, 2017), and is publicly available at
+\url{http://github.com/spacetelescope/acsql/}.
+
+Several feature branches of the code were created throughout the building of this project
+such that the \texttt{master} branch (which is considered the ``production'' branch)
+always contained operational code (while the code in the branches may contain unfinished
+implementations).  Such branches include \texttt{create-database} (for implementation of
+the database schema), \texttt{add-logging} (for implementation of system logging),
+\texttt{build-ingest} (for implementation of data ingestion software), and
+\texttt{web-application} (for implementation of the web application).  For each merge of a
+feature branch, a \texttt{tag} and \texttt{release} was created for the \texttt{master} branch,
+which allows a specific version of the \texttt{master} branch to be saved in the
+repository.  These releases are available at
+\url{https://github.com/spacetelescope/acsql/releases}.
+
+Additionally, using \texttt{GitHub} allowed for issue tracking of bugs, features, and
+potential enhancements to the code repository.  Current open issues of the repository
+can be found at \url{https://github.com/spacetelescope/acsql/issues}.
+
+\subsection{Programming and Documentation Standards}
+
+All code contained within this project was written to adhere to specific standards and
+conventions, namely (1) the \texttt{PEP8} Style Guide for \texttt{python} code (van Rossum, 2001),
+(2) The \texttt{PEP257} \texttt{python} guide for module and function docstring conventions
+(Goodger, 2001), and (3) the \texttt{numpydocs} documentation standard (NumPy Documentation,
+2017).  More details on each of these standards and conventions are given below.
+
+The \texttt{PEP8} Style Guide for \texttt{python} code (abbreviated for `Python Enhancement
+Proposal \#8`) documents \texttt{python} coding conventions including variable naming,
+spacing, line length, module layout, function layout, comments, and design patterns.  Only
+in specific cases were these conventions not followed, such as using a single line of code,
+even if it exceeded the recoomended 80 characters, to allow for greater readability.  By
+following these conventions, the style of the \texttt{acsql} code is constistent amongst
+each module and attempts to reflect the style of industry-grade \texttt{python} code.
+
+The \texttt{PEP257} guide for docstring conventions describes standard conventions used
+for function and module docstrings (i.e. the API documentation found in block
+comments at the beginning of modules or immediately after function declarations).  Like
+\texttt{PEP8}, following these conventions ensure consistency amongst the \texttt{acsql}
+code documentation.  Furthermore, the \texttt{numpydocs} documentation convention provides
+some additional details on top of the \texttt{PEP257} conventions and is used in many
+\texttt{python} packages including the \texttt{numpy} (numerical \texttt{python}) and
+\texttt{scipy} (scientific \texttt{python}) packages (van der Walt et al., 2011).  Figure N
+shows an example of these conventions, taken from the
+\texttt{ascql.ingest.ingest.get$\_$proposal$\_$type} function.
+
+% Figure for docstring convention example
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/docstrings.png}
+\caption{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
+using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}
+\label{fig1}
+\end{figure}
+
+Another benefit to using \texttt{PEP257} and \texttt{numpydoc} docstring conventions is
+that API documentation creation tools such as \texttt{sphinx} (Brandi et al., 2007) or
+\texttt{epydoc} (Loper, 2004) can automatically convert the docs into other output
+formats such as \texttt{HTML} and \texttt{PDF}.  For this project, we use
+\texttt{sphinx} to convert API documentation to \texttt{HTML}, and host the webpages online
+using the \texttt{readthedocs}, which is an open-source, community supported tool for
+hosting and browing documentation (Read the Docs, 2017). The documentation for
+\texttt{acsql} is hosted at \url{http://acsql.readthedocs.io/}.  The output documentation
+as seen on \texttt{readthedocs} for the example function in figure N is provided in Figure N.
+
+% Figure for docstring convention example in readthedocs
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/readthedocs.png}
+\caption{The \texttt{readthedocs} documentation for the \texttt{acsql} example function
+seen in Figure N.}
+\label{fig1}
+\end{figure}
+
+
+\subsection{Filesystem: The MAST public Cache}
+
+\subsection{Filesystem: Archive of JPEGs and Thumbnails}
+
+\subsection{Database: Relational Schema}
 
 % Figure for acsql database schema
 \begin{figure}[!t]
@@ -321,6 +457,15 @@ Topics to discuss:
 \caption{The relational database schema for the \texttt{acsql} database.}
 \label{fig1}
 \end{figure}
+
+\subsection{Database: MySQL + SQLAlchemy}
+
+\subsection{Database: ORMs}
+
+\subsection{Data ingestion software}
+
+\subsection{Website:}
+
 
 % Results
 \section{Results}\label{sec:results}
@@ -414,13 +559,38 @@ Appendix two text goes here.
 % Referecnes
 \begin{thebibliography}{1}
 
+\bibitem{IEEEhowto:numpydoc}
+\emph{A Guide to NumPy/SciPy Documentation}, [Online; accessed 2017-08-05], available at
+\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}
+
 \bibitem{IEEEhowto:avila}
 Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:brandi}
+Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
+\url{http://www.sphinx-doc.org/en/stable/}.
 
 \bibitem{IEEEhowto:fits}
 \emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
 International Astronomical Union FITS Working Group, available at
 \url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+
+\bibitem{IEEEhowto:git}
+\emph{git}, [Online; accessed 2017-08-05], available at \url{https://git-scm.com}.
+
+\bibitem{IEEEhowto:github}
+\emph{GitHub}, [Online; accessed 2017-08-05], available at \url{https:/github.com}.
+
+\bibitem{IEEEhowto:goodger}
+Goodger, D., 2001, \emph{PEP 257 -- Docstring Conventions}, Python Developer's Guide,
+available at \url{https://www.python.org/dev/peps/pep-0257/}.
+
+\bibitem{IEEEhowto:loper}
+Loper, E., 2004, \emph{Epydoc: Generating API Documentation in Python}, Proceedings of the
+Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net/}.
+
+\bibitem{IEEEhowto:readthedocs}
+\emph{Read the Docs}, [Online; accessed 2017-08-05], available at \url{https://readthedocs.org}.
 
 \bibitem{IEEEhowto:robitaille}
 Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
@@ -432,6 +602,14 @@ Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 
 \bibitem{IEEEhowto:mast}
 \emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
 available at \url{https://archive.stsci.edu/}.
+
+\bibitem{IEEEhowto:vanDerWalt}
+van der Walt, S., Colbert, C., and Varoquaux, G., 2011, \emph{The NumPy Array: A Structure for
+Efficient Numerical Computation}, Computing in Science \& Engineering, 13, 22-30.
+
+\bibitem{IEEEhowto:vanRossum}
+van Rossum, G., 2001, \emph{PEP 8 -- Style Guide for Python Code}, Python Developer's Guide,
+available at \url{https://www.python.org/dev/peps/pep-0008/}.
 
 \end{thebibliography}
 
