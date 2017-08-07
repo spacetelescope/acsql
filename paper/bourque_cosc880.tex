@@ -474,7 +474,24 @@ seen in Figure N.}
 \end{figure}
 
 
-\subsection{Filesystem: The MAST public Cache}
+\subsection{Filesystem: Archive of ACS data}
+
+The \texttt{acsql} filesystem is a Network File System (NFS) that stores all on-orbit
+ACS data on disk in an organized set of directories and subdirectories.  Figure N shows
+an example of this directory structure: The parent directory is the first four characters
+of the 9-character \texttt{rootname}, which maps directly to an indidual \texttt{PROPOSID}.
+The subdirectories of the parent directories are named after the full 9-character
+\texttt{rootname} such that each parent directory contains the \texttt{rootname} subdirectories
+that were observed for that particular \texttt{PROPOSID}.  Each \texttt{rootname}
+subdirectory contains every available filetype (as described in Section 1.1.4) for the
+particular observation is stored.
+
+Figure N shows how the total size of the filesystem has evolved over the lifetime of the
+mission; currently, the filesystem occupies \sim{40} TB of storage space.  Note that the
+file sizes across the detectors and across the various filetypes may vary depending on the
+nature of the particular obseration (for example, full-frame observations result in larger
+file sizes than subarray observations, calibrated filetypes have larger file sizes than
+un-calibrated filetypes, etc.).
 
 \subsection{Filesystem: Archive of JPEGs and Thumbnails}
 
