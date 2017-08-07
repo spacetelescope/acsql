@@ -97,3 +97,4 @@ acsql/website/static/img/thumbnails
 *.log
 *.aux
 *.out
+*.dat
