@@ -81,7 +81,7 @@ D002KERN, String
 D008COEF, String
 D007OUCO, String
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String

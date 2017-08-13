@@ -51,7 +51,7 @@ PYWCSVER, String
 PHOTCORR, String
 D002KERN, String
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String
@@ -542,7 +542,7 @@ D027FVAL, String
 D032ISCL, String
 D042VER, String
 D037GEOM, String
-TIME-OBS, String
+TIME_OBS, String
 ORIGIN, String
 D017OUUN, String
 D046MASK, String

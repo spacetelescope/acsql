@@ -63,7 +63,7 @@ N_TM_GAP, Integer
 SLEWING, String
 TLM_PROB, Bool
 TM_GAP, Float
-TDF-DOWN, Bool
+TDF_DOWN, Bool
 GS_GAP, String
 GSFAIL, String
 SGSTAR, String

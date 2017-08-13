@@ -80,7 +80,7 @@ D002KERN, String
 D008COEF, String
 D007OUCO, String
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String
@@ -674,7 +674,7 @@ D034OUCO, String
 D040OUUN, String
 D033VER, String
 D033GEOM, String
-TIME-OBS, String
+TIME_OBS, String
 CTE_NAME, String
 D038PIXF, Float
 OPUS_VER, String

@@ -46,7 +46,7 @@ TLMFORM, String
 APER_V2, Float
 TM_GAP, Float
 BITPIX, Integer
-TDF-DOWN, Bool
+TDF_DOWN, Bool
 XPIXINC, Float
 OBSERVTN, String
 LOS_MOON, Float

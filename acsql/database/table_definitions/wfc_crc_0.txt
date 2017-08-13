@@ -46,7 +46,7 @@ BIASLEVD, Float
 PHOTCORR, String
 CCDOFSTB, Integer
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String
@@ -78,7 +78,7 @@ ATODCORR, String
 BADINPDQ, Integer
 REJ_RATE, Float
 ATODGND, Float
-TIME-OBS, String
+TIME_OBS, String
 DIRIMAGE, String
 CTE_VER, String
 FLASHSTA, String

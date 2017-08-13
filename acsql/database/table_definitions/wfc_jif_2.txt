@@ -65,6 +65,6 @@ TLM_PROB, String
 N_TM_GAP, String
 GS_GAP, Float
 SGSTAR, String
-TDF-DOWN, Bool
+TDF_DOWN, Bool
 NO_TLM, String
 SLEWING, Bool

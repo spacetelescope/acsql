@@ -65,6 +65,6 @@ TM_GAP, Float
 GS_GAP, Float
 SGSTAR, String
 GSFAIL, String
-TDF-DOWN, Bool
+TDF_DOWN, Bool
 NO_TLM, Bool
 SLEWING, Bool

@@ -40,7 +40,7 @@ PYWCSVER, String
 PHOTCORR, String
 D002KERN, String
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String
@@ -951,7 +951,7 @@ PR_INV_F, String
 PROCTIME, Float
 LINENUM, String
 ASN_ID, String
-TIME-OBS, String
+TIME_OBS, String
 PR_INV_L, String
 ASN_TAB, String
 PA_V3, Float
