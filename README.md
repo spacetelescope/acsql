@@ -9,7 +9,7 @@ Official Documentation: http://acsql.readthedocs.io/
 
 The `acsql` package requires the following dependencies:
 
-- Python 3.+
+- `python 3.+`
 - `astropy`
 - `flask`
 - `numpy`
