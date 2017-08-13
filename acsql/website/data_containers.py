@@ -93,10 +93,9 @@ def _get_metadata_from_database(data_dict):
         table = getattr(database_interface, '{}_raw_0'.format(detector))
         result = session.query(
             table.aperture, table.exptime, table.filter1, table.filter2,
-            table.targname, getattr(table, 'date-obs'),
-            getattr(table, 'time-obs'), table.expstart, table.expflag,
-            table.quality, table.ra_targ, table.dec_targ, table.pr_inv_f,
-            table.pr_inv_l).filter(table.rootname == rootname).one()
+            table.targname, table.date_obs, table.time_obs, table.expstart,
+            table.expflag, table.quality, table.ra_targ, table.dec_targ,
+            table.pr_inv_f, table.pr_inv_l).filter(table.rootname == rootname).one()
         result = [item for item in result]
         result.append(detector)
         results.append(result)
