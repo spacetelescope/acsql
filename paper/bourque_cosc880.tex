@@ -36,10 +36,6 @@
 {\scriptsize [2] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
 {\scriptsize [3] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}
 \end{flushleft}
-\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem M. Bourque, S. Ogaz, A. Viana, and
-M. Durbin were with the Space Telescope Science Institute, Baltimore, MD, 21218.
-\protect\\
-E-mail: bourque@stsci.edu}
 \thanks{Manuscript received Month DD, YYYY}}
 
 % Abstract
@@ -482,7 +478,7 @@ seen in Figure N.}
 \subsection{Filesystem: Archive of ACS data}
 
 The \texttt{acsql} filesystem is a Network File System (NFS) that stores all on-orbit
-ACS data on disk in an organized set of directories and subdirectories.  Figure N shows
+ACS data on disk in an organized set of directories and subdirectories hosted at STScI. Figure N shows
 an example of this directory structure: The parent directory is the first four characters
 of the 9-character \texttt{rootname}, which maps directly to an individual \texttt{PROPOSID}.
 The subdirectories of the parent directories are named after the full 9-character
@@ -606,9 +602,171 @@ in which the observation was most recenly updated in the database, respectively.
 The \texttt{last$\_$ingest$\_$date} allows the database maintainer to determine when
 data in the database may become outdated and require re-ingestion.
 
-\subsection{Database: MySQL + SQLAlchemy}
+The \texttt{datasets} table lists which filetypes are available for each
+observation.  If a particular filetype is available for the given \texttt{rootname},
+the value for the appropriate column in the table is the full
+\texttt{<rootname>$\_$<filetype>.fits} filename (for example, the \texttt{raw} column
+contains the value \texttt{jcs718koq$\_$raw.fits} for \texttt{rootname} \texttt{jcs718ko}).
+If a particular filetype is not available, the value of the column is \texttt{NULL}.
+This table allows a user to determine which header tables are queryable for a given
+\texttt{rootname}.  The \texttt{rootname} in the \texttt{datasets} table acts as both
+a primary key for the table as well as a foreign key that maps to the \texttt{rootname}
+of the \texttt{master} table.
 
-\subsection{Database: ORMs}
+The remaining 109 tables were designed to be in direct correspondance with the
+header metadata key/value pairs found in observations files; each column is named in
+the same manner as the header keys, with the value of that column reflecting the header
+value. There is one table for each \texttt{detector}, \texttt{filetype},
+and \texttt{extension} combination; collectively, these are referred to as the `header'
+tables.  Like with the \texttt{datasets} table, the \texttt{rootname} column serves as a
+primary key for the header tables as well as a foreign key that maps to the \texttt{rootname}
+of the \texttt{master} table.
+
+
+\subsection{Database: \texttt{MySQL} + \texttt{SQLAlchemy}}
+
+The \texttt{acsql} database is stored on a \texttt{MySQL} server (\texttt{Version 5.6})
+(Oracle, 2017) that is hosted at STScI.  The database schema was implimented using
+\texttt{SQLAlchemy}, which is an open-source SQL toolkit and Object Relational Mapper (ORM) for
+\texttt{python} (Bayer, 2006).  As an ORM, \texttt{SQLAlchemy} enables \texttt{python} classes
+to be easily translated to \texttt{SQL}-based database tables, and vice versa.  Additionall,
+\texttt{SQLAlchemy} provides \texttt{python} methods for connecting to a SQL-based database and
+performing typical \texttt{SQL} tasks such as inserts, updates, and queries.
+
+There are several key functions and classes that were used to construct the \texttt{acsql}
+database (all of which can be found in the \texttt{acsql.database.database$\_$interface.py} module).
+One such function is the \texttt{load$\_$connection}, as shown in Figure N.  This function creates
+three \texttt{SQLAlchemy} objects that are used to establish a connection with the \texttt{acsql}
+database: \texttt{engine}, \texttt{base}, and \texttt{session}, each described below.
+
+The \texttt{engine} object contains the Python Database API Specification (also
+known as \texttt{DBAPI}), which provides a low-level API for \texttt{python}-specific, commonly-used
+database tasks (Lemburg, 2017).  It is created from the \texttt{sqlalchemy.create$\_$engine} method, which
+requires a user-supplied \texttt{connection$\_$string}.  The \texttt{connection$\_$string} is a string
+that contains information about the type of database, the specific database dialect being used, and
+the user credentials (e.g. username, password, port number, and host server name).  In the case
+of the \texttt{acsql}, this connection string takes the form of
+\texttt{'mysql+pymysql://username:password@host:port/acsql'}.  The \texttt{connection$\_$string} is
+imported from a user supplied \texttt{config} file within the \texttt{acsql} library
+(as will be discussed in section 3.9).
+
+The \texttt{base} object serves as a base class for declarative class definitions (i.e. the
+classes that are used to define the database tables).  It is created from the
+\texttt{sqlalchemy.ext.declarative.declatative$\_$base} method.  Perhaps most importantly, the
+\texttt{base} object contains methods for creating and dropping tables from the class
+definitions (e.g. \texttt{base.metadata.create$\_$all()} and \texttt{base.metadata.drop$\_$all()},
+respectively).
+
+The \texttt{session} object provides a primary usage interface for database operations, and
+is created via the \texttt{sqlalchemy.sessionmaker} method, which takes as a parameter the
+\texttt{engine} object.  The methods of the \texttt{session} object are primarily used to
+query the database (i.e. \texttt{session.query()}) as well as commiting inserts or updates (i.e.
+\texttt{session.commit()}).
+
+% Figure for load_connection in database_interface
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/load_connection.png}
+\caption{The \texttt{load$\_$conenction} function, which is used to build a connection to the
+\texttt{acsql} database}.
+\label{fig1}
+\end{figure}
+
+The \texttt{master} and \texttt{datasets} tables were implemented via explicit class definitions in
+\texttt{database$\_$interface}, and are shown in Figures N and N, respectively.  Each table column is
+defined using the \texttt{sqlalchemy.Column} object, which is a class that can be initialized
+with the datatype that will be stored in the column (e.g. \texttt{String}, \texttt{Float}, \texttt{Integer},
+etc.) as well as parameters that set SQL-like constraints and parameters on the column values.  These
+include, but are not limited to, primary keys (e.g. the \texttt{primary$\_$key=True} parameter in the
+\texttt{master.rootname} column), foreign key constrains (e.g. the \texttt{ForeignKey} constraint in the
+\texttt{datasets.rootname} column), uniqueness constraints (e.g. the \texttt{unique=True} parameters in
+the \texttt{master.path} column), and \texttt{NULL} constraints (e.g. the \texttt{nullable=False} parameter
+in the \texttt{master.first$\_$ingest$\_$date} column).  \texttt{SQLAlchemy} determines the name of the
+table via the \texttt{$\_$$\_$tablename$\_$$\_$} attribute, and determines the name of the columns by
+the name of the variable used to initialize each \texttt{Column} object.
+
+% Figure for master table in database_interface
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/master_table.png}
+\caption{The class definition for constructing the \texttt{master} table via \texttt{SQLAlchemy}.}
+\label{fig1}
+\end{figure}
+
+% Figure for datasets table in database_interface
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/datasets_table.png}
+\caption{The class definition for constructing the \texttt{datasets} table via \texttt{SQLAlchemy}.}
+\label{fig1}
+\end{figure}
+
+Since there are 109 header tables, some of which have hundreds of columns, it is not practical to construct
+a class definition for each table in a similar manner to that of the \texttt{master} and \texttt{datasets}
+table.  Instead, these class definitions were implemented via the \texttt{database$\_$interface.orm$\_$factory}
+function, which is a factory function that creates and returns a class definition for each header table, based on
+the given \texttt{class$\_$name} that reflects the \texttt{detector}/\texttt{filetype}/\texttt{extension} combination
+(e.g. \texttt{wfc$\_$raw$\_$0}).  The \texttt{orm$\_$factory} function is shown in Figure N.  Similar to the
+\texttt{Master} and \texttt{Datasets} classes, some of the columns in the \texttt{orm$\_$factory} function are
+explicitly defined via the \texttt{SQLAlchemy} \texttt{Column} class.  However, the columns that correspond to
+header key/value pairs are defined in a separate function named \texttt{define$\_$columns}, shown in Figure N.
+
+% Figure for orm_factory in database_interface
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/orm_factory.png}
+\caption{The \texttt{orm$\_$factory} function, used to define class definitions for header tables.}
+\label{fig1}
+\end{figure}
+
+% Figure for define_columns in database_interface
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/define_columns.png}
+\caption{The \texttt{define$\_$columns} function, used to define columns used in the header tables.}
+\label{fig1}
+\end{figure}
+
+The purpose of the \texttt{define$\_$columns} function is to define \texttt{SQAlchemy} \texttt{Column}
+objects for each header keyword in the headers of the particular \texttt{detector}/\texttt{filetype}/\texttt{extension}
+combination (provided in the given \texttt{class$\_$name} parameter).  This is accomplished by reading in a text
+file (named \texttt{<class$\_$name>.txt} that contains the header keywords and their datatype (one per line) for
+the given \texttt{class$\_$name}. An portion of an example text file is shown in Figure N.
+
+% Figure for table defintion text file
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.8in]{./figures/table_definition.png}
+\caption{The contents of an example text file used to define the columns of a header table in the
+\texttt{define$\_$columns} function. The example table used here is the \texttt{wfc$\_$asn$\_$0} table.}
+\label{fig1}
+\end{figure}
+
+Furthermore, the 109 text files used to define the header table columns are also generated in an
+automated fashion via the \texttt{acsql.database.make$\_$tabledefs.py} module.  This module uses
+a set of example FITS files to scrape its header contents, determine all of the header keywords and
+their datatypes, and write the results to a text file.  Similarly, the
+\texttt{acsql.database.update$\_$tabledefs.py} is used to add new header keywords by comparing the
+header contents of a given FITS file and the existing column definition text files\footnote{New header
+keywords are occaisonally introduced to ACS data proceeding updates to its calibration software}.
+
+With the implementation of the \texttt{orm$\_$factory} and \texttt{define$\_$columns} function, it is
+then trivial to create class definitions for each of the 109 header tables.  An example of this is
+shown in Figure N, where the several of the \texttt{WFC} header tables are defined.
+
+% Figure for orm_factory calls
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1.5in]{./figures/orm_factory_calls.png}
+\caption{An example of how the \texttt{orm$\_$factory} function is called to create class
+defintions for the header tables.}
+\label{fig1}
+\end{figure}
+
+With the \texttt{master}, \texttt{datasets}, and each of the 109 header tables defined in the
+\texttt{database$\_$interface} module, creating the database tables on the \texttt{MySQL} server
+is accomplished by executing the \texttt{base.metadata.create$\_$all()} method.
+
 
 \subsection{Data ingestion software}
 
@@ -711,6 +869,10 @@ Appendix one text goes here.
 \bibitem{IEEEhowto:avila}
 Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
 
+\bibitem{IEEEhowto:bayer}
+Bayer, M., 2006–, \emph{SQLAlchemy: The database toolkit for Python}, [Online; accessed 2017-02-21],
+available at \url{http://www.sqlalchemy.org/}.
+
 \bibitem{IEEEhowto:brandi}
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
 \url{http://www.sphinx-doc.org/en/stable/}.
@@ -730,9 +892,17 @@ International Astronomical Union FITS Working Group, available at
 Goodger, D., 2001, \emph{PEP 257 -- Docstring Conventions}, Python Developer's Guide,
 available at \url{https://www.python.org/dev/peps/pep-0257/}.
 
+\bibitem{IEEEhowto:lemburg}
+Lemburg, M., 2017, \emph{PEP 249 -- Python Database API Specification v2.0}, Python Developer's Guide,
+available at \url{https://www.python.org/dev/peps/pep-0249/}.
+
 \bibitem{IEEEhowto:loper}
 Loper, E., 2004, \emph{Epydoc: Generating API Documentation in Python}, Proceedings of the
 Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net/}.
+
+\bibitem{IEEEhowto:oracle}
+\emph{MySQL 5.6 Reference Manual}, Oracle, [Online; accessed 2017-08-13], available at
+\url{https://dev.mysql.com/doc/refman/5.6/en/}
 
 \bibitem{IEEEhowto:readthedocs}
 \emph{Read the Docs}, [Online; accessed 2017-08-05], available at \url{https://readthedocs.org}.
