@@ -188,12 +188,18 @@ def update_header_table(file_dict, ext):
         try:
             for key, value in header.items():
                 key = key.strip()
+
+                # Switch hypens to underscores
+                if '-' in key:
+                    key = key.replace('-', '_')
+
                 if key in exclude_list or value == "":
                     continue
                 elif key not in TABLE_DEFS[table.lower()]:
                     logging.warning('{}: {} not in {}'\
                         .format(file_dict['full_rootname'], key, table))
                     continue
+
                 input_dict[key.lower()] = value
 
             insert_or_update(table, input_dict)
@@ -216,12 +222,13 @@ def update_master_table(rootname_path):
     """
 
     rootname = os.path.basename(rootname_path)[:-1]
+    path = rootname_path[-15:]
     proposid = get_metadata_from_test_files(rootname_path, 'proposid')
     proposal_type = get_proposal_type(proposid)
 
     # Insert a record in the master table
     data_dict = {'rootname': rootname,
-                  'path': rootname_path,
+                  'path': path,
                   'first_ingest_date': date.today().isoformat(),
                   'last_ingest_date': date.today().isoformat(),
                   'detector': get_metadata_from_test_files(rootname_path,

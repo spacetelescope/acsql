@@ -41,7 +41,7 @@ OUTPUT_COLUMNS = [('rootname','Rootname'), ('detector','Detector'),
     ('proposal_type','Proposal Type'), ('pr_inv_l','PI Last Name'),
     ('pr_inv_f','PI First Name'), ('proposid','Proposal ID'), ('filter1','Filter1'),
     ('filter2','Filter2'), ('aperture','Aperture'), ('expstart','Expstart'),
-    ('date-obs','Date of Observation'), ('time-obs','Time of Observation'),
+    ('date_obs','Date of Observation'), ('time_obs','Time of Observation'),
     ('targname','Target Name'), ('ra_targ','Target RA'), ('dec_targ','Target Dec'),
     ('obstype','Observation Type'), ('obsmode','Observation Mode'),
     ('subarray','Subarray'), ('imagetyp', 'Image Type'), ('asn_id','Association ID')]

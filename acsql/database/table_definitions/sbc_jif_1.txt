@@ -65,6 +65,6 @@ TM_GAP, String
 TLM_PROB, String
 SLEWING, String
 N_TM_GAP, String
-TDF-DOWN, String
+TDF_DOWN, String
 GSFAIL, String
 SGSTAR, String

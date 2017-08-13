@@ -34,7 +34,7 @@ EXPTIME, Float
 LFLTFILE, String
 PHOTCORR, String
 NAXIS, Integer
-DATE-OBS, String
+DATE_OBS, String
 FWSOFFST, Integer
 POSTARG1, Float
 OSCNTAB, String
@@ -57,7 +57,7 @@ DRIZCORR, String
 RA_TARG, Float
 PA_V3, Float
 P1_SHAPE, String
-TIME-OBS, String
+TIME_OBS, String
 DIRIMAGE, String
 BITPIX, Integer
 P1_NPTS, Integer

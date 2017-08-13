@@ -67,4 +67,4 @@ GSFAIL, String
 TM_GAP, String
 NO_TLM, String
 SLEWING, Bool
-TDF-DOWN, Bool
+TDF_DOWN, Bool

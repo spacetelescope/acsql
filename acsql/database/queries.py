@@ -314,10 +314,9 @@ def filenames_in_date_range(begin_date, end_date):
         performing the query.
     """
 
-    date_obs = getattr(WFC_raw_0, 'date-obs')  # Python doesn't like hyphens
     query = session.query(WFC_raw_0.filename)\
-        .filter(date_obs >= begin_date)\
-        .filter(date_obs <= end_date)
+        .filter(WFC_raw_0.date_obs >= begin_date)\
+        .filter(WFC_raw_0.date_obs <= end_date)
     query_results = query.all()
 
     print('\nQuery performed:\n\n{}\n'.format(str(query)))
