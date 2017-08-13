@@ -26,7 +26,6 @@ Dependencies
     - ``PIL``
 """
 
-import copy
 import logging
 import os
 
@@ -57,20 +56,15 @@ def make_jpeg(file_dict):
             height = data.shape[0] + data2.shape[0]
             width = data.shape[1]
             new_array = np.zeros((height, width))
-            new_array[0:height/2, :] = data
-            new_array[height/2:height, :] = data2
+            new_array[0:int(height/2), :] = data
+            new_array[int(height/2):height, :] = data2
             data = new_array
 
     # Clip the top and bottom 1% of pixels.
-    sorted_data = copy.copy(data)
-    sorted_data = sorted_data.ravel()
-    sorted_data.sort()
-    top = sorted_data[int(len(sorted_data) * 0.99)]
-    bottom = sorted_data[int(len(sorted_data) * 0.01)]
-    top_index = np.where(data > top)
-    data[top_index] = top
-    bottom_index = np.where(data < bottom)
-    data[bottom_index] = bottom
+    top = np.percentile(data, 99)
+    data[data > top] = top
+    bottom = np.percentile(data, 1)
+    data[data < bottom] = bottom
 
     # Scale the data.
     data = data - data.min()
