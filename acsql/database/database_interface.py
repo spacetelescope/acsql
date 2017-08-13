@@ -52,16 +52,16 @@ from sqlalchemy import Column
 from sqlalchemy import create_engine
 from sqlalchemy import Date
 from sqlalchemy import DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Index
 from sqlalchemy import Enum
-from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy import Integer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
 from sqlalchemy import Time
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import Float
 
 from acsql.utils.utils import SETTINGS
 
@@ -98,7 +98,7 @@ def define_columns(data_dict, class_name):
         elif keyword[1] == 'String':
             data_dict[keyword[0].lower()] = Column(String(50))
         elif keyword[1] == 'Float':
-            data_dict[keyword[0].lower()] = Column(Float())
+            data_dict[keyword[0].lower()] = Column(Float(precision=32))
         elif keyword[1] == 'Decimal':
             data_dict[keyword[0].lower()] = Column(Float(precision='13,8'))
         elif keyword[1] == 'Date':
@@ -212,7 +212,7 @@ class Master(base):
 
     __tablename__ = 'master'
     rootname = Column(String(8), primary_key=True, index=True, nullable=False)
-    path = Column(String(43), unique=True, nullable=False)
+    path = Column(String(15), unique=True, nullable=False)
     first_ingest_date = Column(Date, nullable=False)
     last_ingest_date = Column(Date, nullable=False)
     detector = Column(Enum('WFC', 'HRC', 'SBC'), nullable=False)

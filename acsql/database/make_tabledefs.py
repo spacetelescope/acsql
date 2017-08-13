@@ -69,7 +69,8 @@ def make_tabledefs(detector):
             print('Making file {}'.format(filename))
             with open(filename, 'w') as f:
                 for col in hsel.table.itercols():
-                    if col.name in ['ROOTNAME', 'Filename', 'FILENAME', 'Ext']:
+                    column_name = col.name
+                    if column_name in ['ROOTNAME', 'Filename', 'FILENAME', 'Ext']:
                         continue
                     elif col.dtype in [np.dtype('S68'), np.dtype('S80')]:
                         ptype = 'String'
@@ -81,9 +82,13 @@ def make_tabledefs(detector):
                         ptype = 'Float'
                     else:
                         print('Could not find type match: {}:{}'.format(
-                            col.name, col.dtype))
+                            column_name, col.dtype))
 
-                    f.write('{}, {}\n'.format(col.name, ptype))
+                    # If the column has a hyphen, switch it to underscore
+                    if '-' in column_name:
+                        column_name = column_name.replace('-', '_')
+
+                    f.write('{}, {}\n'.format(column_name, ptype))
 
 
 if __name__ == '__main__':
