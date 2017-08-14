@@ -768,9 +768,105 @@ With the \texttt{master}, \texttt{datasets}, and each of the 109 header tables d
 is accomplished by executing the \texttt{base.metadata.create$\_$all()} method.
 
 
-\subsection{Data ingestion software}
+\subsection{Data ingestion software: Algorithm}
 
-\subsection{Website:}
+Another critical component of the ACS Quicklook system are the modules that are used to ingest
+data into the \texttt{acsql} database and to create the ``Quicklook'' JPEGs and thumbails.
+By the term `ingest', we refer to the following algorithm:
+
+1. \textbf{\textit{Identify newly available public ACS data in the filesystem:}}  This is accomplished by
+comparing the list of \texttt{rootnames} in the filesystem with the list of \texttt{rootnames}
+in the \texttt{master} table of the \texttt{acsql} database.  Any \texttt{rootnames} that
+exist in the filesystem but not in the database are considered new \texttt{rootnames} to
+be ingested.
+
+2. \textbf{\textit{Loop over each \texttt{rootname} (in a parallelized manner):}}  The ingestion
+software (i.e. the \texttt{acsql.ingest.ingest} module), takes as input a single
+\texttt{rootname}, such that if there are multiple \texttt{rootnames} to be ingested, the
+calls to the ingestion module can be parallelized over many CPUs.  The ingestion of one
+\texttt{rootname} does not depend on the ingestion of another, nor is the order of which
+files are ingested important.  Please note that steps 3 through N are written from the
+perspective that a single \texttt{rootname} is being ingested (i.e. inside of the loop.)
+
+3. \textbf{\textit{Update the \texttt{master} table with information about the \texttt{rootname}:}}
+At this point, the \texttt{master} table can be updated with metadata pertaining to the
+\texttt{rootname}.  A generic \texttt{insert$\_$or$\_$update} function was written
+(available in the \texttt{acsql.utils.utils} module) to determine if an entry should be
+inserted (in the case of first-time ingestion) or updated (in the case of re-ingestion).
+This function uses various \texttt{sqlalchemy} methods and the class definitions described
+in section 3.6 to perform the \texttt{insert} or \texttt{update} operation.  The
+\texttt{insert$\_$or$\_$update} function is shown in Figure N.
+
+% Figure for insert_or_update
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/insert_or_update.png}
+\caption{The \texttt{insert$\_$or$\_$update} function from the \texttt{acsql.utils.utils}
+module, used at various times during the data ingestion process to determine if an
+entry should be inserted or updated in the \texttt{acsql} database.}
+\label{fig1}
+\end{figure}
+
+4. \textbf{\textit{Loop over the available \texttt{filetypes} for the given \texttt{rootname}:}}
+The available \texttt{filetypes} are determined by traversing down a level in the tree
+structure of the filesystem and identifying which files are present. Once determined,
+the ingestion algorithm processes each \texttt{<rootname>$\_$<filetype>.fits} file
+individually.  Please note that steps 5 through N are written from the perspective that
+a single file is being ingested (i.e. inside of the next nested loop).
+
+5. \textbf{\textit{Create a \texttt{python} dictionary with metadata about the file}:}  To reduce
+the amount of variables being passed around to various functions, a data container
+in the form of a \texttt{python} dictionary data type is created to hold metadata needed
+by the remainder of the ingestion process.  We refer to this data container as the
+\texttt{file$\_$dict}.  The \texttt{file$\_$dict} contains metadata such as the absolute
+path of the file in the filesystem, the \texttt{filetype}, the available FITS file
+extensions of the file, and the absolute paths to which the ``Quicklook'' JPEGs and
+Thumbnails will be written.
+
+6. \textbf{\textit{For each FITS file exentension, extract the header information and update
+the appropriate header table in the \texttt{acsql} database:}}  The header information
+is read into a \texttt{python} dictionary via the \texttt{astropy.io.fits} module.
+Besides some minor fixes for a few corner cases (such as converting hypens in header keys
+to underscores as to avoid \texttt{python} errors), it is rather trivial to perform
+and \texttt{insert} or \texttt{update} operation via the \texttt{insert$\_$or$\_$update}
+function (see Figure N).
+
+7. \textbf{\textit{Update the \texttt{datasets} table for the given \texttt{filetype}:}}
+At this point, an entry in the \texttt{datasets} table is either inserted if it is the
+first \texttt{filetype} for the \texttt{rootname} being ingested, or updated if a
+\texttt{filetype} under the same \texttt{rootname} had already been ingested.
+
+8. \textbf{\textit{If the \texttt{filetype} is either \texttt{raw}, \texttt{flt}, or
+\texttt{flc}, then create a ``Quicklook'' JPEG image:}}  JPEGs are produced only for
+\texttt{raw}, \texttt{flt}, and \texttt{flc} \texttt{filetypes}, since it are these
+\texttt{filetypes} that contain actual two-dimensional image data.  The image data are
+read into multidimensional \texttt{numpy} array data types via the
+\texttt{astropy.io.fits} module.  The data are then rescaled as to avoid an undesirable
+image stretch caused by extremely high or low-valued pixels, and saved to a \texttt{.jpg}
+format.
+
+9. \textbf{\textit{If the \texttt{filetype} is \texttt{flt}, then create a ``Quicklook''
+Thumbnail image:}} Thumbnail images are only produced for \texttt{flt} filetypes since they
+are only meant to be viewed as a means to discover the larger JPEG images via the
+\texttt{acsql} web application.  Thumbnails are generated by simply opening up the
+corresponding \texttt{flt} JPEG and resizing it to 128x128 pixels.
+
+This workflow is encapsulated within several modules across the \texttt{acsql.scripts} and
+\texttt{acsql.ingest} subpackages, as will be desribed in section 3.9.  These modules are
+intended to be executed daily (as an automatically-spawned process) as to keep the ACS
+Quicklook system up-to-date on any public data as it becomes available.
+
+
+\subsection{Data ingestion software: \texttt{logging}}
+
+Since the data ingestion software is intended to be executed not by humans but rather
+by an automatic process, we implemented a system by which the status of the execution
+of ingest can be logged to an output text file and analyzed at a later time.  Such log
+files can be used to assess if there was any issues with the ingestion process, including
+but not limited to:
+
+
+\subsection{Web Application}
 
 \subsection{\texttt{acsql} Library}
 
