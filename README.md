@@ -15,6 +15,7 @@ The `acsql` package requires the following dependencies:
 - `numpy`
 - `numpydoc`
 - `pymysql`
+- `requests`
 - `sqlalchemy`
 - `wtforms`
 - `wtforms_components`
