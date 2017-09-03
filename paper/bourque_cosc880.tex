@@ -1139,14 +1139,13 @@ the user-supplied \texttt{config.yaml} file (see Section 3.10).
 Currently, the filesystem is $\sim$40 terabytes in size (see Figure N). Figure N shows how this breaks down by individual
 detector and filetype.  Unsurprisingly .... discuss results.
 
-% Figure for number of images per filetype
-% \begin{figure}[!t]
-% \centering
-% \includegraphics[width=3.5in]{./figures/docstrings.png}
-% \caption{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
-% using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}
-% \label{fig1}
-% \end{figure}
+Figure for number of images per filetype
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
+\caption{The number of files in the \texttt{acsql} filesystem by filetype.}
+\label{fig1}
+\end{figure}
 
 As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
 ACS data (via \texttt{ingest$\_$production.py}, see section 3.10).  The location of the JPEG/Thumbnail filesystem is determined
