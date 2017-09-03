@@ -914,7 +914,193 @@ database table, the creation of a JPEG or Thumbnail.)
 
 \subsection{Web Application}
 
-\subsection{\texttt{acsql} Library}
+The front-end of the \texttt{acsql} system is the web application.
+
+
+\subsection{\texttt{acsql} Package}
+
+All code associated with the \texttt{acsql} project is contained within a single \texttt{git} repository
+(also named \texttt{acsql}), which we refer to as the ``\texttt{acsql} Library'', or ``\texttt{acsql} package''.
+The package layout is shown below:
+
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+\begin{lstlisting}
+acsql/
+    LICENSE
+    README.md
+    MANIFEST.in
+    setup.py
+    paper/
+        ...
+    presentation/
+        ...
+    docs/
+        Makefile
+        requirements.rst
+        source/
+          conf.py
+          database.rst
+          index.rst
+          ingest.rst
+          scripts.rst
+          utils.rst
+          website.rst
+    acsql/
+        __init__.py
+        database/
+            __init__.py
+            database_interface.py
+            make_tabledefs.py
+            queries.py
+            reset_database.py
+            table_definitions/
+                *.txt
+            update_tabledefs.py
+        ingest/
+            __init__.py
+            ingest.py
+            make_file_dict.py
+            make_jpeg.py
+            make_thumbnail.py
+        scripts/
+            __init__.py
+            ingest_production.py
+        utils/
+            __init__.py
+            config.yaml
+            utils.py
+        website/
+            __init__.py
+            acsql_webapp.py
+            data_containers.py
+            form_options.py
+            query_form.py
+            query_lib.py
+            static/
+                css/
+                    *.css
+                img/
+                    jpegs
+                    thumbnails
+                js/
+                    *.js
+            templates/
+                *.html
+\end{lstlisting}
+
+We now provide a brief description of each package component:\\
+
+\noindent\texttt{LICENSE}: A BSD 3-Clause license, which states that the \texttt{acsql} package is an open source software package
+and may be used and redistributed.\\
+
+\noindent\texttt{README.md}: A \texttt{README} file that describes how to install and use the \texttt{acsql} package.\\
+
+\noindent\texttt{MANIFEST.in}: A list of static files to be included in the tarball file when the user installs the
+\noindent\texttt{acsql} package.\\
+
+\noindent\texttt{setup.py}: The \texttt{acsql} package installtion script.  Executing this script with \texttt{python setup.py install}
+installs the package into the software environment.\\
+
+\noindent\texttt{paper/}: A subdirectory which contains all materials used for the creation of this paper.\\
+
+\noindent\texttt{presentation/}: A subdirectory which contains all materials used for the creation of the COSC 880 presentation.\\
+
+\noindent\texttt{docs/}: A subdirectory which contains all materials used for the creation of the \texttt{sphinx} API docuemntation
+hosted on Read the Docs (see Section 3.2).\\
+
+\noindent\texttt{Makefile}: A \texttt{make} script that is used to build the \texttt{sphinx} API docuemntation from the source
+reStructured Text files (see below) (see Section 3.2).\\
+
+\noindent\texttt{requirements.rst}: A list of \texttt{acsql} package dependencies, used by Read the Docs to build a virtual
+machine that constructs the resulting \texttt{html} doc pages (see Section 3.2).\\
+
+\noindent\texttt{source/}: A subdirectory that contains all of the reStructured Text files used for building the \texttt{sphinx}
+API docuemntation, one \texttt{.rst} file per subpackage, including a master \texttt{index.rst} file (see Section 3.2).\\
+
+\noindent\texttt{acsql/}: A subdirectory that contains all \texttt{Python} code that is part of the official \texttt{acsql} Library.
+This is the top level of the importable \texttt{acsql} package.\\
+
+\noindent\texttt{$\_$$\_$init$\_$$\_$.py}: A \texttt{Python} file that indicates that the subdirectory is part of the overall
+\texttt{acsql} package.\\
+
+\noindent\texttt{database/}: The \texttt{database} subpackage, containing \texttt{Python} modules that pertain to the \texttt{acsql}
+database (see Sections 3.5 and 3.6).\\
+
+\noindent\texttt{database$\_$interface.py}: The \texttt{Python} module for constructing and connecting to the \texttt{acsql} database
+(see Section 3.6). \\
+
+\noindent\texttt{make$\_$tabledefs.py}: The \texttt{Python} module for creating the table definition text files (see Section 3.6) \\
+
+\noindent\texttt{queries.py}: A \texttt{Python} module that contains several examples of queries that can be used with the
+\texttt{acsql} database.\\
+
+\noindent\texttt{reset$\_$database.py}: A \texttt{Python} module that allows the user to `reset' the \texttt{acsql} database (i.e.
+drop all tables, then create all tables).\\
+
+\noindent\texttt{table$\_$definitions}: A subdirectory containing all of the \texttt{<detector>$\_$<filetype>$\_$<extension>} text files,
+each of which contain a list of header keys along with their datatypes (see Section 3.6).\\
+
+\noindent\texttt{update$\_$tabledefs.py}: A \texttt{Python} module that allows the user to update the \texttt{table$\_$definitions}
+text files with new header keywords (see Section 3.6).\\
+
+\noindent\texttt{ingest/}: The \texttt{ingest} subpackage, containing \texttt{Python} modules for ingesting new data into the
+\texttt{acsql} system, including database updates and the creation of JPEGs/Thumbnails (see Section 3.7).\\
+
+\noindent\texttt{ingest.py}: A \texttt{Python} module for performing the ingestion of a single file (see Section 4.7).\\
+
+\noindent\texttt{make$\_$file$\_$dict.py}: A \texttt{Python} module for creating a \texttt{file$\_$dict} for an individual file
+(see Section 3.7).\\
+
+\noindent\texttt{make$\_$jpeg.py}: A \texttt{Python} module for creating a JPEG image from an individal file (see Section 3.7).\\
+
+\noindent\texttt{make$\_$thumbnail.py}: A \texttt{Python} module for creating a Thumbnail image from an individal JPEG (see Section 3.7).\\
+
+\noindent\texttt{scripts/}: The \texttt{scripts} subpackage, containing \texttt{Python} modules for ingesting multiple files from
+the \texttt{acsql} filesystem, as well as storage place for possible future instrument calibration and monitoring routines. \\
+
+\noindent\texttt{ingest$\_$production}: The \texttt{Python} module for ingesting new ACS data as it becomes publicly available, intended
+to be executed periodically.\\
+
+\noindent\texttt{utils/}: The \texttt{utils} subpackage, containing \texttt{Python} modules that are useful for general \texttt{acsql}
+operations (e.g. configuring \texttt{loggging}, supplying hard-coded instrument configurations, etc.) as well as a configuration file
+for storing sensitive credentials and directory locations.\\
+
+\noindent\texttt{config.yaml}: A text file containing hard-coded user-specific directory locations and \texttt{acsql} database
+credentials.  Specifially, it contains values for the \texttt{acsql} database \texttt{connection$\_$string}, as well as locations for
+the \texttt{filesystem}, \texttt{log$\_$dir}, \texttt{jpeg$\_$dir}, and \texttt{thumbnail$\_$dir}.  The contents of the \texttt{config.yaml}
+file can be imported via the \texttt{utils.utils.SETTINGS} dictionary.\\
+
+\noindent\texttt{utils.py}: A \texttt{Python} module containing various functions that are generally useful for \texttt{acsql} operations,
+such as configuring logging, determining if a database entry requires an \texttt{insert} or an \texttt{update}, and hard-coded \texttt{Python}
+variables that reflect instrument/system configurations.\\
+
+\noindent\texttt{website/}: The \texttt{website} subpackage, containing \texttt{Python} modules that are used in the construction and
+operations of the \texttt{acsql} web application (see Section 3.9).\\
+
+\noindent\texttt{acsql$\_$webapp.py}: The main \texttt{Python} module for running the \texttt{acsql} web application, using the \texttt{Python}
+\texttt{Flask} web framework (see Section 3.9).\\
+
+\noindent\texttt{data$\_$containers.py}: The \texttt{Python} module that contains various functions for reterning various data to be used
+by the \texttt{acsql} web application (see Section 3.9).\\
+
+\noindent\texttt{form$\_$options.py}: A \texttt{Python} module that stores form data for the database query portion of the \texttt{acsql}
+web application (see Section 3.9)\\
+
+\noindent\texttt{query$\_$form.py}: A \texttt{Python} module that contains class objects for building the query form for the database
+query portion of the \texttt{acsql} web application (see Section 3.9)\\
+
+\noindent\texttt{query$\_$lib.py}: A \texttt{Python} module that contains various functions to support the querying of the \texttt{acsql}
+databse through the \texttt{acsql} web application (see Section 3.9).\\
+
+\noindent\texttt{static/}: A subdirectory containing static materials used by the \texttt{acsql} web application, such as \texttt{CSS}
+templates (i.e. \texttt{css/}, \texttt{JavaScript} functions (i.e. \texttt{js/}, and symbolic links to the JPEGs and Thumbnails hosted
+on the web application (i.e. \texttt{img/} (see Section 3.9).\\
+
+\noindent\texttt{templates/}: A subdirectory containing \texttt{HTML} templates used to render the various webpages of the \texttt{acsql}
+web application, one for each page (see Section 3.9).\\
+
+For further details on each \texttt{Python} module within the \texttt{acsql} package, readers are encouraged to view the official
+API documentation hosted at \url{http://acsql.readthedocs.io/}.
 
 
 % Results
