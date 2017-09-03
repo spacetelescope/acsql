@@ -395,7 +395,7 @@ Topics to discuss:
 
 
 % Methodology
-\section{Methodology}\label{sec:methodology}
+\section{Methodology and Implementation}\label{sec:methodology}
 
 In this chapter, we disucss the methods by which we implemented the various subsystems
 of the ACS Quicklook system.  Additionally, we discuss the programming standards and
@@ -1106,52 +1106,64 @@ API documentation hosted at \url{http://acsql.readthedocs.io/}.
 % Results
 \section{Results}\label{sec:results}
 
-Topics to discuss:
-1. GitHub repository
-2. ReadTheDocs documentation repository
-3. Quantification of Database records
-4. Quantification of Code repository
-5. Website location
+The results of the system implementation (described in Chapter 2) were several project deliverables (each described further in the
+sections below:
+
+\begin{enumerate}
+\item Filesystem
+\item Database
+\item Web Application
+\item Software package
+\item Software documenation
+\end{enumerate}
 
 
+The project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used
+by ACS users external to STScI.
 
-% An example of a double column floating figure using two subfigures.
-% (The subfig.sty package must be loaded for this to work.)
-% The subfigure \label commands are set within each subfloat command,
-% and the \label for the overall figure must come after \caption.
-% \hfil is used as a separator to get equal spacing.
-% Watch out that the combined width of all the subfigures on a
-% line do not exceed the text width or a line break will occur.
-%
-%\begin{figure*}[!t]
-%\centering
-%\subfloat[Case I]{\includegraphics[width=2.5in]{box}%
-%\label{fig_first_case}}
-%\hfil
-%\subfloat[Case II]{\includegraphics[width=2.5in]{box}%
-%\label{fig_second_case}}
-%\caption{Simulation results for the network.}
-%\label{fig_sim}
-%\end{figure*}
-%
-%\begin{table}[!t]
-%% increase table row spacing, adjust to taste
-%\renewcommand{\arraystretch}{1.3}
-% if using array.sty, it might be a good idea to tweak the value of
-% \extrarowheight as needed to properly center the text within the cells
-%\caption{An Example of a Table}
-%\label{table_example}
-%\centering
-%% Some packages, such as MDW tools, offer better commands for making tables
-%% than the plain LaTeX2e tabular which is used here.
-%\begin{tabular}{|c||c|}
-%\hline
-%One & Two\\
-%\hline
-%Three & Four\\
-%\hline
-%\end{tabular}
-%\end{table}
+
+\subsection{Filesystem Deliverable}
+
+As described in Sections 3.3 and 3.4, the \texttt{acsql} filesystem is comprised of two major parts: (1) A filesystem
+that stores the archive of publicly-available ACS data (i.e. the FITS files), and (2) a filesystem of ``Quicklook''
+JPEGs and Thumbnails.
+
+For the former, we utilzed an already-existing filesystem of ACS data internal to STScI known as the ``MAST public cache'';
+this filesystem is organized in a very similar way to that shown in Figure N\footnote{We omit the mention of the parent
+directory structure and server names here as well as in the \texttt{acsql} code repository as to avoid exposing possible
+sensitive information.}.  Though this service is internal to STScI, it is possible for an external user to reconstruct the
+filesystem, as all data within the MAST public cache is publically available to download via the MAST archive (i.e.
+\url{https://archive.stsci.edu/}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
+the user-supplied \texttt{config.yaml} file (see Section 3.10).
+
+Currently, the filesystem is $\sim$40 terabytes in size (see Figure N). Figure N shows how this breaks down by individual
+detector and filetype.  Unsurprisingly .... discuss results.
+
+% Figure for number of images per filetype
+% \begin{figure}[!t]
+% \centering
+% \includegraphics[width=3.5in]{./figures/docstrings.png}
+% \caption{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
+% using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}
+% \label{fig1}
+% \end{figure}
+
+As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
+ACS data (via \texttt{ingest$\_$production.py}, see section 3.10).  The location of the JPEG/Thumbnail filesystem is determined
+by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
+Discuss quantities of JPEGS.
+
+
+\subsection{Database Deliverable}
+
+
+\subsection{Web Application Deliverable}
+
+
+\subsection{Software Package Deliverable}
+
+
+\subsection{Software Documentation Deliverable}
 
 
 % Conclusion
@@ -1165,12 +1177,6 @@ Topics to discuss:
 1. Possible simplification based on MAST archive
 2. Possible extensions to other insturments
 
-% Appendices
-\appendices
-\section{\texttt{acsql} code}
-Appendix one text goes here.
-
-
 % use section* for acknowledgment
 \ifCLASSOPTIONcompsoc
   \section*{Acknowledgments}
@@ -1178,6 +1184,12 @@ Appendix one text goes here.
   \section*{Acknowledgment}
 \fi
   The authors would like to thank...
+
+% Appendices
+\appendices
+\section{\texttt{acsql} code}
+Appendix one text goes here.
+
 
 
 % Can use something like this to put references on a page
