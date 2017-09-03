@@ -29,7 +29,7 @@
 \begin{document}
 
 % Title
-\title{The Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS) Quicklook Project}
+\title{The Hubble Space Telescope Advanced Camera for Surveys Quicklook Project}
 
 % Authors
 \author{Matthew~Bourque[1], Sara~Ogaz[1], Alex~Viana[2], Meredith~Durbin[3], Norman Grogin[1]\\
@@ -1136,10 +1136,13 @@ filesystem, as all data within the MAST public cache is publically available to 
 \url{https://archive.stsci.edu/}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
 the user-supplied \texttt{config.yaml} file (see Section 3.10).
 
-Currently, the filesystem is $\sim$40 terabytes in size (see Figure N). Figure N shows how this breaks down by individual
-detector and filetype.  Unsurprisingly .... discuss results.
+Currently, the filesystem consists of $\sim$number total files. Figure N shows how this breaks down by individual
+filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt} make up the majority of the files, which is not surprising
+considering that these filetypes occurr for nearly every observing mode.  On the other hand, we see a small amount of
+\texttt{crj} and \texttt{crc} files, which is also unsurprising considering that these filetypes are only triggered for
+specific observing modes.
 
-Figure for number of images per filetype
+% Figure for number of images per filetype
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
@@ -1150,10 +1153,27 @@ Figure for number of images per filetype
 As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
 ACS data (via \texttt{ingest$\_$production.py}, see section 3.10).  The location of the JPEG/Thumbnail filesystem is determined
 by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
-Discuss quantities of JPEGS.
+Currently, there are N JPEGS and N corresponding Thumbnail images in the filesystem.
 
 
 \subsection{Database Deliverable}
+
+As described in Sections 3.5 and 3.6, the \texttt{acsql} database is a \texttt{MySQL} database that stores the header
+information of every public ACS dataset.  Currently, this database is hosted on a server that is internal to STScI.  However,
+external users may build their own copy of the database via the \texttt{ingest$\_$production.py} and \texttt{database$\_$interface}
+modules.  All 111 tables of \texttt{acsql} database are up to date as of the time of this writing (September 2017), and it is
+intended that the database will be kept up-to-date via periodic executions of \texttt{ingest$\_$production.py}.
+
+Figure N shows the number of records in each table of the database.  Currently, there are $\sim$4,300,000 records in total amongst
+the 111 tables.
+
+% Figure for number of records per table
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/database_records.png}
+\caption{The number of records in each of the \texttt{acsql} database tables.}
+\label{fig1}
+\end{figure}
 
 
 \subsection{Web Application Deliverable}
