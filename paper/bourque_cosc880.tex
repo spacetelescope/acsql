@@ -60,7 +60,7 @@
 
 
 % Authors
-\author{Matthew~Bourque[1], Sara~Ogaz[1], Alex~Viana[2], Meredith~Durbin[3], Norman Grogin[1]\\
+\author{Matthew~Bourque\textsuperscript{1}, Sara~Ogaz\textsuperscript{1}, Alex~Viana\textsuperscript{2}, Meredith~Durbin\textsuperscript{3}, and Norman Grogin\textsuperscript{1}\\
 \begin{flushleft}
 {\scriptsize [1] Space Telescope Science Institute, Baltimore, Maryland 21218. email: bourque@stsci.edu, ogaz@stsci.edu, grogin@stsci.edu}\\
 {\scriptsize [2] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
@@ -375,39 +375,63 @@ Universal Time (e.g. \texttt{14:21:56}).\\
 
 \subsection{Motivation}
 
-The motivation for the ACS Quicklook system is driven by several shortcomings of the
-FITS file structure as well as the current capabilities of MAST from a specific
-user perspective (inteded users and their use cases are discussed in section 1.2).
-Some of these shortcomings are described below along with the intended way the
-ACS Quicklook application will address them.\newline
+The motivation for the \texttt{acsql} system is driven by several limitations
+of the FITS file structure as well as the current capabilities of MAST from specific
+user perspectives (inteded users and their use cases are discussed in section 1.2).
+Some of these limitations are described below, along with the intended way the
+ACS Quicklook application aims to address them.\newline
 
-\textit{Data retreival letency:} Currently, users who wish to retreive data from
-the MAST archive must submit a retreival request via the MAST online interface.
-Once the retreival request is processed (usually automatically unless it is a
-request of a large number of datasets), the data are either transfered to the user
-directly via \texttt{sftp}, transfered to a "staging area" in which the user can
-log into and copy the data via \texttt{ftp} at their leisure, or sent by mail via
-DVD, depending on which option the user selects.  In the case of any one of these
-options, the time between a download request and the the time in which the user
-has fully retreived the data is a non-significant amount of time.  In the fastest
-scenario of the \texttt{sftp} option, a typical request can take minutes to hours
-to be completed.  The ACS Quicklook system attempts to circumnavigate this retreival
-process by making the full data products instantly available via read-only access of
-the filesystem subystem, as well as a subset of the data products (and corresponding
-metadata) instantly available to view through the web application.
+\subsubsection{Data retreival letency}
 
-\textit{File I/O:} Users who
+Currently, users who wish to retreive data from the MAST must submit a retreival
+request via the MAST online interface. Once the retreival request is processed
+(usually automatically unless it is a request of a large number of datasets),
+the data are either transfered to the user directly via \texttt{sftp}, transfered
+to a ``staging area'' in which the user can log into and copy the data via
+\texttt{ftp} at their leisure, or sent by mail via DVD, depending on which option
+the user selects.  In the case of any one of these options, the time between a
+download request and the the time in which the user has fully retreived the data
+may be a significant amount of time.  In the fastest scenario of the
+\texttt{sftp} option, a typical request can take minutes to hours to be completed.
+Furthermore, there are limited options available for programmatically obtaining new
+data; users who wish to retreive the latest availble data must (1) discover which
+datasets are of interest via a query to the MAST database, (2) construct a download
+request, (3) submit the download request, and (4) await the data.
 
-\textit{Data redundancy:} Something.
+The ACS Quicklook system attempts to circumnavigate this retreival process by making
+the full data products instantly available via read-only access of the \texttt{acsql}
+filesystem, as well as a subset of the data products (and corresponding metadata)
+instantly available to view through the web application.  By having all of the available
+data centrally located, users need not to go through this request process; data can
+be directly read from the storage areas on disk.
 
-\textit{Data discovery:} Something
+\subsection{File I/O}
+
+% Figure for IO time profile
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/fileio_time.png}
+\caption{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword
+from a varying number of ACS data files via reading the FITS file using the
+\texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (green)}
+\label{fig1}
+\end{figure}
+
+
+\subsection{Data redundancy}
+
+
+\subsection{Data discovery}
 
 
 \subsection{Use Cases}
 The intended user of ACS Quicklook are ACS instrument scientists, analysts,
 or scientific users who wish to perform one or more of the following use cases:
 
-1. View
+1. Visually inspect an image from the ACS archive
+2. Determine which datasets exist in the ACS archive for a given set of observational parameters
+3. Determine the observational parameters for a given dataset
+4. Programmatically analyze images across custom datasets
 
 
 % Related Work
@@ -1411,16 +1435,17 @@ the official code documentation.
 
 % Discussion
 \section{Discussion}\label{sec:discussion}
-Topics to discuss:
 
-1. Possible simplification based on MAST archive
-2. Possible extensions to other insturments
-3. Possible extensions to the current implementation
+\subsection{Possible enhancements to the \texttt{acsql} system}
 
 Though these currently are the only
 two main features, we expect that the web application may be a source of significant ongoing development,
 as the number of possible features implemented on top of the \texttt{acsql} database and \texttt{acsql}
 filesystem are plentiful.
+
+\subsection{Possible simplifications based on MAST archive}
+
+\subsection{Possible extensions to other instruments or missions}
 
 
 % Conclusion
@@ -1434,7 +1459,15 @@ The conclusion goes here.
 \else
   \section*{Acknowledgment}
 \fi
-  The authors would like to thank...
+  The authors would like to thanks various members of the STScI staff that were extremely valuable for helping make
+  this project come together: members of the WFC3/Quicklook team, for their years of ongoing development and support
+  of the WFC3/Quicklook project, without which there would be no inspiration to create this similar project (Varun Bajaj,
+  Ariel Bowers, Michael Dulue, Meredith Durbin, Jules Fowler, Catherine Gosmeyer, Heather Gunning, Harish Khandrika,
+  Catherine Martlin, Abhi Rajan, Clare Shanahan, Ben Sunnquist, Alex Viana); members of the Instruments Division,
+  who support the creation and maintenance of an internal web server (Francesca Boffi, Norman Grogin); Members of the
+  Information Technology and Services Division who provided valuable resources such as the database server and disk
+  space used to store project materials; and finally, Named Person, who provided insightful comments and suggestions
+  on this document.
 
 
 % Can use something like this to put references on a page
