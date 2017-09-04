@@ -1318,7 +1318,7 @@ sections below:
 \begin{enumerate}
 \item Filesystem
 \item Database
-\item Web Application
+\item Web application
 \item Software package
 \item Software documenation
 \end{enumerate}
@@ -1326,7 +1326,6 @@ sections below:
 
 The project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used
 by ACS users external to STScI.
-
 
 \subsection{Filesystem Deliverable}
 
@@ -1385,7 +1384,8 @@ the 111 tables.
 
 \subsection{Web Application Deliverable}
 
-At this time, the web application is not yet hosted on a dedicated web server (neither externally nor
+As described in Section 3.9, the \texttt{acsql} web application consists of a series of \texttt{Python} modules
+and static files.  Currently, the web application is not yet hosted on a dedicated web server (neither externally nor
 internally to STScI\footnote{At the time of this writing, work is being done to build an web server that
 is internal to STScI to allow ACS instrument team members to more easily access the \texttt{acsql} web
 application.  We expect this web server to be operation within the next few months.}), however, users can
@@ -1395,16 +1395,19 @@ users must (1) ensure that they have built (or have access to) the \texttt{acsql
 (2) have installed the \texttt{Python} package dependencies, and (3) have filled out the \texttt{config.yaml}
 file (see Section 3.10).
 
-
 \subsection{Software Package Deliverable}
 
+As described in Sections 3.1 and 3.10, the \texttt{acsql} git repository serves as the software package that contains
+all of the code and supporting materials needed to operate the \texttt{acsql} system.  The software package is open-source,
+and is avilable to download directly from the \texttt{GitHub} repository (\url{http://github.com/acsql/}).  All
+future enhancements and bug fixes to the \texttt{acsql} project will occur through this version-controlled repository.
 
 \subsection{Software Documentation Deliverable}
 
-
-% Conclusion
-\section{Conclusion}\label{sec:conclusion}
-The conclusion goes here.
+As described in Section 3.2, another deliverable for the project is the API documentation that is automatically
+generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are available through the \texttt{acsql} package,
+but are also hosted on \texttt{readthedocs}, available at \url{http://acsql.readthedocs.io/}.  This is considered
+the official code documentation.
 
 % Discussion
 \section{Discussion}\label{sec:discussion}
@@ -1418,6 +1421,12 @@ Though these currently are the only
 two main features, we expect that the web application may be a source of significant ongoing development,
 as the number of possible features implemented on top of the \texttt{acsql} database and \texttt{acsql}
 filesystem are plentiful.
+
+
+% Conclusion
+\section{Conclusion}\label{sec:conclusion}
+The conclusion goes here.
+
 
 % use section* for acknowledgment
 \ifCLASSOPTIONcompsoc
