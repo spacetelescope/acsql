@@ -942,7 +942,185 @@ database table, the creation of a JPEG or Thumbnail.)
 
 \subsection{Web Application}
 
-The front-end of the \texttt{acsql} system is the web application.
+\subsubsection{Overview}
+
+The front-end of the \texttt{acsql} system is the web application.  The web application is built using
+\texttt{Python} and \texttt{Flask}, which is a \texttt{Python} based web framework (Ronacher, 2010).
+Currently, the web application has two main features/modes of use: (1) viewing JPEGs and image metadata
+for any publicly-available ACS \texttt{raw}, \texttt{flt}, and \texttt{flc} image (when applicible), and
+(2) performing relational queries on the \texttt{acsql} database.  To visiualize these features, we show
+examples of some of the different webpages that make up the web application in Figures N through N, and
+further describe each below.
+
+Figure N shows the \texttt{acsql} homepage.  The homepage, as well as all other webpages in the web
+application, contains a menu bar at the top containing four links: (1) to the database query page,
+(2) to the archive links page, (3) to the \texttt{acsql} code repository on GitHub, and (4) to the
+\texttt{readthedocs} documentation page.  Clicking the ``ACS Quicklook'' button in the menu bar allows
+the user to return to the homepage, regadless of which webpage they are currently viewing.  Additionally,
+the homepage also contains button-type links to the database query page and the archive links page.
+
+% Figure for homepage
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/homepage.png}
+\caption{The homepage of the \texttt{acsql} web application.}
+\label{fig1}
+\end{figure}
+
+Figure N shows an example of the database query page.  This page allows users to fill out a form that
+in turn gets converted to a query of the \texttt{acsql} database and executed when hitting the
+`Submit' button at the bottom of the page.  Note that the form contains only a subset of the
+many possible database paramters; we limited the database query page to only options that we deemed
+to be particularly useful or potentially frequently used by the user.  As such, we expect that this
+page to be further expanded and/or modified in the future as more use cases become apparent.
+
+% Figure for database query
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/database_query_page.png}
+\caption{A portion of the database query page of the \texttt{acsql} web application.}
+\label{fig1}
+\end{figure}
+
+In this example, we use the form to find all data that were taken with the \texttt{WFC} detector,
+are of Observation Type \texttt{IMAGING}, and were observed by the Principle Investigator Zolt
+Levay\footnote{Zolt Levay is a Science Visuals Developer at STScI, and has been the PI of many
+programs that have acquired images for HST public releases.}.  Note that there are three output
+options: (1) an \texttt{HTML table}, which returns a webpage showing the selected `Output Columns'
+(in this case, the Rootname, PI last/first name, Proposal ID, Aperture, Date/Time of observation,
+and the Target Name) (see Figure N), (2) a CSV file, which is downloaded to the user's machine,
+containing a comma-separated table of the selected output columns (see Figure N), or (3) a webpage
+showing the Thumbnail images of all of the resulting images (see Figure N).
+
+% Figure for query results table
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/database_query_results_html.png}
+\caption{The results of the database query shown in Figure N in the form of an HTML
+table.}
+\label{fig1}
+\end{figure}
+
+% Figure for query results csv
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/database_query_results_csv.png}
+\caption{The results of the database query shown in Figure N in the form of an CSV
+file.}
+\label{fig1}
+\end{figure}
+
+% Figure for query results thumbnails
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/database_query_results_thumbnails.png}
+\caption{The results of the database query shown in Figure N in the form of thumbnail
+images.}
+\label{fig1}
+\end{figure}
+
+Figure N shows the archive links page.  This page contains links to every proposal that contains
+publicly availble ACS data via the 4-5 digit \texttt{PROPOSID}.  Clicking one of the links
+opens a new window to a `view proposal' webpage (see Figure N).  Similar to the database query
+results shown in Figure N, the `view proposal' webpage shows thumbnail images of every ACS
+dataset available in the given proposal.  The `view proposal' pages contain several buttons and
+filters near the top of the page; using these will sort and/or filter out the thumbnail images
+based on the chosen paramters.  Figure N shows an example of this webpage, using proposal 14039.
+
+% Figure for archive links
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/archive_links.png}
+\caption{The archive links webpage of the \texttt{acsql} web application.}
+\label{fig1}
+\end{figure}
+
+% Figure for view proposal
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/view_proposal.png}
+\caption{An example of a `view proposal' webpage, using proposal 14039.}
+\label{fig1}
+\end{figure}
+
+In the `view proposal' webpages, users may click on any one of the thumbnail images to bring up
+the `view image' webpage for that particular image.  An example of this webpage is shown in Figure
+N, using the dataset \texttt{jcs718kmq}.  This webpage contains the ``Quicklook'' JPEG of the image
+along with useful metadata of the dataset near the top of the page.  It also contains an additional link
+(\texttt{proposal}) to view the other images within the particular proposal via the appropriate
+`view proposal' webpage.
+
+% Figure for view image
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/view_image.png}
+\caption{An example of a `view image' webpage, using dataset \texttt{jcs718kmq}.}
+\label{fig1}
+\end{figure}
+
+\subsubsection{Implementation}
+
+The web application is implemented by several \texttt{Python} modules, namely:
+
+\begin{itemize}
+\item \texttt{acsql$\_$webapp.py}
+\item \texttt{data$\_$containers.py}
+\item \texttt{form$\_$options.py}
+\item \texttt{query$\_$form.py}
+\item \texttt{query$\_$lib.py}
+\end{itemize}
+
+as well as several subdirectories containing useful static files and templates, namely:
+
+\begin{itemize}
+\item \texttt{static/css/*.css}
+\item \texttt{static/js/*.js}
+\item \texttt{static/img/*}
+\item \texttt{templates/*.html}
+\end{itemize}
+
+Below we further describe these modules, directories, and files, and how they relate to each other.
+
+The \texttt{acsql$\_$webapp} module is the main module for running the \texttt{acsql} web application;
+it is this module that must be executed in order to serve the web application (either on a dedicated
+web server, or locally on a user's machine, accessed through the user's \texttt{localhost}).  This module
+uses the \texttt{Flask} web framework to receive incoming \texttt{HTML} requests.  It is structured such
+that each \texttt{acsql} webpage relates to an individual function within \texttt{acsql$\_$webapp} (for
+example, accessing the \texttt{/archive/} webpage results in the execution of the \texttt{archive} function).
+Each of these functions contain the appropriate \texttt{Python} logic and rendering of \texttt{HTML} templates
+to return the desired webpage.
+
+Much of the functionality required to gather data needed for the various \texttt{acsql} webpages (e.g. lists
+of images, image metadata, paths to JPEG images on disk, etc.) is imported into \texttt{acsql$\_$webapp} from
+the \texttt{data$\_$containers.py} module.  That is to say, many of the functions within the
+\texttt{acsql$\_$webapp} module calls functions from \texttt{data$\_$containers} to gather data to eventually
+pass on to the \texttt{HTML} template.  This design choice was made in order to separate the data from the
+functionality, which is often regarded as a best practice in software engineering.
+
+Along those same lines, the \texttt{form$\_$options.py} module is simply a container module for storing
+the possible form options (e.g. apertures, filters, output column, proposal types, etc.) for the database query
+form page.  These data could have been defined within the \texttt{acsql$\_$webapp} module, but we chose to
+separate out these data.
+
+The \texttt{query$\_$form.py} and \texttt{query$\_$lib.py} modules are used extensively to render the
+database query webpage and convert a completed form into an executable query on the \texttt{acsql} database,
+respectively.  The \texttt{query$\_$form} module contains several class objects for supplying specific types
+of form fields (e.g. check box fields, text fields, multiple select fields) as well as functions that validate
+form entries.  Several of the form objects are extensions of components (via subclassing) provided by the
+\texttt{wtforms} library, which is a form validation and rednering library for \texttt{Python} web development
+(wtforms).  The {query$\_$lib} module contains functions that parse, build, validate, and return \texttt{SQLAlchemy}
+\texttt{query} objects from the results of a submitted database query form.  These queries are then executed
+on the \texttt{acsql} database and results are used to render the database query result HTML, CSV, and/or Thumbnail
+webpages.
+
+Like many web applications, we also store static files such as \texttt{HTML} templates, \texttt{CSS} templates, and static
+images in separate \texttt{static/} and \texttt{templates/} directories.  The \texttt{static/css/} directory
+contains the \texttt{CSS} templates used in the \texttt{HTML} templates.  Similarly, the \texttt{static/js/} directory
+contains several \texttt{JavaScript} libraries, also used in the \texttt{HTML} templates. Lastly, the \texttt{templates/}
+directory contains the \texttt{HTML} templates used to render the various webpages of the web application.  There is one
+template for each webpage, as well as a template that houses \texttt{HTML} that is common to each webpage (e.g. the
+menu bar), named \texttt{base.html}. Aside from some minor tweaks, we use templates from \texttt{Bootstrap}, which is a
+front-end component library and open source toolkit for developing \texttt{HTML}, \texttt{CSS}, and \texttt{JS} (bootstrap).
 
 
 \subsection{\texttt{acsql} Package}
@@ -1164,7 +1342,7 @@ filesystem, as all data within the MAST public cache is publically available to 
 \url{https://archive.stsci.edu/}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
 the user-supplied \texttt{config.yaml} file (see Section 3.10).
 
-Currently, the filesystem consists of $\sim$number total files. Figure N shows how this breaks down by individual
+Currently, the filesystem consists of $\sim$1,030,000 total files. Figure N shows how this breaks down by individual
 filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt} make up the majority of the files, which is not surprising
 considering that these filetypes occurr for nearly every observing mode.  On the other hand, we see a small amount of
 \texttt{crj} and \texttt{crc} files, which is also unsurprising considering that these filetypes are only triggered for
@@ -1181,7 +1359,8 @@ specific observing modes.
 As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
 ACS data (via \texttt{ingest$\_$production.py}, see section 3.10).  The location of the JPEG/Thumbnail filesystem is determined
 by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
-Currently, there are N JPEGS and N corresponding Thumbnail images in the filesystem.
+Currently, there are $\sim$457,000 JPEGS and $\sim$185,000 corresponding Thumbnail images in the filesystem\footnote{recall that Thumbnail
+images are only generated for \texttt{flt} filetypes, hence the descrepency in number}.
 
 
 \subsection{Database Deliverable}
@@ -1206,6 +1385,16 @@ the 111 tables.
 
 \subsection{Web Application Deliverable}
 
+At this time, the web application is not yet hosted on a dedicated web server (neither externally nor
+internally to STScI\footnote{At the time of this writing, work is being done to build an web server that
+is internal to STScI to allow ACS instrument team members to more easily access the \texttt{acsql} web
+application.  We expect this web server to be operation within the next few months.}), however, users can
+operate the application through the user's \texttt{localhost}.  Detailed installation and operation
+instructions for the web application are provided in the official documentation (see Section 3.2).  In short,
+users must (1) ensure that they have built (or have access to) the \texttt{acsql} filesystem and database,
+(2) have installed the \texttt{Python} package dependencies, and (3) have filled out the \texttt{config.yaml}
+file (see Section 3.10).
+
 
 \subsection{Software Package Deliverable}
 
@@ -1223,6 +1412,12 @@ Topics to discuss:
 
 1. Possible simplification based on MAST archive
 2. Possible extensions to other insturments
+3. Possible extensions to the current implementation
+
+Though these currently are the only
+two main features, we expect that the web application may be a source of significant ongoing development,
+as the number of possible features implemented on top of the \texttt{acsql} database and \texttt{acsql}
+filesystem are plentiful.
 
 % use section* for acknowledgment
 \ifCLASSOPTIONcompsoc
@@ -1253,6 +1448,9 @@ Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore
 \bibitem{IEEEhowto:bayer}
 Bayer, M., 2006–, \emph{SQLAlchemy: The database toolkit for Python}, [Online; accessed 2017-02-21],
 available at \url{http://www.sqlalchemy.org/}.
+
+\bibitem{IEEEhowto:bootstrap}
+\emph{Bootstrap}, [Online; accessed 2017-09-04], available at \url{http://getbootstrap.com/}.
 
 \bibitem{IEEEhowto:brandi}
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
@@ -1292,6 +1490,9 @@ Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net
 Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
 Astronomy \& Astrophysics, 558, A33.
 
+\bibitem{IEEEhowto:ronacher}
+Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \url{http://flask.pocoo.org/}
+
 \bibitem{IEEEhowto:smith}
 Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
 
@@ -1306,6 +1507,9 @@ Efficient Numerical Computation}, Computing in Science \& Engineering, 13, 22-30
 \bibitem{IEEEhowto:vanRossum}
 van Rossum, G., 2001, \emph{PEP 8 -- Style Guide for Python Code}, Python Developer's Guide,
 available at \url{https://www.python.org/dev/peps/pep-0008/}.
+
+\bibitem{IEEEhowto:wtforms}
+\emph{wtforms}, [Online; accessed 2017-09-04], available at \url{https://github.com/wtforms/wtforms/}.
 
 \end{thebibliography}
 
