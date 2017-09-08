@@ -74,11 +74,11 @@
 \begin{abstract}
 The Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS) instrument has been acquiring thousands of astronomical images
 each year since its installation in 2002 and subsequent restoration in 2009.  The ACS Quicklook Project (\texttt{acsql}) provides
-a means for users to discover and interact with these data via a database-driven web application.  This is accomplished via several
-\texttt{acsql} components: (1) A $\sim$40 TB network file system, which stores all on-orbit ACS data files on disk, (2) a
+a means for users to discover and interact with these data through a database-driven web application.  The system is comprised of
+several \texttt{acsql} components: (1) A $\sim$40 TB network file system, which stores all on-orbit ACS data files on disk, (2) a
 \texttt{MySQL} database, which stores observational metadata in a normalized relational form, allowing users to build custom datasets
-based on obseravational parameters, (3) A \texttt{Python}/\texttt{Flask}-based web application, which allows users to view
-``Quicklook'' JPEG images of any publicly-available ACS data along with its metadata, and (4) a \texttt{Python} code library, which
+based on obseravational parameters, (3) A Python/\texttt{Flask}-based web application, which allows users to view
+``Quicklook'' JPEG images of any publicly-available ACS data along with its metadata, and (4) a Python code library, which
 provides a platform on which users can build automated instrument calibration and monitoring routines.  The \texttt{acsql} project
 may be extended to support the forthcoming James Webb Space Telescope (JWST) mission, which is scheduled to launch in 2018.
 \end{abstract}}
@@ -104,9 +104,9 @@ the WFC and HRC detectors, until 2009 when astronauts succesfully restored the W
 detector during Servicing Mission 4; the HRC still remains unoperational.
 
 Besides these few hiccups, the ACS instrument has been steadily acquiring astronomical
-images over its 15 on-orbit lifetime.  Figure 1 shows an estimates of the number of
+images over its 15 on-orbit lifetime.  Figure 1 shows an estimate of the number of
 observations over time for each of the three detectors.  To date, there have been
-nearly 200,000 of observations total.  Further information about the ACS instrument
+nearly 200,000 observations total.  Further information about the ACS instrument
 including its history, configuration, performance, and scientific capability can be
 found in the ACS Instrument Handbook (Avila et al., 2017).
 
@@ -127,18 +127,18 @@ Hubble Space Telescope, and the forthcoming James Webb Space Telescope} (Barbara
 Through MAST, users can request and retreive data for any publicly-available dataset
 via \texttt{ftp}, \texttt{sftp}, or DVD by mail\footnote{Not all HST data are publicly
 available; most HST data of scientific targets are considered proprietary for up to
-one calendar year, after which they are publicly released.}.  The ACS data, like most all other
+one calendar year, after which they are publicly released.}.  The ACS data, like most other
 astronomical data, are stored in the Flexible Image Transport System (FITS) filetype
 (FITS, 2008).  This filetype has several unique characteristics, as will be
 discuessed in section 1.1.
 
-The ACS Quicklook Project is a \texttt{python}-based application for discovering,
+The ACS Quicklook Project is a Python-based application for discovering,
 viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
 (1) A filesystem that stores ACS instrument data files and "Quicklook" JPEGs in an
 organized Network File System (NFS), (2) A \texttt{MySQL} database that stores image
-metadata of each observation, (3) A \texttt{python}/\texttt{Flask}-based web application
-for interacting with the filesystem and database, and (4) A \texttt{python} code library
-(named \texttt{acsql}) that contains code for connecting to the database, ingesting new
+metadata of each observation, (3) A Python/\texttt{Flask}-based web application
+for interacting with the filesystem and database, and (4) A Python code library
+that contains code for connecting to the database, ingesting new
 data, logging production code execution, and building/maintaining the database and web
 application.  Each of these subsystems are explained in further detail in the Methodology
 section of this paper.
@@ -405,7 +405,22 @@ instantly available to view through the web application.  By having all of the a
 data centrally located, users need not to go through this request process; data can
 be directly read from the storage areas on disk.
 
-\subsection{File I/O}
+\subsubsection{File I/O}
+
+A significant limitation of the FITS file format is the amount of time required for
+file I/O.  With users often finding themselves analyzing hundreds to thousands of
+images, this file I/O can be quite a burden on the total processing time of such
+analysis.  \texttt{acsql} attempts to mitigate this processing time by storing the
+valuable image metadata that users often seek in a relational database.
+
+Queries to the \texttt{acsql} database prove to be much faster than opening and
+closing individual FITS files, and the difference in data retreival times increases
+linearly with increasing amount of files.  Consider an example situation in which a
+user wishes to retreive the date of observation (i.e. the \texttt{DATE-OBS} header
+keyword in the 0th extension of a \texttt{raw} FITS file) for one thousand files.
+Figure N shows that the total time required to gather this information is $\sim$N times less
+when quering the \texttt{acsql} database than when retreiving the data directly from
+the FITS files.
 
 % Figure for IO time profile
 \begin{figure}[!t]
@@ -417,25 +432,38 @@ from a varying number of ACS data files via reading the FITS file using the
 \label{fig1}
 \end{figure}
 
+In order to build the \texttt{acsql} database, each ACS FITS file must ultimately be
+opened in order to retrieve the header information.  However, this operation is only
+performed once and needed not to be performed by the user.
 
-\subsection{Data redundancy}
+\subsubsection{Data redundancy}
 
 
-\subsection{Data discovery}
 
 
-\subsection{Use Cases}
-The intended user of ACS Quicklook are ACS instrument scientists, analysts,
-or scientific users who wish to perform one or more of the following use cases:
+\subsubsection{Data discovery}
 
-1. Visually inspect an image from the ACS archive
-2. Determine which datasets exist in the ACS archive for a given set of observational parameters
-3. Determine the observational parameters for a given dataset
-4. Programmatically analyze images across custom datasets
+
+\subsubsection{Use Cases}
+
+The intended primary users of the \texttt{acsql} application are ACS isntrument analysts that
+work for the ACS instrument team at STScI.  However, the application is not limited to this
+user base; since the application is non-proprietary, other potential users exist, such as
+scientists and researchers external to STScI.
+
+The \texttt{acsql} was designed with four main use cases in mind, each briefly described below.
+
+\textit{Use case 1: Visually inspect an image from the ACS archive}
+\textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of observational parameters}
+\textit{Use case 3: Determine the observational parameters for a given dataset}
+\textit{Use case 4: Programmatically analyze images across custom datasets}
 
 
 % Related Work
 \section{Related Work}\label{sec:related_work}
+
+
+
 
 Topics to discuss:
 

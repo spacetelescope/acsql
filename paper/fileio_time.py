@@ -15,7 +15,7 @@ from acsql.utils.utils import SETTINGS
 
 if __name__ == '__main__':
 
-    num_files_list = np.arange(1, 501)
+    num_files_list = np.arange(1, 1001)
     times_header, times_database = [], []
 
     for num_files in num_files_list:
@@ -51,11 +51,11 @@ if __name__ == '__main__':
     plt.style.use('bmh')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(num_files_list, times_database, color='green', label='acsql Database')
-    ax.plot(num_files_list, times_header, color='red', label='astropy.fits')
+    ax.plot(num_files_list[1:], times_database[1:], color='green', label='acsql Database')
+    ax.plot(num_files_list[1:], times_header[1:], color='red', label='astropy.fits')
     ax.set_xlabel('# of files')
     ax.set_ylabel('Time (seconds)')
     ax.set_title('Time to retrieve DATE-OBS from header')
     plt.legend(loc='upper left')
     plt.tight_layout()
-    plt.savefig('figures/fileio_time.png')
+    plt.savefig('figures/fileio_time_plhstins1.png')
