@@ -135,13 +135,14 @@ discuessed in section 1.1.
 The ACS Quicklook Project is a Python-based application for discovering,
 viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
 (1) A filesystem that stores ACS instrument data files and "Quicklook" JPEGs in an
-organized Network File System (NFS), (2) A \texttt{MySQL} database that stores image
-metadata of each observation, (3) A Python/\texttt{Flask}-based web application
-for interacting with the filesystem and database, and (4) A Python code library
-that contains code for connecting to the database, ingesting new
-data, logging production code execution, and building/maintaining the database and web
-application.  Each of these subsystems are explained in further detail in the Methodology
-section of this paper.
+organized Network File System (NFS) (hereby referred to as the \texttt{acsql} filesystem),
+(2) A \texttt{MySQL} database that stores image metadata of each observation (hereby referred to
+as the \texttt{acsql} database), (3) A Python/\texttt{Flask}-based web application
+for interacting with the filesystem and database (hereby referred to as the \texttt{acsql} web
+application), and (4) A Python code library that contains code for connecting to the database,
+ingesting new data, logging production code execution, and building/maintaining the database
+and web application.  Each of these subsystems are explained in further detail in Chapter 3
+(Methodology).
 
 This paper aims to outline and detail the ACS Quicklook project as part of the Towson
 University Computer Science Masters Program Graduate Project.  The remaining subsections
@@ -377,9 +378,9 @@ Universal Time (e.g. \texttt{14:21:56}).\\
 
 The motivation for the \texttt{acsql} system is driven by several limitations
 of the FITS file structure as well as the current capabilities of MAST from specific
-user perspectives (inteded users and their use cases are discussed in section 1.2).
-Some of these limitations are described below, along with the intended way the
-ACS Quicklook application aims to address them.\newline
+user perspectives. Some of these limitations are described below, along with the
+way the ACS Quicklook application aims to address them.  We also discuss the
+inteded users of the application and the expected use cases.\newline
 
 \subsubsection{Data retreival letency}
 
@@ -438,20 +439,49 @@ performed once and needed not to be performed by the user.
 
 \subsubsection{Data redundancy}
 
+As will be discussed in section 1.3.5, the primary user base for \texttt{acsql} is a group
+of ACS instrument analysts who use ACS data on a daily basis.  As such, each user may
+require access to a varying amount of ACS data over time; some data may be useful for
+their work one day, but not the next, while some data is consistently being analyzed over
+time.  Furthermore, instrument analysts may share the need for specific data with one or
+more of their colleagues. Consider a situation in which two instrument anaysist require data
+from a proposal 11655. Traditionally, for the two instrument analysts to obtain the data they
+need, they would have to submit a download request to MAST for data from 11655 and store the data
+in personal directories.  Unless this effort is explicitly coordinated amongst the two
+individuals, they will each likely download and store a copy of this data, when in reality, only
+one copy is needed.  As illustrated, this workflow leads to possible data redundancy.  With
+the ACS instrument team employing roughly a dozen instrument analysts, the scale of this
+data redundancy can grow quite large.
 
-
+Recently, MAST has mitigated this issue through what is known as the MAST public cache, which is
+a centrally-located, organized network file system that stores all publicly-available HST data and
+is internal to STScI.  THe \texttt{acsql} filesystem is built on top of the MAST public cache
+to provide accessibility to all ACS data in one central location.  Furthermore, the \texttt{acsql}
+application provides the \texttt{acsql} database (for observational metadata needs) and the
+\texttt{acsql} web application (for quick data viewing).  With the combination of these three
+components, instrument analysts have instant access to all ACS data at any time; no need for
+coordination amongst other instrument analysts or storage of separate copies.
 
 \subsubsection{Data discovery}
+
+
 
 
 \subsubsection{Use Cases}
 
 The intended primary users of the \texttt{acsql} application are ACS isntrument analysts that
-work for the ACS instrument team at STScI.  However, the application is not limited to this
+work for the ACS instrument team at STScI.  ACS instrument analysts use ACS data frequently
+in their day-to-day work, using the data to help calibrate, monitor, and characterize the
+various aspects and behaviors of the ACS instrument.  On any given day, an instrument analyst
+may need to analyze data from a number of observing modes, time periods, or filetypes.  In this
+regard, the \texttt{acsql} application aims to limit the amount of time and effort required by
+instrument analysts to discover and access the data that they need to perform such work.
+It should be noted, though, that the \texttt{acsql} application is not limited to this
 user base; since the application is non-proprietary, other potential users exist, such as
 scientists and researchers external to STScI.
 
-The \texttt{acsql} was designed with four main use cases in mind, each briefly described below.
+With the nature of ACS instrument work in mind, the \texttt{acsql} application was designed
+with four main use cases in mind, each briefly described below.
 
 \textit{Use case 1: Visually inspect an image from the ACS archive}
 \textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of observational parameters}
@@ -462,16 +492,53 @@ The \texttt{acsql} was designed with four main use cases in mind, each briefly d
 % Related Work
 \section{Related Work}\label{sec:related_work}
 
+There exist several other tools that aim to provide an interface to users for discovering and viewing
+HST data.  In this chapter, we briefly discuss each of these tools and point out the similarites
+and differences of them in comparison with the ACS Quicklook application.
 
 
+\subsection{The WFC3/Quicklook application}
 
-Topics to discuss:
+The main inspiration for the construction of the ACS Quicklook application was derived from the sucess
+of a similar application for the Wide Field Camera 3 (WFC3) instrument (also on board HST), known as the
+WFC3/Quicklook (\texttt{wfc3ql}) application.  The \texttt{wfc3ql} application shares many of the core
+components that \texttt{acsql} does, including a filesystem that stores all WFC3 data on disk, a relational
+database that stores WFC3 FITS header information, and a web application for user interactivity with the
+system (Bourque et al, 2016).  The \texttt{wfc3ql} has been developed by the WFC3 team at STScI since WFC3
+was installed on HST in 2009 during Servicing Mission 4.  The project started out as a single script that
+performed a dowload request to MAST for new data, created Quicklook JPEGs from the resulting images, and
+saved them to a directory.  Since then, the project has evolved to the filesystem/database/web application stack
+that more closely resembles that of \texttt{acsql}.
 
-1. The MAST archive
-2. The MAST portal
-3. The WFC3/Quicklook project
-4. Other Astronomy Institutions
-5. How ACS/Quicklook is different
+However, despite the similarites, it should be noted that the implementation of the \texttt{wfc3ql} infrastructure
+differs significantly from that of \texttt{acsql} (implementaiton details of the \texttt{acsql} components are
+detailed in Chapter N).  For example, unlike the \texttt{acsql} filesystem, which contains only publicly-available data, the
+\texttt{wfc3ql} filesystem is essentially a copy of the MAST archive for WFC3.  As such, it contains all data,
+including proprietary data which can only be used internally by the WFC3 team at STScI.  Since the \texttt{wfc3ql}
+filesystem contains proprietary data, much support is needed in the software to restrict data to certain file
+directories, user groups, and file permissions.  Additionally, the \texttt{wfc3ql} database only supports a small subset of
+FITS filetypes and extensions, while \texttt{acsql} supports all ACS filetypes and extensions.
+
+Furthermore, with \texttt{wfc3ql} being continuously developed over the past eight years by a team of several developers, there
+exist several features in \texttt{wfc3ql} that are not currently implemented on \texttt{acsql}.  For example, the
+\texttt{wfc3ql} application supports the daily visual inspection of new WFC3 data, some data of which are proprietary.  Such
+a feature is not possible for \texttt{acsql}, as the \texttt{acsql} filesystem is built upon a cache of only publicly-available
+data (and thus the project can be considered open-source and non-proprietary).  Secondly, \texttt{wfc3ql} currently contains
+several instrument calibration and monitoring routines that are built upon the \texttt{wfc3ql} automation platform/code
+library (known as \texttt{pyql}), while \texttt{acsql} has yet to implement any of such routines.  A third example is that
+the \texttt{wfc3ql} web application supports the tracking of WFC3 instrument `anomalies' (i.e. anomalous features in images
+that should be noted to instrument team members (Gosmeyer, 2017)). These features, amongst others, clearly serve as
+possible extensions to the \texttt{acsql} system; such extensions are discussed further in Chapter 5.
+
+
+\subsection{The MAST Archive}
+
+As mentioned in Chapter 1, MAST is the source of all HST data, and as such the MAST webpages also provide a means to
+view HST images and their metadata.
+
+\subsection{The MAST Portal}
+
+\subsection{Other Astronomy Institutions}
 
 
 % Methodology
@@ -1521,6 +1588,14 @@ available at \url{http://www.sqlalchemy.org/}.
 
 \bibitem{IEEEhowto:bootstrap}
 \emph{Bootstrap}, [Online; accessed 2017-09-04], available at \url{http://getbootstrap.com/}.
+
+\bibitem{IEEEhowto:bourque_adass}
+Bourque, M., et al., 2016, \emph{The Hubble Space Telescope Wide Field Camera 3 Quicklook Project},
+Astronomical Data Analysis Software $\&$ Systems Conference Proceedings, ADASS XXVI, ASP-CS, submitted
+
+\bibitem{IEEEhowto:bourque_astroinformatics}
+Bourque, M., et al., 2016, \emph{The HST/WFC3 Quicklook Project: A User Interface to Hubble
+Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 2016, Astroinformatics.
 
 \bibitem{IEEEhowto:brandi}
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
