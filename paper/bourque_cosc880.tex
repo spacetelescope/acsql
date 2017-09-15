@@ -63,8 +63,8 @@
 \author{Matthew~Bourque\textsuperscript{1}, Sara~Ogaz\textsuperscript{1}, Alex~Viana\textsuperscript{2}, Meredith~Durbin\textsuperscript{3}, and Norman Grogin\textsuperscript{1}\\
 \begin{flushleft}
 {\scriptsize [1] Space Telescope Science Institute, Baltimore, Maryland 21218. email: bourque@stsci.edu, ogaz@stsci.edu, grogin@stsci.edu}\\
-{\scriptsize [2] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
-{\scriptsize [3] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}
+{\scriptsize [2] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}
+{\scriptsize [3] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
 \end{flushleft}
 \thanks{Manuscript received Month DD, YYYY}}
 
@@ -464,7 +464,47 @@ coordination amongst other instrument analysts or storage of separate copies.
 
 \subsubsection{Data discovery}
 
+As will be discussed in section 1.3.5, ACS instrument analysts often wish to know which datasets
+(i.e. rootnames) exist for various observational parameters.  For example, one may need to
+analyze data that were observed between a specific time period, or observed with a specific pointing
+on the sky.  Conversely, an instrument analyst may have knowledge of specific rootnames, but wish
+to know the observational parameters associated with them.
 
+MAST has tools which allow users to discover rootnames and/or parameters for observations, such as
+the MAST portal, which is a public-facing online data discovery tool for various data collections such
+as HST data, high level science products, and catalogs of astronomical source positions (further
+discussed in Chapter 3) (MAST, 2017).  The MAST portal offers features that may be of particular
+interest to research astronomers at academic institutions, for example, an image of the location of
+the scientific target on the sky (`AstroView'), an interactive GUI for displaying results, and an
+option to export results to various file types.  An example query of this tool is shown in Figure N.
+
+% Figure for MAST portal example
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/mast_portal.png}
+\caption{An example of a query to the MAST data discovery portal.}
+\label{fig1}
+\end{figure}
+
+Though the MAST portal has many useful features, there are some limitations to the tool from the
+perspective of an instrument analyst at STScI.  One such limitation is that the observational metadata
+available through the MAST portal does not include all of the observational metadata available in
+the FITS headers; it is limited to a small subset of header keywords, mainly from the RAW and FLT
+filetypes, amongst other MAST-generated metadata (e.g. `Target Classification').  Another limitation
+is that the result of a query is keyed off of an `Observation ID' as opposed to a traditional
+\texttt{rootname}.  The `Observation ID' may map to one or more individual observations (and thus
+one or more individual \texttt{rootnames}), making it difficult for instrument analysts to discover
+which \texttt{rootnames} (and thus data files) that are associated with the observational metadata
+they seek.  Similarly, this makes it difficult to use the MAST portal to query for information based
+on an individual observation.
+
+The \texttt{acsql} application aims to provide an intuitive, one-to-one correspondance between the
+FITS header values and the \texttt{acsql} database schema.  The column names in the header tables of
+the \texttt{acsql} database exactly match the names found in the FITS headers, and each extension
+of each ACS filetype is supported.  Furthermore, the primary key of each header table in the database
+is the \texttt{rootname} that instrument analysts use in their day-to-day work, as opposed to an
+`Observation ID'.  With this configuration, it is straightforward to discover data via a database
+query using header keywords.
 
 
 \subsubsection{Use Cases}
@@ -1644,6 +1684,9 @@ Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 
 \bibitem{IEEEhowto:mast}
 \emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
 available at \url{https://archive.stsci.edu/}.
+
+\bibitem{IEEEhowto:mast_portal}
+\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
 
 \bibitem{IEEEhowto:vanDerWalt}
 van der Walt, S., Colbert, C., and Varoquaux, G., 2011, \emph{The NumPy Array: A Structure for
