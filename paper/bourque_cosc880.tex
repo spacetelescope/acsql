@@ -452,36 +452,27 @@ in Use Case (2).
 % Related Work
 \section{Related Work} \label{chap2}
 
-The main inspiration for the construction of the ACS Quicklook application was derived from the sucess
-of a similar application for the Wide Field Camera 3 (WFC3) instrument (also on board HST), known as the
-WFC3/Quicklook (\texttt{wfc3ql}) application.  The \texttt{wfc3ql} application shares many of the core
-components that \texttt{acsql} does, including a filesystem that stores all WFC3 data on disk, a relational
-database that stores WFC3 FITS header information, and a web application for user interactivity with the
-system (Bourque et al, 2016).  The \texttt{wfc3ql} has been developed by the WFC3 team at STScI since WFC3
-was installed on HST in 2009 during Servicing Mission 4.  The project started out as a single script that
-performed a dowload request to MAST for new data, created Quicklook JPEGs from the resulting images, and
-saved them to a directory.  Since then, the project has evolved to the filesystem/database/web application stack
-that more closely resembles that of \texttt{acsql}.
+The main inspiration for the construction of the \texttt{acsql} application was derived from the success of a similar application for the Wide Field Camera 3 (WFC3) instrument
+(also on board HST), known as the WFC3/Quicklook (\texttt{wfc3ql}) application.  The \texttt{wfc3ql} application shares many of the core components that \texttt{acsql} does,
+including a filesystem that stores all WFC3 data on disk, a relational database that stores WFC3 FITS header information, and a web application for user interactivity with the
+system[11][12].  The \texttt{wfc3ql} application has been developed by the WFC3 team at STScI since WFC3 was installed on HST in 2009 during Servicing Mission 4[2].  The genesis of
+the application was a single script that performed a dowload request to MAST for new data, created Quicklook JPEGs from the resulting images, and saved them to a centrally-located
+directory.  Since then, the project has evolved into the filesystem/database/web stack that more closely resembles that of the \texttt{acsql} application.
 
-However, despite the similarites, it should be noted that the implementation of the \texttt{wfc3ql} infrastructure
-differs significantly from that of \texttt{acsql} (implementaiton details of the \texttt{acsql} components are
-detailed in Chapter N).  For example, unlike the \texttt{acsql} filesystem, which contains only publicly-available data, the
-\texttt{wfc3ql} filesystem is essentially a copy of the MAST archive for WFC3.  As such, it contains all data,
-including proprietary data which can only be used internally by the WFC3 team at STScI.  Since the \texttt{wfc3ql}
-filesystem contains proprietary data, much support is needed in the software to restrict data to certain file
-directories, user groups, and file permissions.  Additionally, the \texttt{wfc3ql} database only supports a small subset of
-FITS filetypes and extensions, while \texttt{acsql} supports all ACS filetypes and extensions.
+However, despite the similarites, it should be noted that the implementation of the \texttt{wfc3ql} infrastructure differs significantly from that of \texttt{acsql}
+(implementaiton details of the \texttt{acsql} components are detailed in Chapter \ref{cap3}).  For example, unlike the \texttt{acsql} filesystem, which contains only
+publicly-available data, the \texttt{wfc3ql} filesystem is essentially a duplicate of the MAST archive for WFC3.  As such, it contains all data, including proprietary data which can
+only be used internally by the WFC3 team at STScI.  Since the \texttt{wfc3ql} filesystem contains proprietary data, much support is needed in the software infrastructure to restrict
+data to certain file directories, user groups, and file permissions.  Additionally, the \texttt{wfc3ql} database only supports a small subset of FITS filetypes and extensions, while
+\texttt{acsql} supports all ACS filetypes and extensions.
 
-Furthermore, with \texttt{wfc3ql} being continuously developed over the past eight years by a team of several developers, there
-exist several features in \texttt{wfc3ql} that are not currently implemented on \texttt{acsql}.  For example, the
-\texttt{wfc3ql} application supports the daily visual inspection of new WFC3 data, some data of which are proprietary.  Such
-a feature is not possible for \texttt{acsql}, as the \texttt{acsql} filesystem is built upon a cache of only publicly-available
-data (and thus the project can be considered open-source and non-proprietary).  Secondly, \texttt{wfc3ql} currently contains
-several instrument calibration and monitoring routines that are built upon the \texttt{wfc3ql} automation platform/code
-library (known as \texttt{pyql}), while \texttt{acsql} has yet to implement any of such routines.  A third example is that
-the \texttt{wfc3ql} web application supports the tracking of WFC3 instrument `anomalies' (i.e. anomalous features in images
-that should be noted to instrument team members (Gosmeyer, 2017)). These features, amongst others, clearly serve as
-possible extensions to the \texttt{acsql} system; such extensions are discussed further in Chapter 5.
+With \texttt{wfc3ql} being continuously developed over the past eight years by a team of several developers, many features have been implemented within \texttt{wfc3ql}.  Several of
+these features are not currently implemented on \texttt{acsql}.  For example, the \texttt{wfc3ql} application supports the daily visual inspection of new WFC3 data, some data of which
+are proprietary.  Such a feature is not possible for \texttt{acsql}, as the \texttt{acsql} filesystem is built upon the MAST cache of only publicly-available data (and thus the \texttt{acsql}
+application can be considered open-source and non-proprietary).  Secondly, \texttt{wfc3ql} currently contains several instrument calibration and monitoring routines that are built upon
+the \texttt{wfc3ql} automation platform and code library (known as \texttt{pyql}), while \texttt{acsql} has yet to implement any of such routines.  A third example is that the \texttt{wfc3ql}
+web application supports the tracking of WFC3 instrument `anomalies' (i.e. anomalous features in images that are tracked by instrument team members[13]. These features, amongst others,
+clearly serve as possible extensions to the \texttt{acsql} system; such extensions are discussed further in Chapter \ref{chap5}.
 
 
 % Methodology
@@ -1555,7 +1546,17 @@ Astronomy \& Astrophysics, 558, A33.
 \bibitem{IEEEhowto:mast_portal}
 \emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
 
+\bibitem{IEEEhowto:bourque_adass}
+Bourque, M., et al., 2016, \emph{The Hubble Space Telescope Wide Field Camera 3 Quicklook Project},
+Astronomical Data Analysis Software $\&$ Systems Conference Proceedings, ADASS XXVI, ASP-CS, submitted
 
+\bibitem{IEEEhowto:bourque_astroinformatics}
+Bourque, M., et al., 2016, \emph{The HST/WFC3 Quicklook Project: A User Interface to Hubble
+Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 2016, Astroinformatics.
+
+\bibitem{IEEEhowto:gosmeyer}
+Gosmeyer, C.M., and The Quicklook Team, 2017, \emph{WFC3 Anomalies Flagged by the Quicklook Team},
+WFC3 Instrument Science Report, 2017-22, available at \url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2017-22.pdf}
 
 
 
@@ -1575,13 +1576,6 @@ available at \url{http://www.sqlalchemy.org/}.
 \bibitem{IEEEhowto:bootstrap}
 \emph{Bootstrap}, [Online; accessed 2017-09-04], available at \url{http://getbootstrap.com/}.
 
-\bibitem{IEEEhowto:bourque_adass}
-Bourque, M., et al., 2016, \emph{The Hubble Space Telescope Wide Field Camera 3 Quicklook Project},
-Astronomical Data Analysis Software $\&$ Systems Conference Proceedings, ADASS XXVI, ASP-CS, submitted
-
-\bibitem{IEEEhowto:bourque_astroinformatics}
-Bourque, M., et al., 2016, \emph{The HST/WFC3 Quicklook Project: A User Interface to Hubble
-Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 2016, Astroinformatics.
 
 \bibitem{IEEEhowto:brandi}
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
