@@ -100,7 +100,7 @@ Channel (SBC), desingned for far-ultraviolet imaging and spectroscopy.  ACS expe
 the WFC and HRC detectors, until 2009 when astronauts succesfully restored the WFC detector during Servicing Mission 4[2]; the HRC still
 remains unoperational.
 
-Despite this electronics filure, the ACS instrument has been steadily acquiring astronomical images over its 15 on-orbit lifetime.
+Despite this electronics failure, the ACS instrument has been steadily acquiring astronomical images over its 15 on-orbit lifetime.
 Figure \ref{fig1} shows an estimate of the number of observations over time for each of the three detectors.  To date, there have been
 nearly 200,000 observations total.  Further information about the ACS instrument including its history, configuration, performance, and
 scientific capability can be found in the ACS Instrument Handbook[3].
@@ -109,7 +109,7 @@ scientific capability can be found in the ACS Instrument Handbook[3].
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/num_obs.png}
-\caption{The number of observations over time for each of the three detectors on ACS.}
+\caption{\textit{The number of observations over time for each of the three detectors on ACS.}}
 \label{fig1}
 \end{figure}
 
@@ -254,7 +254,7 @@ while others may contain only $\sim$40 keywords.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/header_example.png}
-\caption{A section of an example header, taken from the 0th extension of the file \texttt{j6mf6lhq$\_$raw.fits}.}
+\caption{\textit{A section of an example header, taken from the 0th extension of the file \texttt{j6mf6lhq$\_$raw.fits}.}}
 \label{fig2}
 \end{figure}
 
@@ -368,8 +368,8 @@ increasing number of files at a rate of $\sim$2.5 seconds per 100 files.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/fileio_time.png}
-\caption{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword from a varying number of ACS data files via reading the FITS file using the
-\texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (green)}
+\caption{\textit{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword from a varying number of ACS data files via reading the FITS file using the
+\texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (green)}.}
 \label{fig3}
 \end{figure}
 
@@ -409,7 +409,7 @@ results, and an option to export results to various file types.  An example quer
 \begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/mast_portal.png}
-\caption{An example of a query to the MAST data discovery portal.}
+\caption{\textit{An example of a query to the MAST data discovery portal.}}
 \label{fig4}
 \end{figure}
 
@@ -478,21 +478,15 @@ clearly serve as possible extensions to the \texttt{acsql} system; such extensio
 % Methodology
 \section{Methodology and Implementation} \label{chap3}
 
-In this chapter, we disucss the methods by which we implemented the various subsystems
-of the ACS Quicklook system.  Additionally, we discuss the programming standards and
-standard workflows that were employed to promote code quality such as readability,
-maintainability, extensibility, etc; we believe that this aspect of the project is
-at least equaly important to the system as its individual components.
+In this chapter, we disucss the methods by which we implemented the various components of the \texttt{acsql} application.  Additionally, we discuss the programming standards and
+workflows (sections \ref{sec3.1} and \ref{sec3.2}) that were employed to foster code qualities such as readability, maintainability, extensibility, etc; we believe that this aspect
+of the project is at least equaly important to the application and its future maintenance as its individual components.
 
 
 \subsection{Version control} \label{sec3.1}
 
-All code associated with this project (including this paper iteself) is version
-controlled using the \texttt{git} Version Control System (VCS) (git, 2017).
-The \texttt{git} repository for the project is named \texttt{acsql}.
-The \texttt{git} repository is also hosted on \texttt{GitHub}, a repository
-hosting service (GitHub, 2017), and is publicly available at
-\url{http://github.com/spacetelescope/acsql/}.
+All software associated with this project (including this paper iteself) is version-controlled using the \texttt{git} Version Control System (VCS)[14]. The \texttt{git} repository for the
+project is named \texttt{acsql} and is hosted on \texttt{GitHub}, a repository hosting service[15].  The repository is publicly available at \textcolor{blue}{\url{http://github.com/spacetelescope/acsql/}}.
 
 Several feature branches of the code were created throughout the building of this project
 such that the \texttt{master} branch (which is considered the ``production'' branch)
@@ -504,11 +498,11 @@ the database schema), \texttt{add-logging} (for implementation of system logging
 feature branch, a \texttt{tag} and \texttt{release} was created for the \texttt{master} branch,
 which allows a specific version of the \texttt{master} branch to be saved in the
 repository.  These releases are available at
-\url{https://github.com/spacetelescope/acsql/releases}.
+\textcolor{blue}{\url{https://github.com/spacetelescope/acsql/releases}}.
 
 Additionally, using \texttt{GitHub} allowed for issue tracking of bugs, features, and
 potential enhancements to the code repository.  Current open issues of the repository
-can be found at \url{https://github.com/spacetelescope/acsql/issues}.
+can be found at \textcolor{blue}{\url{https://github.com/spacetelescope/acsql/issues}}.
 
 
 \subsection{Programming and Documentation Standards} \label{sec3.2}
@@ -542,8 +536,8 @@ shows an example of these conventions, taken from the
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/docstrings.png}
-\caption{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
-using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}
+\caption{\textit{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
+using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}}
 \label{fig5}
 \end{figure}
 
@@ -554,15 +548,15 @@ formats such as \texttt{HTML} and \texttt{PDF}.  For this project, we use
 \texttt{sphinx} to convert API documentation to \texttt{HTML}, and host the webpages online
 using the \texttt{readthedocs}, which is an open-source, community supported tool for
 hosting and browing documentation (Read the Docs, 2017). The documentation for
-\texttt{acsql} is hosted at \url{http://acsql.readthedocs.io/}.  The output documentation
+\texttt{acsql} is hosted at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.  The output documentation
 as seen on \texttt{readthedocs} for the example function in figure N is provided in Figure N.
 
 % Figure for docstring convention example in readthedocs
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/readthedocs.png}
-\caption{The \texttt{readthedocs} documentation for the \texttt{acsql} example function
-seen in Figure N.}
+\caption{\textit{The \texttt{readthedocs} documentation for the \texttt{acsql} example function
+seen in Figure N.}}
 \label{fig6}
 \end{figure}
 
@@ -583,8 +577,8 @@ particular observation is stored.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=2.0in]{./figures/filesystem_structure.png}
-\caption{A representation of the directory structure within the \texttt{acsql} filesystem,
-using a few observations as an example.}
+\caption{\textit{A representation of the directory structure within the \texttt{acsql} filesystem,
+using a few observations as an example.}}
 \label{fig7}
 \end{figure}
 
@@ -599,8 +593,8 @@ un-calibrated filetypes, etc.).
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/filesystem_size.png}
-\caption{The size of the \texttt{acsql} filesystem as a function of observation
-date.}
+\caption{\textit{The size of the \texttt{acsql} filesystem as a function of observation
+date.}}
 \label{fig8}
 \end{figure}
 
@@ -630,8 +624,8 @@ application.  An example of a \texttt{JPEG} image and its corresponding
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/jpeg_and_thumbnail.png}
-\caption{An example of a \texttt{JPEG} image (left) and its corresponding
-\texttt{thumbnail} image using example dataset \texttt{jcs718koq}.}
+\caption{\textit{An example of a \texttt{JPEG} image (left) and its corresponding
+\texttt{thumbnail} image using example dataset \texttt{jcs718koq}.}}
 \label{fig9}
 \end{figure}
 
@@ -650,9 +644,9 @@ are only inteded for navigation and quick-viewing.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/jpeg_filesystem.png}
-\caption{A representation of the directory structure for the \texttt{JPEG} (left)
+\caption{\textit{A representation of the directory structure for the \texttt{JPEG} (left)
 and \texttt{thumbail} (right) portion of the \texttt{acsql} filesystem, using a
-few observations as an example.}
+few observations as an example.}}
 \label{fig10}
 \end{figure}
 
@@ -678,8 +672,8 @@ indicate which filetypes are available for a particular \texttt{rootname}, and
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/schema.png}
-\caption{The relational database schema for the \texttt{acsql} database.}
-\label{fig11}
+\caption{\textit{The relational database schema for the \texttt{acsql} database.}
+\label{fig11}}
 \end{figure}
 
 The \texttt{master} table contains information that is particularly useful
@@ -759,8 +753,8 @@ query the database (i.e. \texttt{session.query()}) as well as commiting inserts 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/load_connection.png}
-\caption{The \texttt{load$\_$conenction} function, which is used to build a connection to the
-\texttt{acsql} database}.
+\caption{\textit{The \texttt{load$\_$conenction} function, which is used to build a connection to the
+\texttt{acsql} database.}}
 \label{fig12}
 \end{figure}
 
@@ -781,7 +775,7 @@ the name of the variable used to initialize each \texttt{Column} object.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/master_table.png}
-\caption{The class definition for constructing the \texttt{master} table via \texttt{SQLAlchemy}.}
+\caption{\textit{The class definition for constructing the \texttt{master} table via \texttt{SQLAlchemy}.}}
 \label{fig13}
 \end{figure}
 
@@ -789,7 +783,7 @@ the name of the variable used to initialize each \texttt{Column} object.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/datasets_table.png}
-\caption{The class definition for constructing the \texttt{datasets} table via \texttt{SQLAlchemy}.}
+\caption{\textit{The class definition for constructing the \texttt{datasets} table via \texttt{SQLAlchemy}.}}
 \label{fig14}
 \end{figure}
 
@@ -807,7 +801,7 @@ header key/value pairs are defined in a separate function named \texttt{define$\
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/orm_factory.png}
-\caption{The \texttt{orm$\_$factory} function, used to define class definitions for header tables.}
+\caption{\textit{The \texttt{orm$\_$factory} function, used to define class definitions for header tables.}}
 \label{fig15}
 \end{figure}
 
@@ -815,7 +809,7 @@ header key/value pairs are defined in a separate function named \texttt{define$\
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/define_columns.png}
-\caption{The \texttt{define$\_$columns} function, used to define columns used in the header tables.}
+\caption{\textit{The \texttt{define$\_$columns} function, used to define columns used in the header tables.}}
 \label{fig16}
 \end{figure}
 
@@ -829,8 +823,8 @@ the given \texttt{class$\_$name}. An portion of an example text file is shown in
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.8in]{./figures/table_definition.png}
-\caption{The contents of an example text file used to define the columns of a header table in the
-\texttt{define$\_$columns} function. The example table used here is the \texttt{wfc$\_$asn$\_$0} table.}
+\caption{\textit{The contents of an example text file used to define the columns of a header table in the
+\texttt{define$\_$columns} function. The example table used here is the \texttt{wfc$\_$asn$\_$0} table.}}
 \label{fig17}
 \end{figure}
 
@@ -850,8 +844,8 @@ shown in Figure N, where the several of the \texttt{WFC} header tables are defin
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.5in]{./figures/orm_factory_calls.png}
-\caption{An example of how the \texttt{orm$\_$factory} function is called to create class
-defintions for the header tables.}
+\caption{\textit{An example of how the \texttt{orm$\_$factory} function is called to create class
+defintions for the header tables.}}
 \label{fig18}
 \end{figure}
 
@@ -893,9 +887,9 @@ in section 3.6 to perform the \texttt{insert} or \texttt{update} operation.  The
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/insert_or_update.png}
-\caption{The \texttt{insert$\_$or$\_$update} function from the \texttt{acsql.utils.utils}
+\caption{\textit{The \texttt{insert$\_$or$\_$update} function from the \texttt{acsql.utils.utils}
 module, used at various times during the data ingestion process to determine if an
-entry should be inserted or updated in the \texttt{acsql} database.}
+entry should be inserted or updated in the \texttt{acsql} database.}}
 \label{fig19}
 \end{figure}
 
@@ -965,7 +959,7 @@ file showing the ingestion of a single rootname (\texttt{j8zh21xv}) is provided 
 \centering
 \subfloat{\includegraphics[width=7.0in]{./figures/log.png}%
 \label{fig_first_case}}
-\caption{An example log file for the ingestion of a single file (\texttt{j8zh21xv}).}
+\caption{\textit{An example log file for the ingestion of a single file (\texttt{j8zh21xv}).}}
 \label{fig20}
 \end{figure*}
 
@@ -1014,7 +1008,7 @@ the homepage also contains button-type links to the database query page and the 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/homepage.png}
-\caption{The homepage of the \texttt{acsql} web application.}
+\caption{\textit{The homepage of the \texttt{acsql} web application.}}
 \label{fig21}
 \end{figure}
 
@@ -1029,7 +1023,7 @@ page to be further expanded and/or modified in the future as more use cases beco
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/database_query_page.png}
-\caption{A portion of the database query page of the \texttt{acsql} web application.}
+\caption{\textit{A portion of the database query page of the \texttt{acsql} web application.}}
 \label{fig22}
 \end{figure}
 
@@ -1047,8 +1041,8 @@ showing the Thumbnail images of all of the resulting images (see Figure N).
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/database_query_results_html.png}
-\caption{The results of the database query shown in Figure N in the form of an HTML
-table.}
+\caption{\textit{The results of the database query shown in Figure N in the form of an HTML
+table.}}
 \label{fig23}
 \end{figure}
 
@@ -1056,8 +1050,8 @@ table.}
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/database_query_results_csv.png}
-\caption{The results of the database query shown in Figure N in the form of an CSV
-file.}
+\caption{\textit{The results of the database query shown in Figure N in the form of an CSV
+file.}}
 \label{fig24}
 \end{figure}
 
@@ -1065,8 +1059,8 @@ file.}
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/database_query_results_thumbnails.png}
-\caption{The results of the database query shown in Figure N in the form of thumbnail
-images.}
+\caption{\textit{The results of the database query shown in Figure N in the form of thumbnail
+images.}}
 \label{fig25}
 \end{figure}
 
@@ -1082,7 +1076,7 @@ based on the chosen paramters.  Figure N shows an example of this webpage, using
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/archive_links.png}
-\caption{The archive links webpage of the \texttt{acsql} web application.}
+\caption{\textit{The archive links webpage of the \texttt{acsql} web application.}}
 \label{fig26}
 \end{figure}
 
@@ -1090,7 +1084,7 @@ based on the chosen paramters.  Figure N shows an example of this webpage, using
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/view_proposal.png}
-\caption{An example of a `view proposal' webpage, using proposal 14039.}
+\caption{\textit{An example of a `view proposal' webpage, using proposal 14039.}}
 \label{fig27}
 \end{figure}
 
@@ -1105,7 +1099,7 @@ along with useful metadata of the dataset near the top of the page.  It also con
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/view_image.png}
-\caption{An example of a `view image' webpage, using dataset \texttt{jcs718kmq}.}
+\caption{\textit{An example of a `view image' webpage, using dataset \texttt{jcs718kmq}.}}
 \label{fig28}
 \end{figure}
 
@@ -1357,7 +1351,7 @@ on the web application (i.e. \texttt{img/} (see Section 3.9).\\
 web application, one for each page (see Section 3.9).\\
 
 For further details on each \texttt{Python} module within the \texttt{acsql} package, readers are encouraged to view the official
-API documentation hosted at \url{http://acsql.readthedocs.io/}.
+API documentation hosted at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.
 
 
 % Results
@@ -1389,7 +1383,7 @@ this filesystem is organized in a very similar way to that shown in Figure N\foo
 directory structure and server names here as well as in the \texttt{acsql} code repository as to avoid exposing possible
 sensitive information.}.  Though this service is internal to STScI, it is possible for an external user to reconstruct the
 filesystem, as all data within the MAST public cache is publically available to download via the MAST archive (i.e.
-\url{https://archive.stsci.edu/}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
+\textcolor{blue}{\url{https://archive.stsci.edu/}}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
 the user-supplied \texttt{config.yaml} file (see Section 3.10).
 
 Currently, the filesystem consists of $\sim$1,030,000 total files. Figure N shows how this breaks down by individual
@@ -1402,7 +1396,7 @@ specific observing modes.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
-\caption{The number of files in the \texttt{acsql} filesystem by filetype.}
+\caption{\textit{The number of files in the \texttt{acsql} filesystem by filetype.}}
 \label{fig29}
 \end{figure}
 
@@ -1428,7 +1422,7 @@ the 111 tables.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/database_records.png}
-\caption{The number of records in each of the \texttt{acsql} database tables.}
+\caption{\textit{The number of records in each of the \texttt{acsql} database tables.}}
 \label{fig30}
 \end{figure}
 
@@ -1451,7 +1445,7 @@ file (see Section 3.10).
 
 As described in Sections 3.1 and 3.10, the \texttt{acsql} git repository serves as the software package that contains
 all of the code and supporting materials needed to operate the \texttt{acsql} system.  The software package is open-source,
-and is avilable to download directly from the \texttt{GitHub} repository (\url{http://github.com/acsql/}).  All
+and is avilable to download directly from the \texttt{GitHub} repository (\textcolor{blue}{\url{http://github.com/acsql/}}).  All
 future enhancements and bug fixes to the \texttt{acsql} project will occur through this version-controlled repository.
 
 
@@ -1459,7 +1453,7 @@ future enhancements and bug fixes to the \texttt{acsql} project will occur throu
 
 As described in Section 3.2, another deliverable for the project is the API documentation that is automatically
 generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are available through the \texttt{acsql} package,
-but are also hosted on \texttt{readthedocs}, available at \url{http://acsql.readthedocs.io/}.  This is considered
+but are also hosted on \texttt{readthedocs}, available at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.  This is considered
 the official code documentation.
 
 
@@ -1512,26 +1506,26 @@ The conclusion goes here.
 
 \bibitem{IEEEhowto:sm3b}
 \emph{SM3B}, National Aeronautics and Space Administration, Goddard Space Flight Center,
-[Online; accessed 2017-09-16], available at \url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm3b.html}.
+[Online; accessed 2017-09-16], available at \textcolor{blue}{\url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm3b.html}}.
 
 \bibitem{IEEEhowto:sm4}
 \emph{SM4}, National Aeronautics and Space Administration, Goddard Space Flight Center,
-[Online; accessed 2017-09-16], available at \url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm4.html}.
+[Online; accessed 2017-09-16], available at \textcolor{blue}{\url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm4.html}}.
 
 \bibitem{IEEEhowto:avila}
 Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
 
 \bibitem{IEEEhowto:mast}
 \emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
-available at \url{https://archive.stsci.edu/}.
+available at \textcolor{blue}{\url{https://archive.stsci.edu/}}.
 
 \bibitem{IEEEhowto:fits}
 \emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
 International Astronomical Union FITS Working Group, available at
-\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+\textcolor{blue}{\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}}.
 
 \bibitem{IEEEhowto:stsci}
-\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \url{www.stsci.edu}.
+\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \textcolor{blue}{\url{www.stsci.edu}}.
 
 \bibitem{IEEEhowto:smith}
 Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
@@ -1544,7 +1538,7 @@ Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for as
 Astronomy \& Astrophysics, 558, A33.
 
 \bibitem{IEEEhowto:mast_portal}
-\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
+\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \textcolor{blue}{\url{https://mast.stsci.edu/}}.
 
 \bibitem{IEEEhowto:bourque_adass}
 Bourque, M., et al., 2016, \emph{The Hubble Space Telescope Wide Field Camera 3 Quicklook Project},
@@ -1556,7 +1550,21 @@ Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 20
 
 \bibitem{IEEEhowto:gosmeyer}
 Gosmeyer, C.M., and The Quicklook Team, 2017, \emph{WFC3 Anomalies Flagged by the Quicklook Team},
-WFC3 Instrument Science Report, 2017-22, available at \url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2017-22.pdf}
+WFC3 Instrument Science Report, 2017-22, available at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2017-22.pdf}}
+
+\bibitem{IEEEhowto:git}
+\emph{git}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https://git-scm.com}}.
+
+\bibitem{IEEEhowto:github}
+\emph{GitHub}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https:/github.com}}.
+
+
+
+
+
+
+
+
 
 
 
@@ -1567,48 +1575,41 @@ WFC3 Instrument Science Report, 2017-22, available at \url{http://www.stsci.edu/
 
 \bibitem{IEEEhowto:numpydoc}
 \emph{A Guide to NumPy/SciPy Documentation}, [Online; accessed 2017-08-05], available at
-\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}
+\textcolor{blue}{\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}}/
 
 \bibitem{IEEEhowto:bayer}
 Bayer, M., 2006–, \emph{SQLAlchemy: The database toolkit for Python}, [Online; accessed 2017-02-21],
-available at \url{http://www.sqlalchemy.org/}.
+available at \textcolor{blue}{\url{http://www.sqlalchemy.org/}}.
 
 \bibitem{IEEEhowto:bootstrap}
-\emph{Bootstrap}, [Online; accessed 2017-09-04], available at \url{http://getbootstrap.com/}.
+\emph{Bootstrap}, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{http://getbootstrap.com/}}.
 
 
 \bibitem{IEEEhowto:brandi}
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
-\url{http://www.sphinx-doc.org/en/stable/}.
-
-
-\bibitem{IEEEhowto:git}
-\emph{git}, [Online; accessed 2017-08-05], available at \url{https://git-scm.com}.
-
-\bibitem{IEEEhowto:github}
-\emph{GitHub}, [Online; accessed 2017-08-05], available at \url{https:/github.com}.
+\textcolor{blue}{\url{http://www.sphinx-doc.org/en/stable/}}.
 
 \bibitem{IEEEhowto:goodger}
 Goodger, D., 2001, \emph{PEP 257 -- Docstring Conventions}, Python Developer's Guide,
-available at \url{https://www.python.org/dev/peps/pep-0257/}.
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0257/}}.
 
 \bibitem{IEEEhowto:lemburg}
 Lemburg, M., 2017, \emph{PEP 249 -- Python Database API Specification v2.0}, Python Developer's Guide,
-available at \url{https://www.python.org/dev/peps/pep-0249/}.
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0249/}}.
 
 \bibitem{IEEEhowto:loper}
 Loper, E., 2004, \emph{Epydoc: Generating API Documentation in Python}, Proceedings of the
-Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net/}.
+Second Annual Python Conference, available at \textcolor{blue}{\url{http://epydoc.sourceforge.net/}}.
 
 \bibitem{IEEEhowto:oracle}
 \emph{MySQL 5.6 Reference Manual}, Oracle, [Online; accessed 2017-08-13], available at
-\url{https://dev.mysql.com/doc/refman/5.6/en/}
+\textcolor{blue}{\url{https://dev.mysql.com/doc/refman/5.6/en/}}.
 
 \bibitem{IEEEhowto:readthedocs}
-\emph{Read the Docs}, [Online; accessed 2017-08-05], available at \url{https://readthedocs.org}.
+\emph{Read the Docs}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https://readthedocs.org}}.
 
 \bibitem{IEEEhowto:ronacher}
-Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \url{http://flask.pocoo.org/}
+Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{http://flask.pocoo.org/}}.
 
 
 \bibitem{IEEEhowto:vanDerWalt}
@@ -1617,10 +1618,10 @@ Efficient Numerical Computation}, Computing in Science \& Engineering, 13, 22-30
 
 \bibitem{IEEEhowto:vanRossum}
 van Rossum, G., 2001, \emph{PEP 8 -- Style Guide for Python Code}, Python Developer's Guide,
-available at \url{https://www.python.org/dev/peps/pep-0008/}.
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0008/}}.
 
 \bibitem{IEEEhowto:wtforms}
-\emph{wtforms}, [Online; accessed 2017-09-04], available at \url{https://github.com/wtforms/wtforms/}.
+\emph{wtforms}, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{https://github.com/wtforms/wtforms/}}.
 
 \end{thebibliography}
 
