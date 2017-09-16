@@ -56,15 +56,15 @@
 \begin{document}
 
 % Title
-\title{The Hubble Space Telescope Advanced Camera for Surveys Quicklook Project}
+\title{The Hubble Space Telescope Advanced Camera for Surveys Quicklook Application}
 
 
 % Authors
 \author{Matthew~Bourque\textsuperscript{1}, Sara~Ogaz\textsuperscript{1}, Alex~Viana\textsuperscript{2}, Meredith~Durbin\textsuperscript{3}, and Norman Grogin\textsuperscript{1}\\
 \begin{flushleft}
 {\scriptsize [1] Space Telescope Science Institute, Baltimore, Maryland 21218. email: bourque@stsci.edu, ogaz@stsci.edu, grogin@stsci.edu}\\
-{\scriptsize [2] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}
-{\scriptsize [3] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}\\
+{\scriptsize [2] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}\\
+{\scriptsize [3] Dept. of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington, 98195, email:mdurbin@uw.edu}
 \end{flushleft}
 \thanks{Manuscript received Month DD, YYYY}}
 
@@ -73,14 +73,14 @@
 \justify
 \begin{abstract}
 The Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS) instrument has been acquiring thousands of astronomical images
-each year since its installation in 2002 and subsequent restoration in 2009.  The ACS Quicklook Project (\texttt{acsql}) provides
+each year since its installation in 2002.  The ACS Quicklook Application (\texttt{acsql}) provides
 a means for users to discover and interact with these data through a database-driven web application.  The system is comprised of
-several \texttt{acsql} components: (1) A $\sim$40 TB network file system, which stores all on-orbit ACS data files on disk, (2) a
-\texttt{MySQL} database, which stores observational metadata in a normalized relational form, allowing users to build custom datasets
+several components: (1) A $\sim$40 TB network file system, which stores all on-orbit ACS data files on disk, (2) a
+\texttt{MySQL} database, which stores observational metadata in a normalized relational form and allows users to build custom datasets
 based on obseravational parameters, (3) A Python/\texttt{Flask}-based web application, which allows users to view
 ``Quicklook'' JPEG images of any publicly-available ACS data along with its metadata, and (4) a Python code library, which
-provides a platform on which users can build automated instrument calibration and monitoring routines.  The \texttt{acsql} project
-may be extended to support the forthcoming James Webb Space Telescope (JWST) mission, which is scheduled to launch in 2018.
+provides a platform on which users can build automated instrument calibration and monitoring routines.  The \texttt{acsql} application
+may be extended to support the forthcoming James Webb Space Telescope (JWST) mission, which is scheduled to launch in October, 2018.
 \end{abstract}}
 
 
@@ -91,24 +91,19 @@ may be extended to support the forthcoming James Webb Space Telescope (JWST) mis
 
 
 % Introduction
-\IEEEraisesectionheading{\section{Introduction}\label{sec:introduction}}
-The Advanced Camera for Surveys (ACS) is a third-generation imaging
-instrument on board the Hubble Space Telescope (HST), installed in 2002 during
-Servicing Mission 3B. It is comprised of three detectors: (1) the Wide Field Camera
-(WFC), which is designed for wide-field imaging and spectroscopy in visible to
-near-infrared wavelengths, (2) the High Resolution Channel, which is designed for
-high resolution near-ultraviolet to near-infrared wavelength images and coronography,
-and (3) the Solar Blind Channel (SBC), desingned for far-ultraviolet imaging and
-spectroscopy.  ACS expererienced an electronics failure in 2007 that affected
-the WFC and HRC detectors, until 2009 when astronauts succesfully restored the WFC
-detector during Servicing Mission 4; the HRC still remains unoperational.
+\IEEEraisesectionheading{\section{Introduction} \label{chap1}}
+The Advanced Camera for Surveys (ACS) is a third-generation imaging instrument on board the Hubble Space Telescope (HST), and was
+installed in 2002 during Servicing Mission 3B (shuttle mission STS-109)[1]. It is comprised of three detectors: (1) the Wide Field Camera
+(WFC), which is designed for wide-field imaging and spectroscopy in visible to near-infrared wavelengths, (2) the High Resolution Channel,
+which is designed for high resolution near-ultraviolet to near-infrared wavelength images and coronography, and (3) the Solar Blind
+Channel (SBC), desingned for far-ultraviolet imaging and spectroscopy.  ACS expererienced an electronics failure in 2007 that affected
+the WFC and HRC detectors, until 2009 when astronauts succesfully restored the WFC detector during Servicing Mission 4[2]; the HRC still
+remains unoperational.
 
-Besides these few hiccups, the ACS instrument has been steadily acquiring astronomical
-images over its 15 on-orbit lifetime.  Figure 1 shows an estimate of the number of
-observations over time for each of the three detectors.  To date, there have been
-nearly 200,000 observations total.  Further information about the ACS instrument
-including its history, configuration, performance, and scientific capability can be
-found in the ACS Instrument Handbook (Avila et al., 2017).
+Despite this electronics filure, the ACS instrument has been steadily acquiring astronomical images over its 15 on-orbit lifetime.
+Figure \ref{fig1} shows an estimate of the number of observations over time for each of the three detectors.  To date, there have been
+nearly 200,000 observations total.  Further information about the ACS instrument including its history, configuration, performance, and
+scientific capability can be found in the ACS Instrument Handbook[3].
 
 % Figure for ACS observations over time
 \begin{figure}[!t]
@@ -118,58 +113,44 @@ found in the ACS Instrument Handbook (Avila et al., 2017).
 \label{fig1}
 \end{figure}
 
-ACS data, along with all other data from the other HST instruments past and present
-(e.g. The Wide Field Camera 3 (WFC3), The Cosmic Origins Spectrography (COS), etc.),
-are primarily stored and publicly-available in the Barbara A. Mikulski Archive for
-Space Telescopes (MAST)\footnote{named after the U.S. Senator from Maryland who has
-been a pivitol political driving force behind the manned servicing missions, the
-Hubble Space Telescope, and the forthcoming James Webb Space Telescope} (Barbara, 2017).
-Through MAST, users can request and retreive data for any publicly-available dataset
-via \texttt{ftp}, \texttt{sftp}, or DVD by mail\footnote{Not all HST data are publicly
-available; most HST data of scientific targets are considered proprietary for up to
-one calendar year, after which they are publicly released.}.  The ACS data, like most other
-astronomical data, are stored in the Flexible Image Transport System (FITS) filetype
-(FITS, 2008).  This filetype has several unique characteristics, as will be
-discuessed in section 1.1.
+ACS data, along with the data from the other HST instruments past and present (e.g. The Wide Field Camera 3 (WFC3), The Cosmic Origins
+Spectrography (COS), etc.), are publicly available and primarily stored in the Barbara A. Mikulski Archive for Space Telescopes
+(MAST)\footnote{named after the U.S. Senator from Maryland who has been a pivitol political driving force behind the manned servicing
+missions, the Hubble Space Telescope, and the forthcoming James Webb Space Telescope}[4]. Through MAST, users can request and retreive
+data for any publicly-available dataset via \texttt{ftp}, \texttt{sftp}, or DVD by mail\footnote{Not all HST data are publicly available;
+most HST data of scientific targets are considered proprietary for up to one calendar year, after which they are publicly released.}. Like most
+other astronomical data, ACS data are stored using the Flexible Image Transport System (FITS) data format[5].  This data format has several
+unique characteristics, as will be discuessed in section \ref{sec1.1}.
 
-The ACS Quicklook Project is a Python-based application for discovering,
-viewing, and querying all publicly-available ACS data.  It consists of several subsystems:
-(1) A filesystem that stores ACS instrument data files and "Quicklook" JPEGs in an
-organized Network File System (NFS) (hereby referred to as the \texttt{acsql} filesystem),
-(2) A \texttt{MySQL} database that stores image metadata of each observation (hereby referred to
-as the \texttt{acsql} database), (3) A Python/\texttt{Flask}-based web application
-for interacting with the filesystem and database (hereby referred to as the \texttt{acsql} web
-application), and (4) A Python code library that contains code for connecting to the database,
-ingesting new data, logging production code execution, and building/maintaining the database
-and web application.  Each of these subsystems are explained in further detail in Chapter 3
-(Methodology).
+The ACS Quicklook Application (hereinafter referred to as ``\texttt{acsql}") is a Python-based application for discovering, viewing, and
+querying all publicly-available ACS data.  It consists of several major components: (1) A filesystem that stores ACS instrument data files
+and ``Quicklook" JPEGs in an organized Network File System (NFS) (hereinafter referred to as the ``\texttt{acsql} filesystem"), (2) A
+\texttt{MySQL} database that stores observational metadata of each observation (hereinafter referred to as the ``\texttt{acsql} database"),
+(3) A Python/\texttt{Flask}-based web application for interacting with the filesystem and database (hereinafter referred to as the
+``\texttt{acsql} web application"), and (4) A Python code library that contains software for connecting to the database, ingesting new data,
+logging production code execution, and building/maintaining the database and web application (hereinafter referred to as the ``\texttt{acsql} library"
+or ``\texttt{acsql} package".  Each of these subsystems are explained in further detail in Chapter \ref{chap3} (Methodology).
 
-This paper aims to outline and detail the ACS Quicklook project as part of the Towson
-University Computer Science Masters Program Graduate Project.  The remaining subsections
-in this chapter discuss the motivation and use cases for this application, as well as
-details on the underlying data structure on top of which this project was built.  Chapter
-2 discusses related work to this project and how the ACS Quicklook project differs from
-existing similar applications.  Chapter 3 details the implementations of each of the
-ACS Quicklook subsystems.  Chapter 4 outlines the results of the project, namely the
-project deliverables.  Lastly, chapters 5 and 6 conclude the paper with a discussion
-of possible extensions and modifications to the application.
+This paper outlines ACS Quicklook application as part of the Towson University Computer Science Masters Program Graduate Project.  The remaining
+sections in this chapter discuss the motivation and use cases for this application, as well as details on the underlying data structure on
+which this project was built.  Chapter \ref{chap2} discusses related work to this project and how the \texttt{acsql} application compares.
+Chapter \ref{chap3} details the implementations of each of the \texttt{acsql} components.  Chapter \ref{chap4} outlines the results of the project, namely
+the project deliverables.  Lastly, chapters \ref{chap5} and \ref{chap6} conclude the paper with a discussion of possible extensions and modifications to
+the application.
 
-It should be noted that the work that went into this project by the authors was
-accomplished on behalf of the Space Telescope Science Institute (STScI) located in
-Baltimore, Maryland.  STScI is the home institution for instrument, data, and user
-support of HST, the forthcoming James Webb Space Telescope
-(JWST), and MAST.  STScI is part of the Association of Universities for Research in
-Astronomy (AURA).
+We note that the work that went into this project by the authors was accomplished on behalf of the Space Telescope Science Institute (STScI)
+located in Baltimore, Maryland.  STScI is the home institution for instrument, data, and user support of HST, the forthcoming James Webb Space
+Telescope (JWST), and MAST.  STScI is part of the Association of Universities for Research in Astronomy (AURA)[6].
 
 
-\subsection{Data Structure}
+\subsection{Data Structure} \label{sec1.1}
 
 The design of the ACS Quicklook application, especially the database, is heavily
 dependant on the underlying data structure of ACS FITS files.  As such, it is
 important for the reader to understand this data structure and thus the next four
 sections are dedicated to giving an overview on the subject.
 
-\subsubsection{Filenames}
+\subsubsection{Filenames} \label{sec1.1.1}
 
 Each ACS data file is named in a consistent fashion:\newline
 
@@ -177,20 +158,26 @@ Each ACS data file is named in a consistent fashion:\newline
 
 \noindent where each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric
 characters, and \texttt{$<$filetype$>$} is one of several three-character filetype options
-(discussed in proceeding section 1.1.4).  For example, one ACS observation has the rootname
+(discussed in proceeding section \ref{sec1.1.4}).  For example, one ACS observation has the rootname
 \texttt{j6mf16lhq\_raw.fits} (Principle Investigator Gary Bernstein, observation
 date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname}
 has meaning, and is discussed in section 5.2 of the Introduction to the HST
-Data Handbooks (Smith et al., 2011).  The \texttt{.fits} extension at the end
-of the filename signifies that the file is of FITS format.
+Data Handbooks[3].  The \texttt{.fits} extension at the end of the filename signifies that the file
+is of FITS format.
 
-Note about rootname caveat.
+The unique 9-character \texttt{rootname} is associated with an individual, unique ACS observation.
+However, it should be noted that only the first eight characters of the 9-character \texttt{rootname}
+is truly unique; the last character, which identifies the source of data transmission from the
+telescope\footnote{For example, \texttt{q} = solid-state recorder, \texttt{s} = retransmitted
+solid-state recorder}, has several possible values, however varying values do not associate with
+different observations.  For this reason, as will be discussed in section ref{sec3.5}, we adopt
+an 8-character \texttt{rootname} as a primary key to signify unique ACS observations.
 
-\subsubsection{FITS file structure}
+\subsubsection{FITS file structure} \label{sec1.1.2}
 
-Each ACS FITS file consists of several ``Extensions'', with each extension serving a purpose
+Each ACS FITS file consists of several `extensions', with each extension serving a purpose
 to describe a particular aspect of the observation.  Each extension consists of two parts: (1)
-an extension ``header'', which contain key/value pairs describing image metadata (for example,
+an extension `header', which contain key/value pairs describing image metadata (for example,
 \texttt{DATE-OBS = '2016-09-22'} indicates that the observation date was \texttt{2016-09-22})
 (discussed in the next section), and (2) the extension data, which may be a binary table or,
 more commonly, a multi-dimensional array of detector pixel values.
@@ -204,9 +191,9 @@ pixels were affected by cosmic rays durring the observation).  Typically, for a 
 the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension,
 and the 3rd extension is the \texttt{DQ} extension.  Furthermore, the 0th extension typically has
 no extension data and only an extension header that contains metadata that is common to all
-extensions.  This is referred to as the `Primary Header'.
+extensions.  This is referred to as the `primary header'.
 
-Tables 1-3 describe the different extensions of ACS FITS files for each of the three ACS
+Tables \ref{tab1} and \ref{tab2} describe the different extensions of ACS FITS files for each of the three ACS
 detectors.  Note that there are two sets of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for
 WFC since WFC is comprised of two separate CCD chips.
 
@@ -214,7 +201,7 @@ WFC since WFC is comprised of two separate CCD chips.
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.5}
 \caption{ACS/WFC FITS file extensions}
-\label{wfc_extensions}
+\label{tab1}
 \centering
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -241,7 +228,7 @@ WFC since WFC is comprised of two separate CCD chips.
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.5}
 \caption{ACS/HRC and ACS/SBC FITS file extensions}
-\label{hrc_sbc_extensions}
+\label{tab2}
 \centering
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -263,33 +250,33 @@ Over the years, there have been several tools written in various programming lan
 read in FITS files and automatically convert their extension data to multi-dimensional array
 data types and their extension headers to dictionary data types.  For this project, the
 \texttt{astropy.fits} \texttt{python} library is used extensivly to read and interact with
-ACS FITS files (Robitaille et al., 2013).
+ACS FITS files[4].
 
-\subsubsection{FITS file extension headers}
+\subsubsection{FITS file extension headers} \label{sec1.1.3}
 
-As mentioned in the previous section, each FITS extension contains a ``header'', which
+As mentioned in section \ref{sec1.1.2}, each FITS extension contains a `header, which
 contains key/value pairs of metadata associated with the extension data.  Such metadata
 includes various data that describes the astronomical observation (e.g. target name,
 exposure time, principle investigator name, etc.), telemetry of ACS or HST in general
 at the time of observation (e.g. temperature of the ACS instrument, orientation of the
 telescope pointing, position of the telescope relative to Earth, etc.) or the FITS file
 itself (e.g. the number of extensions, file creation date, etc.). A subsection of an
-example header is shown in Figure 2.
+example header is shown in Figure \ref{fig2}.
 
 % Figure for header example
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/header_example.png}
 \caption{An example header.}
-\label{fig1}
+\label{fig2}
 \end{figure}
 
 Extension headers may contain a large number of keyword/value pairs.  Some extension
 headers contain upwards of 300 keywords, while others may contain only $\sim$40 keywords.
 
-\subsubsection{FITS filetypes for ACS}
+\subsubsection{FITS filetypes for ACS} \label{sec1.1.4}
 
-As discusses in section 1.1.1, each ACS observation may result in several FITS filetypes.
+As discusses in section \ref{sec1.1.1}, each ACS observation may result in several FITS filetypes.
 Each filetype describes the observation in a different way.  The set of available
 filetypes for a given observation is dependent on the characteristics of the observation,
 the details of which are beyond the scope of this paper.  Also beyond the scope of this
@@ -316,11 +303,12 @@ As noted earlier, a given observation may not result in the set of all possible 
 For example, the observation \texttt{j6mf16lhq} only has the filetypes \texttt{raw},
 \texttt{flt}, \texttt{jit}, \texttt{jif}, and \texttt{spt}.
 
-\subsection{Key Metadata}
+
+\subsection{Key Metadata} \label{sec1.2}
 
 There are several metadata key/value pairs that are particulary important for the
-ACS Quicklook application, specifically the web application.  For some reference,
-and context, these metadata are briefly described below.  Note that the \texttt{rootname}
+ACS Quicklook application, specifically the web application.  To provide some context for the
+remainder of this paper, these metadata are briefly described below.  Note that the \texttt{rootname}
 and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are
 metadata that were explicitly added to the database schema.\newline
 
@@ -374,7 +362,7 @@ on the celestial sphere) (e.g. \texttt{49.5375}).\\
 Universal Time (e.g. \texttt{14:21:56}).\\
 
 
-\subsection{Motivation}
+\subsection{Motivation} \label{sec1.3}
 
 The motivation for the \texttt{acsql} system is driven by several limitations
 of the FITS file structure as well as the current capabilities of MAST from specific
@@ -382,9 +370,9 @@ user perspectives. Some of these limitations are described below, along with the
 way the ACS Quicklook application aims to address them.  We also discuss the
 inteded users of the application and the expected use cases.\newline
 
-\subsubsection{Data retreival letency}
+\subsubsection{Data retreival letency} \label{sec1.3.1}
 
-Currently, users who wish to retreive data from the MAST must submit a retreival
+Currently, users who wish to retreive data from MAST must submit a retreival
 request via the MAST online interface. Once the retreival request is processed
 (usually automatically unless it is a request of a large number of datasets),
 the data are either transfered to the user directly via \texttt{sftp}, transfered
@@ -406,7 +394,7 @@ instantly available to view through the web application.  By having all of the a
 data centrally located, users need not to go through this request process; data can
 be directly read from the storage areas on disk.
 
-\subsubsection{File I/O}
+\subsubsection{File I/O} \label{sec1.3.2}
 
 A significant limitation of the FITS file format is the amount of time required for
 file I/O.  With users often finding themselves analyzing hundreds to thousands of
@@ -430,14 +418,14 @@ the FITS files.
 \caption{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword
 from a varying number of ACS data files via reading the FITS file using the
 \texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (green)}
-\label{fig1}
+\label{fig3}
 \end{figure}
 
 In order to build the \texttt{acsql} database, each ACS FITS file must ultimately be
 opened in order to retrieve the header information.  However, this operation is only
 performed once and needed not to be performed by the user.
 
-\subsubsection{Data redundancy}
+\subsubsection{Data redundancy} \label{1.3.3}
 
 As will be discussed in section 1.3.5, the primary user base for \texttt{acsql} is a group
 of ACS instrument analysts who use ACS data on a daily basis.  As such, each user may
@@ -462,7 +450,7 @@ application provides the \texttt{acsql} database (for observational metadata nee
 components, instrument analysts have instant access to all ACS data at any time; no need for
 coordination amongst other instrument analysts or storage of separate copies.
 
-\subsubsection{Data discovery}
+\subsubsection{Data discovery} \label{sec1.3.4}
 
 As will be discussed in section 1.3.5, ACS instrument analysts often wish to know which datasets
 (i.e. rootnames) exist for various observational parameters.  For example, one may need to
@@ -483,7 +471,7 @@ option to export results to various file types.  An example query of this tool i
 \centering
 \includegraphics[width=3.5in]{./figures/mast_portal.png}
 \caption{An example of a query to the MAST data discovery portal.}
-\label{fig1}
+\label{fig4}
 \end{figure}
 
 Though the MAST portal has many useful features, there are some limitations to the tool from the
@@ -507,7 +495,7 @@ is the \texttt{rootname} that instrument analysts use in their day-to-day work, 
 query using header keywords.
 
 
-\subsubsection{Use Cases}
+\subsubsection{Use Cases} \label{sec1.3.5}
 
 The intended primary users of the \texttt{acsql} application are ACS isntrument analysts that
 work for the ACS instrument team at STScI.  ACS instrument analysts use ACS data frequently
@@ -521,23 +509,28 @@ user base; since the application is non-proprietary, other potential users exist
 scientists and researchers external to STScI.
 
 With the nature of ACS instrument work in mind, the \texttt{acsql} application was designed
-with four main use cases in mind, each briefly described below.
+to acheive four main use cases, each briefly described below.
 
-\textit{Use case 1: Visually inspect an image from the ACS archive}
-\textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of observational parameters}
-\textit{Use case 3: Determine the observational parameters for a given dataset}
-\textit{Use case 4: Programmatically analyze images across custom datasets}
+\textit{Use case 1: Visually inspect an image from the ACS archive}:  The application shall allow
+users to view a `Quicklook' JPEG of any publicly-available image in the ACS archive, along with
+useful corresponding observational metadata.
+
+\textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of
+observational parameters}:  The application shall allow users to determine which 9-character
+\texttt{IPPPSSOTT} rootnames exist for a defined set of observational parameters via ACS
+header keywords.
+
+\textit{Use case 3: Determine the observational parameters for a given dataset}: The application
+shall allow users to determine observational parameters (i.e. FITS header keyword values) for
+a given 9-character \texttt{IPPPSSOTT} rootname.
+
+\textit{Use case 4: Programmatically analyze images across custom datasets}: The application
+shall allow users to read ACS image data into memory and perform analysis for data obtained
+in Use Case (2).
 
 
 % Related Work
-\section{Related Work}\label{sec:related_work}
-
-There exist several other tools that aim to provide an interface to users for discovering and viewing
-HST data.  In this chapter, we briefly discuss each of these tools and point out the similarites
-and differences of them in comparison with the ACS Quicklook application.
-
-
-\subsection{The WFC3/Quicklook application}
+\section{Related Work} \label{chap2}
 
 The main inspiration for the construction of the ACS Quicklook application was derived from the sucess
 of a similar application for the Wide Field Camera 3 (WFC3) instrument (also on board HST), known as the
@@ -571,18 +564,8 @@ that should be noted to instrument team members (Gosmeyer, 2017)). These feature
 possible extensions to the \texttt{acsql} system; such extensions are discussed further in Chapter 5.
 
 
-\subsection{The MAST Archive}
-
-As mentioned in Chapter 1, MAST is the source of all HST data, and as such the MAST webpages also provide a means to
-view HST images and their metadata.
-
-\subsection{The MAST Portal}
-
-\subsection{Other Astronomy Institutions}
-
-
 % Methodology
-\section{Methodology and Implementation}\label{sec:methodology}
+\section{Methodology and Implementation} \label{chap3}
 
 In this chapter, we disucss the methods by which we implemented the various subsystems
 of the ACS Quicklook system.  Additionally, we discuss the programming standards and
@@ -591,7 +574,7 @@ maintainability, extensibility, etc; we believe that this aspect of the project 
 at least equaly important to the system as its individual components.
 
 
-\subsection{Version control}
+\subsection{Version control} \label{sec3.1}
 
 All code associated with this project (including this paper iteself) is version
 controlled using the \texttt{git} Version Control System (VCS) (git, 2017).
@@ -617,7 +600,7 @@ potential enhancements to the code repository.  Current open issues of the repos
 can be found at \url{https://github.com/spacetelescope/acsql/issues}.
 
 
-\subsection{Programming and Documentation Standards}
+\subsection{Programming and Documentation Standards} \label{sec3.2}
 
 All code contained within this project was written to adhere to specific standards and
 conventions, namely (1) the \texttt{PEP8} Style Guide for \texttt{python} code (van Rossum, 2001),
@@ -650,7 +633,7 @@ shows an example of these conventions, taken from the
 \includegraphics[width=3.5in]{./figures/docstrings.png}
 \caption{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions,
 using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}
-\label{fig1}
+\label{fig5}
 \end{figure}
 
 Another benefit to using \texttt{PEP257} and \texttt{numpydoc} docstring conventions is
@@ -669,11 +652,11 @@ as seen on \texttt{readthedocs} for the example function in figure N is provided
 \includegraphics[width=3.5in]{./figures/readthedocs.png}
 \caption{The \texttt{readthedocs} documentation for the \texttt{acsql} example function
 seen in Figure N.}
-\label{fig1}
+\label{fig6}
 \end{figure}
 
 
-\subsection{Filesystem: Archive of ACS data}
+\subsection{Filesystem: Archive of ACS data} \label{sec3.3}
 
 The \texttt{acsql} filesystem is a Network File System (NFS) that stores all on-orbit
 ACS data on disk in an organized set of directories and subdirectories hosted at STScI. Figure N shows
@@ -691,7 +674,7 @@ particular observation is stored.
 \includegraphics[width=2.0in]{./figures/filesystem_structure.png}
 \caption{A representation of the directory structure within the \texttt{acsql} filesystem,
 using a few observations as an example.}
-\label{fig1}
+\label{fig7}
 \end{figure}
 
 Figure N shows how the total size of the filesystem has evolved over the lifetime of the
@@ -707,11 +690,11 @@ un-calibrated filetypes, etc.).
 \includegraphics[width=3.5in]{./figures/filesystem_size.png}
 \caption{The size of the \texttt{acsql} filesystem as a function of observation
 date.}
-\label{fig1}
+\label{fig8}
 \end{figure}
 
 
-\subsection{Filesystem: Archive of JPEGs and Thumbnails}
+\subsection{Filesystem: Archive of JPEGs and Thumbnails} \label{sec3.4}
 
 In addition to the ACS data products described in the last section, the
 \texttt{acsql} filesystem also stores ``Quicklook'' \texttt{JPEG} and
@@ -738,7 +721,7 @@ application.  An example of a \texttt{JPEG} image and its corresponding
 \includegraphics[width=3.5in]{./figures/jpeg_and_thumbnail.png}
 \caption{An example of a \texttt{JPEG} image (left) and its corresponding
 \texttt{thumbnail} image using example dataset \texttt{jcs718koq}.}
-\label{fig1}
+\label{fig9}
 \end{figure}
 
 Unlike the ACS data products portion of the filesystem, the \texttt{JPEG}
@@ -759,11 +742,11 @@ are only inteded for navigation and quick-viewing.
 \caption{A representation of the directory structure for the \texttt{JPEG} (left)
 and \texttt{thumbail} (right) portion of the \texttt{acsql} filesystem, using a
 few observations as an example.}
-\label{fig1}
+\label{fig10}
 \end{figure}
 
 
-\subsection{Database: Relational Schema}
+\subsection{Database: Relational Schema} \label{sec3.5}
 
 Another major component of the \texttt{acsql} project is a relational database
 that stores all \texttt{FITS} header key/value pairs for each ACS filetype and
@@ -785,7 +768,7 @@ indicate which filetypes are available for a particular \texttt{rootname}, and
 \centering
 \includegraphics[width=3.5in]{./figures/schema.png}
 \caption{The relational database schema for the \texttt{acsql} database.}
-\label{fig1}
+\label{fig11}
 \end{figure}
 
 The \texttt{master} table contains information that is particularly useful
@@ -821,7 +804,7 @@ primary key for the header tables as well as a foreign key that maps to the \tex
 of the \texttt{master} table.
 
 
-\subsection{Database: \texttt{MySQL} + \texttt{SQLAlchemy}}
+\subsection{Database: \texttt{MySQL} + \texttt{SQLAlchemy}} \label{sec3.6}
 
 The \texttt{acsql} database is stored on a \texttt{MySQL} server (\texttt{Version 5.6})
 (Oracle, 2017) that is hosted at STScI.  The database schema was implimented using
@@ -867,7 +850,7 @@ query the database (i.e. \texttt{session.query()}) as well as commiting inserts 
 \includegraphics[width=3.5in]{./figures/load_connection.png}
 \caption{The \texttt{load$\_$conenction} function, which is used to build a connection to the
 \texttt{acsql} database}.
-\label{fig1}
+\label{fig12}
 \end{figure}
 
 The \texttt{master} and \texttt{datasets} tables were implemented via explicit class definitions in
@@ -888,7 +871,7 @@ the name of the variable used to initialize each \texttt{Column} object.
 \centering
 \includegraphics[width=3.5in]{./figures/master_table.png}
 \caption{The class definition for constructing the \texttt{master} table via \texttt{SQLAlchemy}.}
-\label{fig1}
+\label{fig13}
 \end{figure}
 
 % Figure for datasets table in database_interface
@@ -896,7 +879,7 @@ the name of the variable used to initialize each \texttt{Column} object.
 \centering
 \includegraphics[width=3.5in]{./figures/datasets_table.png}
 \caption{The class definition for constructing the \texttt{datasets} table via \texttt{SQLAlchemy}.}
-\label{fig1}
+\label{fig14}
 \end{figure}
 
 Since there are 109 header tables, some of which have hundreds of columns, it is not practical to construct
@@ -914,7 +897,7 @@ header key/value pairs are defined in a separate function named \texttt{define$\
 \centering
 \includegraphics[width=3.5in]{./figures/orm_factory.png}
 \caption{The \texttt{orm$\_$factory} function, used to define class definitions for header tables.}
-\label{fig1}
+\label{fig15}
 \end{figure}
 
 % Figure for define_columns in database_interface
@@ -922,7 +905,7 @@ header key/value pairs are defined in a separate function named \texttt{define$\
 \centering
 \includegraphics[width=3.5in]{./figures/define_columns.png}
 \caption{The \texttt{define$\_$columns} function, used to define columns used in the header tables.}
-\label{fig1}
+\label{fig16}
 \end{figure}
 
 The purpose of the \texttt{define$\_$columns} function is to define \texttt{SQAlchemy} \texttt{Column}
@@ -937,7 +920,7 @@ the given \texttt{class$\_$name}. An portion of an example text file is shown in
 \includegraphics[width=0.8in]{./figures/table_definition.png}
 \caption{The contents of an example text file used to define the columns of a header table in the
 \texttt{define$\_$columns} function. The example table used here is the \texttt{wfc$\_$asn$\_$0} table.}
-\label{fig1}
+\label{fig17}
 \end{figure}
 
 Furthermore, the 109 text files used to define the header table columns are also generated in an
@@ -958,7 +941,7 @@ shown in Figure N, where the several of the \texttt{WFC} header tables are defin
 \includegraphics[width=1.5in]{./figures/orm_factory_calls.png}
 \caption{An example of how the \texttt{orm$\_$factory} function is called to create class
 defintions for the header tables.}
-\label{fig1}
+\label{fig18}
 \end{figure}
 
 With the \texttt{master}, \texttt{datasets}, and each of the 109 header tables defined in the
@@ -966,7 +949,7 @@ With the \texttt{master}, \texttt{datasets}, and each of the 109 header tables d
 is accomplished by executing the \texttt{base.metadata.create$\_$all()} method.
 
 
-\subsection{Data ingestion software: Algorithm}
+\subsection{Data ingestion software: Algorithm} \label{sec3.7}
 
 Another critical component of the ACS Quicklook system are the modules that are used to ingest
 data into the \texttt{acsql} database and to create the ``Quicklook'' JPEGs and thumbails.
@@ -1002,7 +985,7 @@ in section 3.6 to perform the \texttt{insert} or \texttt{update} operation.  The
 \caption{The \texttt{insert$\_$or$\_$update} function from the \texttt{acsql.utils.utils}
 module, used at various times during the data ingestion process to determine if an
 entry should be inserted or updated in the \texttt{acsql} database.}
-\label{fig1}
+\label{fig19}
 \end{figure}
 
 4. \textbf{\textit{Loop over the available \texttt{filetypes} for the given \texttt{rootname}:}}
@@ -1057,7 +1040,7 @@ intended to be executed daily (as an automatically-spawned process) as to keep t
 Quicklook system up-to-date on any public data as it becomes available.
 
 
-\subsection{Data ingestion software: \texttt{logging}}
+\subsection{Data ingestion software: \texttt{logging}} \label{sec3.8}
 
 Since the data ingestion software is intended to be executed by an automatic process and not
 by a human, we implemented a system by which the status of the ingestion process can be logged
@@ -1072,7 +1055,7 @@ file showing the ingestion of a single rootname (\texttt{j8zh21xv}) is provided 
 \subfloat{\includegraphics[width=7.0in]{./figures/log.png}%
 \label{fig_first_case}}
 \caption{An example log file for the ingestion of a single file (\texttt{j8zh21xv}).}
-\label{fig1}
+\label{fig20}
 \end{figure*}
 
 When the ingestion module gets executed, an empty log file is created with the filename
@@ -1099,9 +1082,7 @@ In most cases, logging statments only occur after a change of state to the syste
 database table, the creation of a JPEG or Thumbnail.)
 
 
-\subsection{Web Application}
-
-\subsubsection{Overview}
+\subsection{Web Application} \label{sec3.9}
 
 The front-end of the \texttt{acsql} system is the web application.  The web application is built using
 \texttt{Python} and \texttt{Flask}, which is a \texttt{Python} based web framework (Ronacher, 2010).
@@ -1123,7 +1104,7 @@ the homepage also contains button-type links to the database query page and the 
 \centering
 \includegraphics[width=3.5in]{./figures/homepage.png}
 \caption{The homepage of the \texttt{acsql} web application.}
-\label{fig1}
+\label{fig21}
 \end{figure}
 
 Figure N shows an example of the database query page.  This page allows users to fill out a form that
@@ -1138,7 +1119,7 @@ page to be further expanded and/or modified in the future as more use cases beco
 \centering
 \includegraphics[width=3.5in]{./figures/database_query_page.png}
 \caption{A portion of the database query page of the \texttt{acsql} web application.}
-\label{fig1}
+\label{fig22}
 \end{figure}
 
 In this example, we use the form to find all data that were taken with the \texttt{WFC} detector,
@@ -1157,7 +1138,7 @@ showing the Thumbnail images of all of the resulting images (see Figure N).
 \includegraphics[width=3.5in]{./figures/database_query_results_html.png}
 \caption{The results of the database query shown in Figure N in the form of an HTML
 table.}
-\label{fig1}
+\label{fig23}
 \end{figure}
 
 % Figure for query results csv
@@ -1166,7 +1147,7 @@ table.}
 \includegraphics[width=3.5in]{./figures/database_query_results_csv.png}
 \caption{The results of the database query shown in Figure N in the form of an CSV
 file.}
-\label{fig1}
+\label{fig24}
 \end{figure}
 
 % Figure for query results thumbnails
@@ -1175,7 +1156,7 @@ file.}
 \includegraphics[width=3.5in]{./figures/database_query_results_thumbnails.png}
 \caption{The results of the database query shown in Figure N in the form of thumbnail
 images.}
-\label{fig1}
+\label{fig25}
 \end{figure}
 
 Figure N shows the archive links page.  This page contains links to every proposal that contains
@@ -1191,7 +1172,7 @@ based on the chosen paramters.  Figure N shows an example of this webpage, using
 \centering
 \includegraphics[width=3.5in]{./figures/archive_links.png}
 \caption{The archive links webpage of the \texttt{acsql} web application.}
-\label{fig1}
+\label{fig26}
 \end{figure}
 
 % Figure for view proposal
@@ -1199,7 +1180,7 @@ based on the chosen paramters.  Figure N shows an example of this webpage, using
 \centering
 \includegraphics[width=3.5in]{./figures/view_proposal.png}
 \caption{An example of a `view proposal' webpage, using proposal 14039.}
-\label{fig1}
+\label{fig27}
 \end{figure}
 
 In the `view proposal' webpages, users may click on any one of the thumbnail images to bring up
@@ -1214,7 +1195,7 @@ along with useful metadata of the dataset near the top of the page.  It also con
 \centering
 \includegraphics[width=3.5in]{./figures/view_image.png}
 \caption{An example of a `view image' webpage, using dataset \texttt{jcs718kmq}.}
-\label{fig1}
+\label{fig28}
 \end{figure}
 
 \subsubsection{Implementation}
@@ -1282,7 +1263,7 @@ menu bar), named \texttt{base.html}. Aside from some minor tweaks, we use templa
 front-end component library and open source toolkit for developing \texttt{HTML}, \texttt{CSS}, and \texttt{JS} (bootstrap).
 
 
-\subsection{\texttt{acsql} Package}
+\subsection{\texttt{acsql} Package} \label{sec3.10}
 
 All code associated with the \texttt{acsql} project is contained within a single \texttt{git} repository
 (also named \texttt{acsql}), which we refer to as the ``\texttt{acsql} Library'', or ``\texttt{acsql} package''.
@@ -1469,7 +1450,7 @@ API documentation hosted at \url{http://acsql.readthedocs.io/}.
 
 
 % Results
-\section{Results}\label{sec:results}
+\section{Results} \label{chap4}
 
 The results of the system implementation (described in Chapter 2) were several project deliverables (each described further in the
 sections below:
@@ -1486,7 +1467,7 @@ sections below:
 The project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used
 by ACS users external to STScI.
 
-\subsection{Filesystem Deliverable}
+\subsection{Filesystem Deliverable} \label{sec4.1}
 
 As described in Sections 3.3 and 3.4, the \texttt{acsql} filesystem is comprised of two major parts: (1) A filesystem
 that stores the archive of publicly-available ACS data (i.e. the FITS files), and (2) a filesystem of ``Quicklook''
@@ -1511,7 +1492,7 @@ specific observing modes.
 \centering
 \includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
 \caption{The number of files in the \texttt{acsql} filesystem by filetype.}
-\label{fig1}
+\label{fig29}
 \end{figure}
 
 As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
@@ -1521,7 +1502,7 @@ Currently, there are $\sim$457,000 JPEGS and $\sim$185,000 corresponding Thumbna
 images are only generated for \texttt{flt} filetypes, hence the descrepency in number}.
 
 
-\subsection{Database Deliverable}
+\subsection{Database Deliverable} \label{sec4.2}
 
 As described in Sections 3.5 and 3.6, the \texttt{acsql} database is a \texttt{MySQL} database that stores the header
 information of every public ACS dataset.  Currently, this database is hosted on a server that is internal to STScI.  However,
@@ -1537,11 +1518,11 @@ the 111 tables.
 \centering
 \includegraphics[width=3.5in]{./figures/database_records.png}
 \caption{The number of records in each of the \texttt{acsql} database tables.}
-\label{fig1}
+\label{fig30}
 \end{figure}
 
 
-\subsection{Web Application Deliverable}
+\subsection{Web Application Deliverable} \label{sec4.3}
 
 As described in Section 3.9, the \texttt{acsql} web application consists of a series of \texttt{Python} modules
 and static files.  Currently, the web application is not yet hosted on a dedicated web server (neither externally nor
@@ -1554,37 +1535,40 @@ users must (1) ensure that they have built (or have access to) the \texttt{acsql
 (2) have installed the \texttt{Python} package dependencies, and (3) have filled out the \texttt{config.yaml}
 file (see Section 3.10).
 
-\subsection{Software Package Deliverable}
+
+\subsection{Software Package Deliverable} \label{sec4.4}
 
 As described in Sections 3.1 and 3.10, the \texttt{acsql} git repository serves as the software package that contains
 all of the code and supporting materials needed to operate the \texttt{acsql} system.  The software package is open-source,
 and is avilable to download directly from the \texttt{GitHub} repository (\url{http://github.com/acsql/}).  All
 future enhancements and bug fixes to the \texttt{acsql} project will occur through this version-controlled repository.
 
-\subsection{Software Documentation Deliverable}
+
+\subsection{Software Documentation Deliverable} \label{sec4.5}
 
 As described in Section 3.2, another deliverable for the project is the API documentation that is automatically
 generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are available through the \texttt{acsql} package,
 but are also hosted on \texttt{readthedocs}, available at \url{http://acsql.readthedocs.io/}.  This is considered
 the official code documentation.
 
-% Discussion
-\section{Discussion}\label{sec:discussion}
 
-\subsection{Possible enhancements to the \texttt{acsql} system}
+% Discussion
+\section{Discussion} \label{chap5}
+
+\subsection{Possible enhancements to the \texttt{acsql} system} \label{sec5.1}
 
 Though these currently are the only
 two main features, we expect that the web application may be a source of significant ongoing development,
 as the number of possible features implemented on top of the \texttt{acsql} database and \texttt{acsql}
 filesystem are plentiful.
 
-\subsection{Possible simplifications based on MAST archive}
+\subsection{Possible simplifications based on MAST archive} \label{sec5.2}
 
-\subsection{Possible extensions to other instruments or missions}
+\subsection{Possible extensions to other instruments or missions} \label{sec5.3}
 
 
 % Conclusion
-\section{Conclusion}\label{sec:conclusion}
+\section{Conclusion} \label{chap6}
 The conclusion goes here.
 
 
@@ -1615,12 +1599,39 @@ The conclusion goes here.
 % Referecnes
 \begin{thebibliography}{1}
 
-\bibitem{IEEEhowto:numpydoc}
-\emph{A Guide to NumPy/SciPy Documentation}, [Online; accessed 2017-08-05], available at
-\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}
+\bibitem{IEEEhowto:sm3b}
+\emph{SM3B}, National Aeronautics and Space Administration, Goddard Space Flight Center,
+[Online; accessed 2017-09-16], available at \url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm3b.html}.
+
+\bibitem{IEEEhowto:sm4}
+\emph{SM4}, National Aeronautics and Space Administration, Goddard Space Flight Center,
+[Online; accessed 2017-09-16], available at \url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm4.html}.
 
 \bibitem{IEEEhowto:avila}
 Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:mast}
+\emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
+available at \url{https://archive.stsci.edu/}.
+
+\bibitem{IEEEhowto:smith}
+Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:robitaille}
+Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
+Astronomy \& Astrophysics, 558, A33.
+
+\bibitem{IEEEhowto:stsci}
+\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \url{www.stsci.edu}.
+
+
+
+
+
+
+\bibitem{IEEEhowto:numpydoc}
+\emph{A Guide to NumPy/SciPy Documentation}, [Online; accessed 2017-08-05], available at
+\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}
 
 \bibitem{IEEEhowto:bayer}
 Bayer, M., 2006–, \emph{SQLAlchemy: The database toolkit for Python}, [Online; accessed 2017-02-21],
@@ -1671,19 +1682,9 @@ Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net
 \bibitem{IEEEhowto:readthedocs}
 \emph{Read the Docs}, [Online; accessed 2017-08-05], available at \url{https://readthedocs.org}.
 
-\bibitem{IEEEhowto:robitaille}
-Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
-Astronomy \& Astrophysics, 558, A33.
-
 \bibitem{IEEEhowto:ronacher}
 Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \url{http://flask.pocoo.org/}
 
-\bibitem{IEEEhowto:smith}
-Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
-
-\bibitem{IEEEhowto:mast}
-\emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
-available at \url{https://archive.stsci.edu/}.
 
 \bibitem{IEEEhowto:mast_portal}
 \emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
