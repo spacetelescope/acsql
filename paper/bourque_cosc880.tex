@@ -188,7 +188,7 @@ Tables \ref{tab1} and \ref{tab2} describe the different extensions of ACS FITS f
 of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for WFC, since WFC is comprised of two separate CCD chips.
 
 % Table for WFC extenions
-\begin{table}[!t]
+\begin{table}[!h]
 \renewcommand{\arraystretch}{1.5}
 \caption{ACS/WFC FITS file extensions}
 \label{tab1}
@@ -215,7 +215,7 @@ of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for WFC, since WFC is compri
 \end{table}
 
 % Table for HRC and SBC extenions
-\begin{table}[!t]
+\begin{table}[!h]
 \renewcommand{\arraystretch}{1.5}
 \caption{ACS/HRC and ACS/SBC FITS file extensions}
 \label{tab2}
@@ -251,7 +251,7 @@ in Figure \ref{fig2}.  Note that extension headers may contain a large number of
 while others may contain only $\sim$40 keywords.
 
 % Figure for header example
-\begin{figure}[!t]
+\begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/header_example.png}
 \caption{A section of an example header, taken from the 0th extension of the file \texttt{j6mf6lhq$\_$raw.fits}.}
@@ -331,168 +331,121 @@ entire detector (e.g. \texttt{WFC}, referred to as a ``full-frame image''), or a
 
 \subsection{Motivation} \label{sec1.3}
 
-The motivation for the \texttt{acsql} system is driven by several limitations
-of the FITS file structure as well as the current capabilities of MAST from specific
-user perspectives. Some of these limitations are described below, along with the
-way the ACS Quicklook application aims to address them.  We also discuss the
-inteded users of the application and the expected use cases.\newline
+The motivation for the \texttt{acsql} application is driven by several limitations of the FITS file structure as well as limitations in the current capabilities of
+MAST from specific user perspectives. Some of these limitations are described below, along with how the \texttt{acsql} application aims to address them.  We also
+discuss the inteded users of the application and their expected use cases.
+
 
 \subsubsection{Data retreival letency} \label{sec1.3.1}
 
-Currently, users who wish to retreive data from MAST must submit a retreival
-request via the MAST online interface. Once the retreival request is processed
-(usually automatically unless it is a request of a large number of datasets),
-the data are either transfered to the user directly via \texttt{sftp}, transfered
-to a ``staging area'' in which the user can log into and copy the data via
-\texttt{ftp} at their leisure, or sent by mail via DVD, depending on which option
-the user selects.  In the case of any one of these options, the time between a
-download request and the the time in which the user has fully retreived the data
-may be a significant amount of time.  In the fastest scenario of the
-\texttt{sftp} option, a typical request can take minutes to hours to be completed.
-Furthermore, there are limited options available for programmatically obtaining new
-data; users who wish to retreive the latest availble data must (1) discover which
-datasets are of interest via a query to the MAST database, (2) construct a download
-request, (3) submit the download request, and (4) await the data.
+Currently, users who wish to retreive data from MAST must submit a retreival request via the MAST online interface or an internal XML request. Once the retreival
+request is processed (usually automatically unless it is a request of a large number of datasets), the data are either transfered to the user directly via
+Secure File Transfer Protocol (\texttt{sftp}), transfered to a ``staging area'' in which the user can log into and copy the data via File Transfer Protocol (\texttt{ftp})
+at their leisure, or sent by mail via DVD, depending on which option the user selects.  In any case, the time between a download request and the the time in which the
+user has fully retreived the data may be a significant amount of time.  In the fastest scenario of an automatically-accepted request and the \texttt{sftp} option, a
+typical request can take minutes to hours to be completed. Furthermore, there are limited options available for programmatically obtaining new data; users who wish to
+retreive the latest availble data must (1) discover which datasets are new via a query to the MAST database, (2) construct a download request, (3) submit the download
+request, and (4) await or retreive the data.  This workflow makes it non-trivial to discover new data and perform analysis on them within the same software program.
 
-The ACS Quicklook system attempts to circumnavigate this retreival process by making
-the full data products instantly available via read-only access of the \texttt{acsql}
-filesystem, as well as a subset of the data products (and corresponding metadata)
-instantly available to view through the web application.  By having all of the available
-data centrally located, users need not to go through this request process; data can
-be directly read from the storage areas on disk.
+The \texttt{acsql} application attempts to circumnavigate this retreival process by making the full data products instantly available via read-only access of
+the \texttt{acsql} filesystem, as well as a `Quicklook` view of the data (and corresponding metadata) instantly available through the \texttt{acsql} web application.
+By having all of the available data centrally located, users need not to go through this request process; data can be directly read from the storage areas on disk.
+
 
 \subsubsection{File I/O} \label{sec1.3.2}
 
-A significant limitation of the FITS file format is the amount of time required for
-file I/O.  With users often finding themselves analyzing hundreds to thousands of
-images, this file I/O can be quite a burden on the total processing time of such
-analysis.  \texttt{acsql} attempts to mitigate this processing time by storing the
-valuable image metadata that users often seek in a relational database.
+A significant limitation of the FITS file format is the amount of time required for file input/output.  With users often finding themselves analyzing hundreds to
+thousands of images, this file I/O can be quite a burden on the total processing time of such analysis.  The \texttt{acsql} application attempts to mitigate this
+processing time by storing the valuable image metadata that users often seek in a relational database.
 
-Queries to the \texttt{acsql} database prove to be much faster than opening and
-closing individual FITS files, and the difference in data retreival times increases
-linearly with increasing amount of files.  Consider an example situation in which a
-user wishes to retreive the date of observation (i.e. the \texttt{DATE-OBS} header
-keyword in the 0th extension of a \texttt{raw} FITS file) for one thousand files.
-Figure N shows that the total time required to gather this information is $\sim$N times less
-when quering the \texttt{acsql} database than when retreiving the data directly from
-the FITS files.
+Queries to the \texttt{acsql} database prove to be much faster than opening and closing individual FITS files, and the difference in data retreival times increases
+linearly with increasing amount of files.  Consider an example situation in which a user wishes to retreive the date of observation (i.e. the \texttt{DATE-OBS} header
+keyword in the 0th extension of a \texttt{raw} FITS file) for one hundred files. Figure \ref{fig3} shows that the total time required to gather this information
+is $\sim$10-fold less when quering the \texttt{acsql} database than when retreiving the data directly from the FITS files, with this gap increasing linearly with
+increasing number of files at a rate of $\sim$2.5 seconds per 100 files.
 
 % Figure for IO time profile
-\begin{figure}[!t]
+\begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/fileio_time.png}
-\caption{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword
-from a varying number of ACS data files via reading the FITS file using the
+\caption{The amount of time it takes to retreive the \texttt{DATE-OBS} header keyword from a varying number of ACS data files via reading the FITS file using the
 \texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (green)}
 \label{fig3}
 \end{figure}
 
-In order to build the \texttt{acsql} database, each ACS FITS file must ultimately be
-opened in order to retrieve the header information.  However, this operation is only
-performed once and needed not to be performed by the user.
+In order to build the \texttt{acsql} database, each ACS FITS file must ultimately be opened in order to retrieve the header information.  However, this operation is only
+performed once and needed not to be performed by the user; once the database is built, users can retreive data by fast database queries.
+
 
 \subsubsection{Data redundancy} \label{1.3.3}
 
-As will be discussed in section 1.3.5, the primary user base for \texttt{acsql} is a group
-of ACS instrument analysts who use ACS data on a daily basis.  As such, each user may
-require access to a varying amount of ACS data over time; some data may be useful for
-their work one day, but not the next, while some data is consistently being analyzed over
-time.  Furthermore, instrument analysts may share the need for specific data with one or
-more of their colleagues. Consider a situation in which two instrument anaysist require data
-from a proposal 11655. Traditionally, for the two instrument analysts to obtain the data they
-need, they would have to submit a download request to MAST for data from 11655 and store the data
-in personal directories.  Unless this effort is explicitly coordinated amongst the two
-individuals, they will each likely download and store a copy of this data, when in reality, only
-one copy is needed.  As illustrated, this workflow leads to possible data redundancy.  With
-the ACS instrument team employing roughly a dozen instrument analysts, the scale of this
-data redundancy can grow quite large.
+As will be discussed in section \ref{sec1.3.5}, the primary user base for the \texttt{acsql} application is a group of ACS instrument analysts who use ACS data on a daily
+basis.  As such, each user may require access to a varying amount of ACS data over time; some data may be useful for their work on a pariticular day, but not on another day,
+while some data is consistently being analyzed on a daily basis.  Furthermore, instrument analysts may share the need for specific data with one or more of their colleagues.
+Consider a situation in which two instrument anaysist require data from a proposal \texttt{11655}. Traditionally, for the two instrument analysts to obtain the data they
+need, they would have to submit a download request to MAST for data from \texttt{11655} and store the data in personal directories.  Unless this effort is explicitly
+coordinated amongst the two individuals, they will each likely download and store a separate copy of this data, when in reality, only one copy is needed.  This workflow leads to
+possible data redundancy.  With the ACS instrument team employing roughly a dozen instrument analysts, the scale of this data redundancy can grow quite large.
 
-Recently, MAST has mitigated this issue through what is known as the MAST public cache, which is
-a centrally-located, organized network file system that stores all publicly-available HST data and
-is internal to STScI.  THe \texttt{acsql} filesystem is built on top of the MAST public cache
-to provide accessibility to all ACS data in one central location.  Furthermore, the \texttt{acsql}
-application provides the \texttt{acsql} database (for observational metadata needs) and the
-\texttt{acsql} web application (for quick data viewing).  With the combination of these three
-components, instrument analysts have instant access to all ACS data at any time; no need for
-coordination amongst other instrument analysts or storage of separate copies.
+Recently, MAST has mitigated this issue through what is known as the MAST public cache, which is a centrally-located, organized network file system that stores all
+publicly-available HST data and is internal to STScI.  THe \texttt{acsql} filesystem is built on top of the MAST public cache to provide accessibility to all ACS data in one
+central location.  Furthermore, the \texttt{acsql} application provides the \texttt{acsql} database (for observational metadata needs) and the \texttt{acsql} web application
+(for quick data viewing).  With the combination of these three components, instrument analysts have instant access to all ACS data at any time in one centralized location; there is
+no need for coordination amongst other instrument analysts or storage of separate copies.
+
 
 \subsubsection{Data discovery} \label{sec1.3.4}
 
-As will be discussed in section 1.3.5, ACS instrument analysts often wish to know which datasets
-(i.e. rootnames) exist for various observational parameters.  For example, one may need to
-analyze data that were observed between a specific time period, or observed with a specific pointing
-on the sky.  Conversely, an instrument analyst may have knowledge of specific rootnames, but wish
-to know the observational parameters associated with them.
+As will be discussed in section \ref{sec1.3.5}, ACS instrument analysts often wish to know which datasets (i.e. rootnames) exist for various observational parameters.
+For example, one may need to analyze data that were observed between a specific time period, or observed with a specific pointing on the sky.  Conversely, an instrument analyst
+may have knowledge of specific rootnames, but wish to learn of the observational parameters associated with them.
 
-MAST has tools which allow users to discover rootnames and/or parameters for observations, such as
-the MAST portal, which is a public-facing online data discovery tool for various data collections such
-as HST data, high level science products, and catalogs of astronomical source positions (further
-discussed in Chapter 3) (MAST, 2017).  The MAST portal offers features that may be of particular
-interest to research astronomers at academic institutions, for example, an image of the location of
-the scientific target on the sky (`AstroView'), an interactive GUI for displaying results, and an
-option to export results to various file types.  An example query of this tool is shown in Figure N.
+MAST has tools which allow users to discover rootnames and/or parameters for observations, such as the MAST portal, which is a public-facing online data discovery tool for
+various data collections such as HST data, high level science products, and catalogs of astronomical source positions[10].  The MAST portal offers features that may be of particular
+interest to research astronomers at academic institutions, for example, an image of the location of the scientific target on the sky (`AstroView'), an interactive GUI for displaying
+results, and an option to export results to various file types.  An example query using this tool is shown in Figure 4.
 
 % Figure for MAST portal example
-\begin{figure}[!t]
+\begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/mast_portal.png}
 \caption{An example of a query to the MAST data discovery portal.}
 \label{fig4}
 \end{figure}
 
-Though the MAST portal has many useful features, there are some limitations to the tool from the
-perspective of an instrument analyst at STScI.  One such limitation is that the observational metadata
-available through the MAST portal does not include all of the observational metadata available in
-the FITS headers; it is limited to a small subset of header keywords, mainly from the RAW and FLT
-filetypes, amongst other MAST-generated metadata (e.g. `Target Classification').  Another limitation
-is that the result of a query is keyed off of an `Observation ID' as opposed to a traditional
-\texttt{rootname}.  The `Observation ID' may map to one or more individual observations (and thus
-one or more individual \texttt{rootnames}), making it difficult for instrument analysts to discover
-which \texttt{rootnames} (and thus data files) that are associated with the observational metadata
-they seek.  Similarly, this makes it difficult to use the MAST portal to query for information based
-on an individual observation.
+Though the MAST portal has many useful features, there are some limitations to the tool from the perspective of an instrument analyst at STScI.  One such limitation is that
+the available observational metadata does not include all of the observational metadata available in the FITS headers; it is limited to a small subset of header keywords, mainly
+from the RAW and FLT filetypes, as well as other MAST-generated metadata not found in the FITS headers (e.g. `Target Classification').  Another limitation is that the queries are
+keyed off of an `Observation ID' as opposed to a traditional 9-character \texttt{rootname}.  The `Observation ID' may map to one or more individual observations (and thus one or more
+individual \texttt{rootnames}), making it difficult for instrument analysts to discover which \texttt{rootnames} (and thus data files) that are associated with the observational
+metadata they seek.  Similarly, this makes it difficult to use the MAST portal to query for information based on an individual observation/9-character \texttt{rootname}.
 
-The \texttt{acsql} application aims to provide an intuitive, one-to-one correspondance between the
-FITS header values and the \texttt{acsql} database schema.  The column names in the header tables of
-the \texttt{acsql} database exactly match the names found in the FITS headers, and each extension
-of each ACS filetype is supported.  Furthermore, the primary key of each header table in the database
-is the \texttt{rootname} that instrument analysts use in their day-to-day work, as opposed to an
-`Observation ID'.  With this configuration, it is straightforward to discover data via a database
-query using header keywords.
+The \texttt{acsql} application aims to provide an intuitive, one-to-one correspondance between the FITS header values and the \texttt{acsql} database schema.  The column names in the
+tables of the \texttt{acsql} database exactly match the names found in the FITS headers, and each extension of each ACS filetype is supported.  Furthermore, the primary key of each
+table in the database is the 9-character \texttt{rootname} that instrument analysts use in their day-to-day work, as opposed to an `Observation ID'.  With this configuration, it
+is straightforward to discover data via a database query using header keywords.
 
 
 \subsubsection{Use Cases} \label{sec1.3.5}
 
-The intended primary users of the \texttt{acsql} application are ACS isntrument analysts that
-work for the ACS instrument team at STScI.  ACS instrument analysts use ACS data frequently
-in their day-to-day work, using the data to help calibrate, monitor, and characterize the
-various aspects and behaviors of the ACS instrument.  On any given day, an instrument analyst
-may need to analyze data from a number of observing modes, time periods, or filetypes.  In this
-regard, the \texttt{acsql} application aims to limit the amount of time and effort required by
-instrument analysts to discover and access the data that they need to perform such work.
-It should be noted, though, that the \texttt{acsql} application is not limited to this
-user base; since the application is non-proprietary, other potential users exist, such as
-scientists and researchers external to STScI.
+The intended primary users of the \texttt{acsql} application are ACS isntrument analysts that work for the ACS instrument team at STScI.  ACS instrument analysts use ACS data frequently
+in their day-to-day work, using the data to help calibrate, monitor, and characterize various aspects of the ACS instrument.  On any given day, an instrument analyst may need to analyze
+data from a number of observing modes, time periods, or filetypes.  In this regard, the \texttt{acsql} application aims to limit the amount of time and effort required by instrument
+analysts to discover and access the data that they need to perform such work. It should be noted, though, that the \texttt{acsql} application is not necessarily limited to this user base;
+since the application is non-proprietary, there is potential for users external to STScI, such as scientific researchers at other academic institutions.
 
-With the nature of ACS instrument work in mind, the \texttt{acsql} application was designed
-to acheive four main use cases, each briefly described below.
+With the nature of ACS instrument work in mind, the \texttt{acsql} application was designed to support four main use cases, each briefly described below.
 
-\textit{Use case 1: Visually inspect an image from the ACS archive}:  The application shall allow
-users to view a `Quicklook' JPEG of any publicly-available image in the ACS archive, along with
-useful corresponding observational metadata.
+\textit{Use case 1: Visually inspect an image from the ACS archive}:  The application shall allow users to view a `Quicklook' JPEG of any publicly-available image in the ACS archive,
+along with useful corresponding observational metadata.
 
-\textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of
-observational parameters}:  The application shall allow users to determine which 9-character
-\texttt{IPPPSSOTT} rootnames exist for a defined set of observational parameters via ACS
-header keywords.
+\textit{Use case 2: Determine which datasets exist in the ACS archive for a given set of observational parameters}:  The application shall allow users to determine which
+9-character \texttt{IPPPSSOTT} rootnames exist for a defined set of observational parameters via ACS header keywords.
 
-\textit{Use case 3: Determine the observational parameters for a given dataset}: The application
-shall allow users to determine observational parameters (i.e. FITS header keyword values) for
+\textit{Use case 3: Determine the observational parameters for a given dataset}: The application shall allow users to determine observational parameters (i.e. FITS header keyword values) for
 a given 9-character \texttt{IPPPSSOTT} rootname.
 
-\textit{Use case 4: Programmatically analyze images across custom datasets}: The application
-shall allow users to read ACS image data into memory and perform analysis for data obtained
+\textit{Use case 4: Programmatically analyze images across custom datasets}: The application shall allow users to read ACS image data into memory and perform analysis for data obtained
 in Use Case (2).
 
 
@@ -1595,16 +1548,12 @@ Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 
 \bibitem{IEEEhowto:lucas}
 Lucas, R. A., et al., 2016, \emph{ACS Data Handbook}, Version 8.0 (Baltimore: STScI)
 
-
-
-
-
-
-
-
 \bibitem{IEEEhowto:robitaille}
 Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
 Astronomy \& Astrophysics, 558, A33.
+
+\bibitem{IEEEhowto:mast_portal}
+\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
 
 
 
@@ -1639,11 +1588,6 @@ Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, availab
 \url{http://www.sphinx-doc.org/en/stable/}.
 
 
-
-
-
-
-
 \bibitem{IEEEhowto:git}
 \emph{git}, [Online; accessed 2017-08-05], available at \url{https://git-scm.com}.
 
@@ -1672,9 +1616,6 @@ Second Annual Python Conference, available at \url{http://epydoc.sourceforge.net
 \bibitem{IEEEhowto:ronacher}
 Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \url{http://flask.pocoo.org/}
 
-
-\bibitem{IEEEhowto:mast_portal}
-\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \url{https://mast.stsci.edu/}
 
 \bibitem{IEEEhowto:vanDerWalt}
 van der Walt, S., Colbert, C., and Varoquaux, G., 2011, \emph{The NumPy Array: A Structure for
