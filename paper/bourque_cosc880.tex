@@ -145,57 +145,47 @@ Telescope (JWST), and MAST.  STScI is part of the Association of Universities fo
 
 \subsection{Data Structure} \label{sec1.1}
 
-The design of the ACS Quicklook application, especially the database, is heavily
-dependant on the underlying data structure of ACS FITS files.  As such, it is
-important for the reader to understand this data structure and thus the next four
-sections are dedicated to giving an overview on the subject.
+The design of \texttt{acsql}, particularly the \texttt{acsql} database, is heavily dependant on the underlying data structure of ACS FITS files.
+As such, it is important for the reader to have a conceptual understanding of this data structure and thus the following sections are dedicated to
+providing an overview on the FITS data format and ACS-specific intricacies.
+
 
 \subsubsection{Filenames} \label{sec1.1.1}
 
-Each ACS data file is named in a consistent fashion:\newline
+The data from each ACS observation is contained within a FITS data file, and is named in a consistent fashion:\newline
 
 \texttt{$<$rootname$>$\_$<$filetype$>$.fits}\newline
 
-\noindent where each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric
-characters, and \texttt{$<$filetype$>$} is one of several three-character filetype options
-(discussed in proceeding section \ref{sec1.1.4}).  For example, one ACS observation has the rootname
-\texttt{j6mf16lhq\_raw.fits} (Principle Investigator Gary Bernstein, observation
-date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname}
-has meaning, and is discussed in section 5.2 of the Introduction to the HST
-Data Handbooks[3].  The \texttt{.fits} extension at the end of the filename signifies that the file
-is of FITS format.
+\noindent where each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric characters, and \texttt{$<$filetype$>$} is one of several possible
+three-character filetype options (discussed in section \ref{sec1.1.4}).  For example, one ACS observation has the filename \texttt{j6mf16lhq\_raw.fits}
+(Principle Investigator Gary Bernstein, observation date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname} has a specific meaning,
+and is discussed in section 5.2 of the Introduction to the HST Data Handbooks[7].  The \texttt{.fits} extension at the end of the filename signifies
+that the file is of the FITS data format.
 
-The unique 9-character \texttt{rootname} is associated with an individual, unique ACS observation.
-However, it should be noted that only the first eight characters of the 9-character \texttt{rootname}
-is truly unique; the last character, which identifies the source of data transmission from the
-telescope\footnote{For example, \texttt{q} = solid-state recorder, \texttt{s} = retransmitted
-solid-state recorder}, has several possible values, however varying values do not associate with
-different observations.  For this reason, as will be discussed in section ref{sec3.5}, we adopt
-an 8-character \texttt{rootname} as a primary key to signify unique ACS observations.
+The unique 9-character \texttt{rootname} is associated with an individual, distinct ACS observation. However, it should be noted that only the first
+eight characters of the 9-character \texttt{rootname} is truly unique; the last character, which identifies the source of data transmission from the
+telescope\footnote{For example, \texttt{q} = solid-state recorder, \texttt{s} = retransmitted solid-state recorder}, has several possible values.  However,
+varying values of the last character do not associate with different observations.  For this reason, as will be discussed in section \ref{sec3.5}, we adopt
+an 8-character \texttt{rootname} as a primary key for the \texttt{acsql} database tables to denote unique ACS observations.
+
 
 \subsubsection{FITS file structure} \label{sec1.1.2}
 
-Each ACS FITS file consists of several `extensions', with each extension serving a purpose
-to describe a particular aspect of the observation.  Each extension consists of two parts: (1)
-an extension `header', which contain key/value pairs describing image metadata (for example,
-\texttt{DATE-OBS = '2016-09-22'} indicates that the observation date was \texttt{2016-09-22})
-(discussed in the next section), and (2) the extension data, which may be a binary table or,
-more commonly, a multi-dimensional array of detector pixel values.
+Each ACS FITS file consists of several `extensions', with each extension serving a specific purpose to describe a particular aspect of the observation.
+Each extension consists of two parts: (1) an extension `header', which contain key/value pairs describing image metadata (for example,
+\texttt{DATE-OBS = '2016-09-22'} indicates that the date the particular observation was made was \texttt{2016-09-22}), and (2) the extension data,
+which may be a binary table or, more commonly, a multi-dimensional array of detector pixel values.
 
-The type of extension data can also vary.  The most common extension data types are (1) `science'
-(\texttt{SCI}), in which the extension data describe a scientific observation, (2) `error'
-(\texttt{ERR}), in which the extension data describe the uncertainty in the pixel values of the
-\texttt{SCI} data, and (3) `data quality' (\texttt{DQ}), in which the extension data describe
-the quality of the pixel values for the detector (for example, they may indicate that certain
-pixels were affected by cosmic rays durring the observation).  Typically, for a given file,
-the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension,
-and the 3rd extension is the \texttt{DQ} extension.  Furthermore, the 0th extension typically has
-no extension data and only an extension header that contains metadata that is common to all
+The type of extension data can also vary.  The most common extension data types are (1) `science' (\texttt{SCI}), in which the data values are the measure
+the brightness of the astronomical scene, (2) `error' (\texttt{ERR}), in which the data values are the measure of the uncertainty in the pixel values of the
+\texttt{SCI} extension, and (3) `data quality' (\texttt{DQ}), in which the data values are 16-bit flags that describe the quality of the pixel values for
+the detector (for example, they may indicate that certain pixels were affected by cosmic rays durring the observation).  Typically, for a given file,
+the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension, and the 3rd extension is the \texttt{DQ} extension.
+Furthermore, the 0th extension typically has no extension data and only an extension header that contains metadata that is common to all
 extensions.  This is referred to as the `primary header'.
 
-Tables \ref{tab1} and \ref{tab2} describe the different extensions of ACS FITS files for each of the three ACS
-detectors.  Note that there are two sets of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for
-WFC since WFC is comprised of two separate CCD chips.
+Tables \ref{tab1} and \ref{tab2} describe the different extensions of ACS FITS files for each of the three ACS detectors.  Note that there are two sets
+of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for WFC, since WFC is comprised of two separate CCD chips.
 
 % Table for WFC extenions
 \begin{table}[!t]
@@ -246,43 +236,34 @@ WFC since WFC is comprised of two separate CCD chips.
 \end{table}
 
 
-Over the years, there have been several tools written in various programming languages to
-read in FITS files and automatically convert their extension data to multi-dimensional array
-data types and their extension headers to dictionary data types.  For this project, the
-\texttt{astropy.fits} \texttt{python} library is used extensivly to read and interact with
-ACS FITS files[4].
+Over the years, there have been several tools written in various programming languages to read the data of FITS files into memory and automatically convert
+their extension data into multi-dimensional array data types as well as their extension headers to dictionary or string data types.  For this project, the
+\texttt{astropy.io.fits} Python module is used extensively to read and interact with the data of ACS FITS files[8].
+
 
 \subsubsection{FITS file extension headers} \label{sec1.1.3}
 
-As mentioned in section \ref{sec1.1.2}, each FITS extension contains a `header, which
-contains key/value pairs of metadata associated with the extension data.  Such metadata
-includes various data that describes the astronomical observation (e.g. target name,
-exposure time, principle investigator name, etc.), telemetry of ACS or HST in general
-at the time of observation (e.g. temperature of the ACS instrument, orientation of the
-telescope pointing, position of the telescope relative to Earth, etc.) or the FITS file
-itself (e.g. the number of extensions, file creation date, etc.). A subsection of an
-example header is shown in Figure \ref{fig2}.
+As mentioned in section \ref{sec1.1.2}, each FITS extension contains a `header', which contains key/value pairs of metadata associated with the extension data.
+Such metadata includes various data that describes the astronomical observation (e.g. target name, exposure time, principle investigator name, etc.), telemetry
+of ACS instrument or HST in general at the time of observation (e.g. temperature of the ACS instrument, orientation of the telescope pointing, position of the
+telescope relative to Earth, etc.) or the FITS file itself (e.g. the number of extensions, file creation date, etc.). A subsection of an example header is shown
+in Figure \ref{fig2}.  Note that extension headers may contain a large number of keyword/value pairs; some extension headers contain upwards of 300 keywords,
+while others may contain only $\sim$40 keywords.
 
 % Figure for header example
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.5in]{./figures/header_example.png}
-\caption{An example header.}
+\caption{A section of an example header, taken from the 0th extension of the file \texttt{j6mf6lhq$\_$raw.fits}.}
 \label{fig2}
 \end{figure}
 
-Extension headers may contain a large number of keyword/value pairs.  Some extension
-headers contain upwards of 300 keywords, while others may contain only $\sim$40 keywords.
 
 \subsubsection{FITS filetypes for ACS} \label{sec1.1.4}
 
-As discusses in section \ref{sec1.1.1}, each ACS observation may result in several FITS filetypes.
-Each filetype describes the observation in a different way.  The set of available
-filetypes for a given observation is dependent on the characteristics of the observation,
-the details of which are beyond the scope of this paper.  Also beyond the scope of this
-paper are the vast details that surround each filetype; each one has a different scientific
-application that is not important to understanding the ACS Quicklook project.  However,
-to provide at least some context, below we give a brief description of each possible
+As discusses in section \ref{sec1.1.1}, each ACS observation may result in several FITS filetypes. Each filetype has a specific scientific application and
+the set of available filetypes for a given observation is dependent on the characteristics of the observation, the details of which are beyond the scope of this
+paper.  These details can however be ascertained from the ACS Data Handbook[9].  To provide some context, below we give a brief description of each possible
 filetype that a given observation may contain:
 
 \begin{itemize}
@@ -299,67 +280,53 @@ filetype that a given observation may contain:
   \item \textbf{asn} - Observation association table.
 \end{itemize}
 
-As noted earlier, a given observation may not result in the set of all possible filetypes.
-For example, the observation \texttt{j6mf16lhq} only has the filetypes \texttt{raw},
-\texttt{flt}, \texttt{jit}, \texttt{jif}, and \texttt{spt}.
+As noted earlier, a given observation may not result in the set of all possible filetypes. For example, the observation \texttt{j6mf16lhq} only results in the
+filetypes \texttt{raw}, \texttt{flt}, \texttt{jit}, \texttt{jif}, and \texttt{spt}.
 
 
 \subsection{Key Metadata} \label{sec1.2}
 
-There are several metadata key/value pairs that are particulary important for the
-ACS Quicklook application, specifically the web application.  To provide some context for the
-remainder of this paper, these metadata are briefly described below.  Note that the \texttt{rootname}
-and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are
-metadata that were explicitly added to the database schema.\newline
+There are several metadata key/value pairs that are particulary important for the \texttt{acsql} application, and namely the web application, which often
+presents these metadata to the user.  To provide some context for the remainder of this paper, these metadata are briefly described below.  Note that the
+\texttt{rootname} and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are metadata that were explicitly added to the
+\texttt{acsql} database schema.\newline
 
-\textit{APERTURE} - The portion of the \texttt{WFC}, \texttt{HRC}, or \texttt{SBC} detector that
-that was used during an observation.  Can either be the entire detector (called a ``full-frame
-image'') (e.g. \texttt{WFC}), or a subsection of the detector (called a ``subarray'') (e.g.
-\texttt{WFC1-1K}).\\
+\textit{APERTURE} - The portion of the \texttt{WFC}, \texttt{HRC}, or \texttt{SBC} detector that that was used during an observation.  This can either be the
+entire detector (e.g. \texttt{WFC}, referred to as a ``full-frame image''), or a subsection of the detector (e.g. \texttt{WFC1-1K}, refered to as a ``subarray'').\\
 
-\textit{DATE-OBS} - The date of the observation in the format \texttt{YYYY-MM-DD}, measured in
-Universal Time (e.g. \texttt{'2017-08-05'}).\\
+\textit{DATE-OBS} - The date of the observation in the format \texttt{YYYY-MM-DD}, measured in Universal Time (e.g. \texttt{'2017-08-05'}).\\
 
-\textit{DEC$\_$TARG} - The declination of the target (i.e. the angular distance the target north or south
-of the celestial equator) (e.g. \texttt{41.2842}).\\
+\textit{DEC$\_$TARG} - The declination of the target (i.e. the angular distance the target north or south of the celestial equator) (e.g. \texttt{41.2842}).\\
 
-\textit{DETECTOR} - The detector used for the observation.  Can either be \texttt{WFC}, \texttt{HRC},
-or \texttt{SBC}.\\
+\textit{DETECTOR} - The detector used for the observation.  Can either be \texttt{WFC}, \texttt{HRC}, or \texttt{SBC}.\\
 
-\textit{EXPFLAG} - Indicates if an observation was interrupted (e.g. \texttt{INTERRUPTED}) or not
-(e.g \texttt{NORMAL}).\\
+\textit{EXPFLAG} - Indicates if an observation was interrupted (e.g. \texttt{INTERRUPTED}) or not (e.g \texttt{NORMAL}).\\
 
-\textit{EXPSTART} - The exposure start time of the observation, in units of Modified Julian Date
-(e.g. \texttt{52473.8}).\\
+\textit{EXPSTART} - The exposure start time of the observation, in units of Modified Julian Date (e.g. \texttt{52473.8}).\\
 
 \textit{EXPTIME} - The exposure duration of the observation, in units of seconds (e.g. \texttt{1000.0}).\\
 
 \textit{FILTER1} - The selected element from the \texttt{ACS} filter wheel \# 1 (e.g. \texttt{F606W}).\\
 
-\textit{FILTER2} - The selected element from the \texttt{ACS} filter wheel \# 1 (e.g. \texttt{F814W}).\\
+\textit{FILTER2} - The selected element from the \texttt{ACS} filter wheel \# 2 (e.g. \texttt{F814W}).\\
 
 \textit{IMAGETYP} - The type of exposure for the observation (e.g. \texttt{BIAS}, \texttt{EXT}, etc.).\\
 
-\textit{OBSTYPE} - The type of observation, either \texttt{IMAGING}, \texttt{SPECTROSCOPIC},
-\texttt{CORONOGRAPHIC}, or \texttt{INTERNAL}.\\
+\textit{OBSTYPE} - The type of observation, either \texttt{IMAGING}, \texttt{SPECTROSCOPIC}, \texttt{CORONOGRAPHIC}, or \texttt{INTERNAL}.\\
 
-\textit{proposal$\_$type} - The type of proposal that the observation belongs to, such as Calibration
-(i.e. \texttt{CAL}) or General Observer (i.e. \texttt{GO}).\\
+\textit{proposal$\_$type} - The type of proposal that the observation belongs to, such as Calibration (i.e. \texttt{CAL}) or General Observer (i.e. \texttt{GO}).\\
 
-\textit{PROPOSID} - The proposal number that the observation belongs to (e.g. \texttt{10695}).\\
+\textit{PROPOSID} - The 4 or 5-digit proposal number that the observation belongs to (e.g. \texttt{10695}).\\
 
-\textit{RA$\_$TARG} - The right ascension of the target (i.e. the angular distance of the target east and west
-on the celestial sphere) (e.g. \texttt{49.5375}).\\
+\textit{RA$\_$TARG} - The right ascension of the target (i.e. the angular distance of the target east and west on the celestial sphere) (e.g. \texttt{49.5375}).\\
 
 \textit{rootname} - The 8-character unique rootname of the observation (e.g. \texttt{j59l5401}).\\
 
-\textit{SUBARRAY} - A boolean flag that indicates if the observation is a full-frame \texttt{APERTURE}
-(i.e. \texttt{0}) or a subarray \texttt{APERTURE} (i.e. \texttt{1}).\\
+\textit{SUBARRAY} - A boolean flag that indicates if the observation is a full-frame \texttt{APERTURE} (i.e. \texttt{0}) or a subarray \texttt{APERTURE} (i.e. \texttt{1}).\\
 
 \textit{TARGNAME} - The name of the target (e.g. \texttt{M87}, \texttt{NGC-4536}, \texttt{ANDROMEDA-I}, etc.).\\
 
-\textit{TIME-OBS} - The time of the start of the observation in the format \texttt{HH:MM:SS}, measured in
-Universal Time (e.g. \texttt{14:21:56}).\\
+\textit{TIME-OBS} - The time of the start of the observation in the format \texttt{HH:MM:SS}, measured in Universal Time (e.g. \texttt{14:21:56}).\\
 
 
 \subsection{Motivation} \label{sec1.3}
@@ -1614,15 +1581,34 @@ Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore
 \emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
 available at \url{https://archive.stsci.edu/}.
 
+\bibitem{IEEEhowto:fits}
+\emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
+International Astronomical Union FITS Working Group, available at
+\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+
+\bibitem{IEEEhowto:stsci}
+\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \url{www.stsci.edu}.
+
 \bibitem{IEEEhowto:smith}
 Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:lucas}
+Lucas, R. A., et al., 2016, \emph{ACS Data Handbook}, Version 8.0 (Baltimore: STScI)
+
+
+
+
+
+
+
 
 \bibitem{IEEEhowto:robitaille}
 Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
 Astronomy \& Astrophysics, 558, A33.
 
-\bibitem{IEEEhowto:stsci}
-\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \url{www.stsci.edu}.
+
+
+
 
 
 
@@ -1652,10 +1638,11 @@ Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 20
 Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
 \url{http://www.sphinx-doc.org/en/stable/}.
 
-\bibitem{IEEEhowto:fits}
-\emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
-International Astronomical Union FITS Working Group, available at
-\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}.
+
+
+
+
+
 
 \bibitem{IEEEhowto:git}
 \emph{git}, [Online; accessed 2017-08-05], available at \url{https://git-scm.com}.
