@@ -1161,8 +1161,7 @@ entry requires an \texttt{insert} or an \texttt{update}, and hard-coded Python v
 % Results
 \section{Results} \label{chap4}
 
-The results of the system implementation (described in Chapter 2) were several project deliverables (each described further in the
-sections below:
+The results of the system implementation (described in Chapter \ref{chap3}) were several project deliverables:
 
 \begin{enumerate}
 \item Filesystem
@@ -1173,59 +1172,52 @@ sections below:
 \end{enumerate}
 
 
-The project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used
-by ACS users external to STScI.
+As mentioned in section \ref{sec1.3.5}, the project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used by users external to STScI.
+In the following subsections, we further describe each on of these deliverables.
+
 
 \subsection{Filesystem Deliverable} \label{sec4.1}
 
-As described in Sections 3.3 and 3.4, the \texttt{acsql} filesystem is comprised of two major parts: (1) A filesystem
-that stores the archive of publicly-available ACS data (i.e. the FITS files), and (2) a filesystem of ``Quicklook''
-JPEGs and Thumbnails.
+As described in Sections \ref{sec3.3} and \ref{sec3.4} the \texttt{acsql} filesystem is comprised of two parts: (1) A filesystem that stores the archive of publicly-available ACS data (i.e. the
+FITS files), and (2) a filesystem of Quicklook JPEGs and thumbnails.
 
-For the former, we utilzed an already-existing filesystem of ACS data internal to STScI known as the ``MAST public cache'';
-this filesystem is organized in a very similar way to that shown in Figure N\footnote{We omit the mention of the parent
-directory structure and server names here as well as in the \texttt{acsql} code repository as to avoid exposing possible
-sensitive information.}.  Though this service is internal to STScI, it is possible for an external user to reconstruct the
-filesystem, as all data within the MAST public cache is publically available to download via the MAST archive (i.e.
-\textcolor{blue}{\url{https://archive.stsci.edu/}}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in
-the user-supplied \texttt{config.yaml} file (see Section 3.10).
+For the former, we utilzed an already-existing filesystem of ACS data internal to STScI known as the ``MAST public cache''; this filesystem is organized in a very similar way to that shown in
+Figure \ref{fig7}\footnote{We omit the mention of the parent directory structure and server names in this document as well as in the \texttt{acsql} code repository as to avoid exposing possible
+sensitive information.}.  Though this service is internal to STScI, it is possible for an external user to reconstruct the filesystem, as all data within the MAST public cache is publically available
+to download via the MAST archive (i.e. \textcolor{blue}{\url{https://archive.stsci.edu/}}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in the user-supplied
+\texttt{config.yaml} file (see section \ref{sec3.10}).
 
-Currently, the filesystem consists of $\sim$1,030,000 total files. Figure N shows how this breaks down by individual
-filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt} make up the majority of the files, which is not surprising
-considering that these filetypes occurr for nearly every observing mode.  On the other hand, we see a small amount of
-\texttt{crj} and \texttt{crc} files, which is also unsurprising considering that these filetypes are only triggered for
-specific observing modes.
+Currently, the filesystem consists of $\sim$1,030,000 total files. Figure \ref{fig29} shows how this breaks down by individual filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt}
+make up the majority of the files, which is not surprising considering that these filetypes exist for nearly every ACS observing mode.  On the other hand, we see a small amount of \texttt{crj} and
+\texttt{crc} files, which is also unsurprising considering that these filetypes are only triggered for very specific observing modes.
 
 % Figure for number of images per filetype
-\begin{figure}[!t]
+\begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
 \caption{\textit{The number of files in the \texttt{acsql} filesystem by filetype.}}
 \label{fig29}
 \end{figure}
 
-As per item (2), the filesystem of JPEGs and Thumbnails was constructed during the ingestion of all publicly-available
-ACS data (via \texttt{ingest$\_$production.py}, see section 3.10).  The location of the JPEG/Thumbnail filesystem is determined
-by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
-Currently, there are $\sim$457,000 JPEGS and $\sim$185,000 corresponding Thumbnail images in the filesystem\footnote{recall that Thumbnail
-images are only generated for \texttt{flt} filetypes, hence the descrepency in number}.
+As for item (2), the filesystem of JPEGs and thumbnails was constructed during the ingestion of all publicly-available ACS data (via \texttt{ingest$\_$production.py}, see section \ref{sec3.9}).
+The location of the JPEG/thumbnail filesystem is determined by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
+Currently, there are $\sim$457,000 JPEGS and $\sim$185,000 corresponding thumbnail images in the filesystem\footnote{recall that thumbnail images are only generated for \texttt{flt} filetypes,
+hence the descrepency in number}.
 
 
 \subsection{Database Deliverable} \label{sec4.2}
 
-As described in Sections 3.5 and 3.6, the \texttt{acsql} database is a \texttt{MySQL} database that stores the header
-information of every public ACS dataset.  Currently, this database is hosted on a server that is internal to STScI.  However,
-external users may build their own copy of the database via the \texttt{ingest$\_$production.py} and \texttt{database$\_$interface}
-modules.  All 111 tables of \texttt{acsql} database are up to date as of the time of this writing (September 2017), and it is
-intended that the database will be kept up-to-date via periodic executions of \texttt{ingest$\_$production.py}.
+As described in sections \ref{sec3.5} and \ref{sec3.6}, the \texttt{acsql} database is a \texttt{MySQL} database that stores the header information of every public ACS dataset.  Currently,
+this database is hosted on a server that is internal to STScI.  However, external users may build their own copy of the database via the \texttt{ingest$\_$production.py} and
+\texttt{database$\_$interface} modules.  All 111 tables of \texttt{acsql} database are up to date as of the time of this writing (September 2017), and it is intended that the database will
+be kept up-to-date via periodic executions of \texttt{ingest$\_$production.py}.
 
-Figure N shows the number of records in each table of the database.  Currently, there are $\sim$4,300,000 records in total amongst
-the 111 tables.
+Figure \ref{fig30} shows the number of records in each table of the database.  Currently, there are $\sim$4,300,000 records in total amongst the 111 tables.
 
 % Figure for number of records per table
-\begin{figure}[!t]
+\begin{figure}[!h]
 \centering
-\includegraphics[width=3.5in]{./figures/database_records.png}
+\includegraphics[width=3.6in]{./figures/database_records.png}
 \caption{\textit{The number of records in each of the \texttt{acsql} database tables.}}
 \label{fig30}
 \end{figure}
@@ -1233,32 +1225,26 @@ the 111 tables.
 
 \subsection{Web Application Deliverable} \label{sec4.3}
 
-As described in Section 3.9, the \texttt{acsql} web application consists of a series of Python modules
-and static files.  Currently, the web application is not yet hosted on a dedicated web server (neither externally nor
-internally to STScI\footnote{At the time of this writing, work is being done to build an web server that
-is internal to STScI to allow ACS instrument team members to more easily access the \texttt{acsql} web
-application.  We expect this web server to be operation within the next few months.}), however, users can
-operate the application through the user's \texttt{localhost}.  Detailed installation and operation
-instructions for the web application are provided in the official documentation (see Section 3.2).  In short,
-users must (1) ensure that they have built (or have access to) the \texttt{acsql} filesystem and database,
-(2) have installed the Python package dependencies, and (3) have filled out the \texttt{config.yaml}
-file (see Section 3.10).
+As described in section \ref{sec3.9}, the \texttt{acsql} web application consists of a series of Python modules and static files.  Currently, the web application is not yet hosted on a
+dedicated web server (neither externally nor internally to STScI\footnote{At the time of this writing, work is being done to build a web server that is internal to STScI to allow ACS instrument
+team members to easily access the \texttt{acsql} web application.  We expect this web server to be operational within the next few months.}), however, users can operate the application through
+the user's \texttt{localhost}.  Detailed installation and operation instructions for the web application are provided in the official documentation (see section \ref{sec3.2}).  In short,
+users must (1) ensure that they have built (or have access to) the \texttt{acsql} filesystem and database, (2) have installed the Python package dependencies, and (3) have filled out the
+\texttt{config.yaml} file (see section \ref{sec3.10}).
 
 
 \subsection{Software Package Deliverable} \label{sec4.4}
 
-As described in Sections 3.1 and 3.10, the \texttt{acsql} git repository serves as the software package that contains
-all of the code and supporting materials needed to operate the \texttt{acsql} system.  The software package is open-source,
-and is avilable to download directly from the \texttt{GitHub} repository (\textcolor{blue}{\url{http://github.com/acsql/}}).  All
-future enhancements and bug fixes to the \texttt{acsql} project will occur through this version-controlled repository.
+As described in section \ref{sec3.1} and \ref{sec3.10}, the \texttt{acsql} git repository serves as the software package that contains all of the software and supporting materials needed to
+operate the \texttt{acsql} application.  The software package is open-source, and is avilable to download directly from the GitHub repository (\textcolor{blue}{\url{http://github.com/acsql/}}).
+All future enhancements and bug fixes to the \texttt{acsql} application will occur through this version-controlled repository.
 
 
 \subsection{Software Documentation Deliverable} \label{sec4.5}
 
-As described in Section 3.2, another deliverable for the project is the API documentation that is automatically
-generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are available through the \texttt{acsql} package,
-but are also hosted on \texttt{readthedocs}, available at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.  This is considered
-the official code documentation.
+As described in section \ref{sec3.2}, another deliverable for the project is the API documentation that is automatically generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are
+available through the \texttt{acsql} package, but are also hosted on \texttt{readthedocs}, available at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.  This is considered the official software
+documentation.
 
 
 % Discussion
