@@ -667,7 +667,7 @@ objects that are used to establish a connection with the \texttt{acsql} database
 The \texttt{engine} object contains the Python Database API Specification (also known as \texttt{DBAPI}), which provides a low-level API for Python-specific, commonly-used
 database tasks[25].  It is created from the \texttt{sqlalchemy.create$\_$engine} method, which requires a user-supplied \texttt{connection$\_$string}.  The \texttt{connection$\_$string}
 is a string that contains information about the database type (e.g. \texttt{MySQL}, the specific database dialect being used, and the user credentials (e.g. username, password, port number,
-and host server name).  In the case of the \texttt{acsql} database, this connection string takes the form of \texttt{'mysql+pymysql://username:password@host:port/acsql'}.
+and host server name).  In the case of the \texttt{acsql} database, this connection string takes the form of \texttt{'mysql+pymysql://username:password@host:port/} \texttt{acsql'}.
 The \texttt{connection$\_$string} is imported from a user supplied \texttt{config} file within the \texttt{acsql} library (as will be discussed in section \ref{sec3.10}).
 
 The \texttt{base} object serves as a base class for declarative class definitions (i.e. the classes that are used to define the database tables).  It is created from the
@@ -1461,48 +1461,48 @@ at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2005-
 
 \bigskip\textbf{Table of Contents:}\bigskip
 
-\noindent \hyperlink{page.1}{\texttt{LICENSE}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{README.md}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{MANIFEST.in}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{setup.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs.Makefile}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/requirements.txt}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/conf.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/database.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/index.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/ingest.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/scripts.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/utils.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{docs/source/website.rst}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/database/queries.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/ingest/ingest.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/utils/utils.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/form$\_$options.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/query$\_$form.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/404.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/500.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/archive.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/base.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/header.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/index.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 1\\
-\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 1\\
+\noindent \hyperlink{page.23}{\texttt{LICENSE}} \dotfill 23\\
+\noindent \hyperlink{page.23}{\texttt{README.md}} \dotfill 23\\
+\noindent \hyperlink{page.24}{\texttt{MANIFEST.in}} \dotfill 24\\
+\noindent \hyperlink{page.26}{\texttt{setup.py}} \dotfill 26\\
+\noindent \hyperlink{page.26}{\texttt{docs.Makefile}} \dotfill 26\\
+\noindent \hyperlink{page.26}{\texttt{docs/requirements.txt}} \dotfill 26\\
+\noindent \hyperlink{page.27}{\texttt{docs/source/conf.py}} \dotfill 27\\
+\noindent \hyperlink{page.29}{\texttt{docs/source/database.rst}} \dotfill 29\\
+\noindent \hyperlink{page.29}{\texttt{docs/source/index.rst}} \dotfill 29\\
+\noindent \hyperlink{page.30}{\texttt{docs/source/ingest.rst}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs/source/scripts.rst}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs/source/utils.rst}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs/source/website.rst}} \dotfill 30\\
+\noindent \hyperlink{page.31}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 31\\
+\noindent \hyperlink{page.36}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 36\\
+\noindent \hyperlink{page.38}{\texttt{acsql/database/queries.py}} \dotfill 38\\
+\noindent \hyperlink{page.42}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 42\\
+\noindent \hyperlink{page.42}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 42\\
+\noindent \hyperlink{page.45}{\texttt{acsql/ingest/ingest.py}} \dotfill 45\\
+\noindent \hyperlink{page.49}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 49\\
+\noindent \hyperlink{page.51}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 51\\
+\noindent \hyperlink{page.52}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 52\\
+\noindent \hyperlink{page.53}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 53\\
+\noindent \hyperlink{page.56}{\texttt{acsql/utils/utils.py}} \dotfill 56\\
+\noindent \hyperlink{page.59}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 59\\
+\noindent \hyperlink{page.62}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 62\\
+\noindent \hyperlink{page.67}{\texttt{acsql/website/form$\_$options.py}} \dotfill 67\\
+\noindent \hyperlink{page.68}{\texttt{acsql/website/query$\_$form.py}} \dotfill 68\\
+\noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 72\\
+\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/404.html}} \dotfill 77\\
+\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/500.html}} \dotfill 77\\
+\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 77\\
+\noindent \hyperlink{page.78}{\texttt{acsql/website/templates/archive.html}} \dotfill 78\\
+\noindent \hyperlink{page.78}{\texttt{acsql/website/templates/base.html}} \dotfill 78\\
+\noindent \hyperlink{page.79}{\texttt{acsql/website/templates/database.html}} \dotfill 79\\
+\noindent \hyperlink{page.80}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 80\\
+\noindent \hyperlink{page.80}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 80\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/header.html}} \dotfill 82\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/index.html}} \dotfill 82\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 82\\
+\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 84\\
+\noindent \hyperlink{page.85}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 85\\
 
 \newpage
 
