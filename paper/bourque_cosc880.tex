@@ -1260,26 +1260,47 @@ components could possibly be extended to support other instruments and missions.
 
 \subsection{Possible enhancements to the \texttt{acsql} application} \label{sec5.1}
 
-\subsubsection{Including proprietary data in the \texttt{acsql} filesystem}
+As mentioned in chapter \ref{chap2}, there exist several features in the \texttt{wfc3ql} application that could serve as possible enhancements to the \texttt{acsql} application.  We elaborate five of
+these features below:
 
-\subsubsection{Building automated instrument calibration and monitoring routines}
+1. \textbf{\textit{Including proprietary data in the \texttt{acsql} filesystem:}}  One of the main features of the \texttt{wfc3ql} application is that it allows users to view and diagnose new data
+just hours after it gets downlinked from HST.  Since most HST data is proprietary up to one year after observation, this introduces a considerable security risk, and thus this feature is only made
+possible by taking special care of file permissions within the infrastructure of the \texttt{wfc3ql} filesystem and database.  Implementing this feature in the \texttt{acsql} application would be
+adventageous from the perspective of an ACS instrument analyst who wishes to perform analysis on new data.  However, allowing for the storage and handeling of proprietary data would prohibit the
+application from being open-source and publicly-available to external users; the application would have to be restricted to ACS instrument team members at at STScI.
 
-\subsubsection{Expanding the database query form}
+2. \textbf{\textit{Building automated instrument calibration and monitoring routines:}}  The \texttt{wfc3ql} application contains several WFC3 instrument calibration and monitoring routines.  These
+routines are in the form of individual Python modules that get executed automatically by \texttt{cron} jobs on a daily, weekly, or monthly basis.  Each one of these monitors serves a specific
+instrument-related purpose, such as monitoring detector hysteresis effects[29], monitoring the dark current of the detector over time[30], and characterizing the behaviour of the instrument
+Channel Select Mechanism[31].  Like WFC3, the ACS instrument also has various detector behaviors and characteristics that could benefit from being automatically monitored or characterized
+over time.  Currently, such efforts are made by individual ACS intrument team members through manual execution of software.  However, by using the \texttt{acsql} filesytem, database, and code library,
+it is possible to automate these tasks, saving employee time resources.
 
-\subsubsection{Adding a script execution status dashboard}
+3. \textbf{\textit{Adding a script execution status dashboard:}}  If there were to be automated instrument calibration and monitoring routines implemented into the application, it would be useful to
+be able to visualize if the exectuions of these scripts were sucessful or not.  The \texttt{wfc3ql} application accomplishes this with a script execution dashboard on the \texttt{wfc3ql} web application
+homepage.  Each automated routine is labeled in the dashboard along with the date/time of last execution and a status column that indicates if the execution completed sucessfully or not.  This helps to
+easily identify any disruptions in the routine \texttt{cron} jobs.
 
-\subsubsection{Tracking ACS image anomalies}
+4. \textbf{\textit{Expanding the database query form:}}  The database query form webpage on the \texttt{acsql} web application allows user to construct and execute a query to the \texttt{acsql} database
+using some of the most commonly used observational parameters (e.g. target name, filter, principle investigator name, etc.).  However, these parameters are just a small subset of the total collection
+of parameters available in the \texttt{acsql} database.  With the database containing all header keywords, it is possible to extend this query form use some more obscure (but useful) observational parameters.
+Examples of these may include telescope telemetry parameters (e.g. insrument temperature, telescope pointing, telescope latitute/longitute, etc.), engineering parameters (e.g. detector gain, detector
+readnoise, etc.), and photometric parameters (e.g. detector sensitivity, photometric zeropoints, etc.).  We expect that the database query webpage in particular will endure the most feature development
+as the usefulness of certain parameters become evident from the user base.
+
+5. \textbf{\textit{Tracking ACS image anomalies:}}  Another major features of the \texttt{wfc3ql} application is the capability to record the occurances of image anomalies (i.e. features in anomalies that
+are unexpected or indicate a peculiar behavior of the instrument).  The user accomplishes this in the `view image' webpage by selecting a checkbox of the anomaly and hitting a `submit' button.  Then,
+a row is inserted into a separate `anomalies' table of the \texttt{wfc3ql} database that indicates that the particular observation contains the particular anomaly.  Such a feature could also be implemented
+in \texttt{acsql} by adding an \texttt{anomalies} table to the \texttt{acsql} database schema as well as the appropriate mechanisms to allow this functionality through the \texttt{ascql} web application.
+Tracking such anomalies would allos ACS instrument analysts to easily be able to identify images affected by certain anomalies, as well as aid to characterize instrument anomailes over time.
 
 
 \subsection{Possible extensions to other instruments or missions} \label{sec5.2}
 
-\subsubsection{STIS CCD}
-
-Imaging instruments
-
-\subsubsection{James Webb Space Telescope}
-
-Talk about IR up the read
+This type of database-driven, web-based application for interacting with instrument data is currently only implemented for the WFC3 (\texttt{wfc3ql}) and ACS (\texttt{acsql} instruments of HST.  However, the
+continued success of \texttt{wfc3ql} and potential success of \texttt{acsql} creates a strong case for implementing such a system for other instruments and missions.  As this project has been fully
+developed at STScI, which is home of the operations for the Hubble Space Telescope and the forthcoming James Webb Space Telescope (JWST), it is reasonable to consider extending this application to other imaging
+instruments on HST (e.g. STIS) and the future imaging instruments on JWST.
 
 
 % Conclusion
@@ -1483,6 +1504,7 @@ Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \textcol
 \textbf{\texttt{docs/source/conf.py}}\lstset{style=code}\lstinputlisting[language=Python]{../docs/source/conf.py}
 \textbf{\texttt{docs/source/database.rst}}\lstset{style=code}\lstinputlisting{../docs/source/database.rst}
 \textbf{\texttt{docs/source/index.rst}}\lstset{style=code}\lstinputlisting{../docs/source/index.rst}
+\newpage
 \textbf{\texttt{docs/source/ingest.rst}}\lstset{style=code}\lstinputlisting{../docs/source/ingest.rst}
 \textbf{\texttt{docs/source/scripts.rst}}\lstset{style=code}\lstinputlisting{../docs/source/scripts.rst}
 \textbf{\texttt{docs/source/utils.rst}}\lstset{style=code}\lstinputlisting{../docs/source/utils.rst}
@@ -1493,16 +1515,17 @@ Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \textcol
 \textbf{\texttt{acsql/database/reset$\_$database.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/reset_database.py}
 \textbf{\texttt{acsql/database/update$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/update_tabledefs.py}
 \textbf{\texttt{acsql/ingest/ingest.py}\lstset{style=code}}\lstinputlisting[language=Python]{../acsql/ingest/ingest.py}
+\newpage
 \textbf{\texttt{acsql/ingest/make$\_$file$\_$dict.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_file_dict.py}
 \textbf{\texttt{acsql/ingest/make$\_$jpeg.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_jpeg.py}
 \textbf{\texttt{acsql/ingest/make$\_$thumbnail.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_thumbnail.py}
-\newpage
 \textbf{\texttt{acsql/scripts/ingest$\_$production.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/scripts/ingest_production.py}
 \textbf{\texttt{acsql/utils/utils.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/utils/utils.py}
 \textbf{\texttt{acsql/website/acsql$\_$webapp.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/acsql_webapp.py}
 \textbf{\texttt{acsql/website/data$\_$containers.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/data_containers.py}
 \textbf{\texttt{acsql/website/form$\_$options.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/form_options.py}
 \textbf{\texttt{acsql/website/query$\_$form.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_form.py}
+\newpage
 \textbf{\texttt{acsql/website/query$\_$lib.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_lib.py}
 \textbf{\texttt{acsql/website/templates/404.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/404.html}
 \textbf{\texttt{acsql/website/templates/500.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/500.html}
