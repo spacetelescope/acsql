@@ -1250,26 +1250,45 @@ documentation.
 % Discussion
 \section{Discussion} \label{chap5}
 
-\subsection{Possible enhancements to the \texttt{acsql} system} \label{sec5.1}
+We consider the collection of the features implemented as described in this document to be the `official release' or `1.0 release' of the \texttt{acsql} application.  This release is tagged as
+version \texttt{v1.0} in the \texttt{acsql} GitHub repository.  It is this release that we expect the user base to begin using the application.
 
-Though these currently are the only
-two main features, we expect that the web application may be a source of significant ongoing development,
-as the number of possible features implemented on top of the \texttt{acsql} database and \texttt{acsql}
-filesystem are plentiful.
+Though this is the official release of the application, future development by the author and/or members of the ACS instrument team at STScI is expected.  There are several ideas for possible
+features that can be added to the application, namely those present in the \texttt{wfc3ql} application, discussed in chapter \ref{chap2}.  Furthermore, some or all of the \texttt{acsql} application
+components could possibly be extended to support other instruments and missions.  Some of these possible enhancements are discussed in the proceeding sections.
 
 
-Include proprietart data
-Build automated calibration and monitoring scripts
-Add capabilities to query form
-script execution status
-anomaly tracking
+\subsection{Possible enhancements to the \texttt{acsql} application} \label{sec5.1}
 
-\subsection{Possible extensions to other instruments or missions} \label{sec5.3}
+\subsubsection{Including proprietary data in the \texttt{acsql} filesystem}
+
+\subsubsection{Building automated instrument calibration and monitoring routines}
+
+\subsubsection{Expanding the database query form}
+
+\subsubsection{Adding a script execution status dashboard}
+
+\subsubsection{Tracking ACS image anomalies}
+
+
+\subsection{Possible extensions to other instruments or missions} \label{sec5.2}
+
+\subsubsection{STIS CCD}
+
+Imaging instruments
+
+\subsubsection{James Webb Space Telescope}
+
+Talk about IR up the read
 
 
 % Conclusion
 \section{Conclusion} \label{chap6}
-The conclusion goes here.
+The \texttt{acsql} application, which is a web application built on top of a filesystem and database of ACS instrument data, has been released and is publicly available for use by ACS users.  The
+application provides mechanisms for users to view image and image metadata for every publicly-available ACS dataset dating back to the installation of the isntrument in 2002.  While this document marks
+the version 1.0 release of this open-source application, we expect ongoing feature development to expand the capabilities of the \texttt{acsql} web application.  With the modularization and
+coding standards found in the \texttt{ascql} software, we hope that this application can be extened and/or used in reference to support a similar application for the forthcoming James Webb Space
+Telescope mission.
 
 
 % use section* for acknowledgment
@@ -1278,15 +1297,13 @@ The conclusion goes here.
 \else
   \section*{Acknowledgment}
 \fi
-  The authors would like to thanks various members of the STScI staff that were extremely valuable for helping make
-  this project come together: members of the WFC3/Quicklook team, for their years of ongoing development and support
-  of the WFC3/Quicklook project, without which there would be no inspiration to create this similar project (Varun Bajaj,
-  Ariel Bowers, Michael Dulue, Meredith Durbin, Jules Fowler, Catherine Gosmeyer, Heather Gunning, Harish Khandrika,
-  Catherine Martlin, Abhi Rajan, Clare Shanahan, Ben Sunnquist, Alex Viana); members of the Instruments Division,
-  who support the creation and maintenance of an internal web server (Francesca Boffi, Norman Grogin); Members of the
-  Information Technology and Services Division who provided valuable resources such as the database server and disk
-  space used to store project materials; and finally, Named Person, who provided insightful comments and suggestions
-  on this document.
+  The authors would like to thanks various members of the STScI staff that were extremely valuable for helping make this project come together: members of the WFC3/Quicklook team, for their years of
+  ongoing development and support of the WFC3/Quicklook application, without which there would be no inspiration to create this similar application (Varun Bajaj, Ariel Bowers, Michael Dulue,
+  Meredith Durbin, Jules Fowler, Catherine Gosmeyer, Heather Gunning, Harish Khandrika, Catherine Martlin, Abhi Rajan, Clare Shanahan, Ben Sunnquist, Alex Viana); members of the Instruments Division,
+  who supported the creation of this project (Francesca Boffi, Norman Grogin, Elena Sabbi); members of the Operations and Engineering Division as well as the Information Technology and Services
+  Division who provided valuable resources such as the database server, GitHub repository, web server, and disk space used to store project materials (Alex Yermolaev, Fausat Ogunsanya, Vera Gibbs);
+  Pey-Lian Lim and Roberto Avila, who provided valueable feedback upon beta testing the web application; Sara Ogaz for assistance in developing some components of the \texttt{acsql} database as part
+  of the Towson University COSC 657 Advance Database Management project, and finally, Named Person, who provided insightful comments and suggestions on this document.
 
 
 % Can use something like this to put references on a page
@@ -1409,7 +1426,52 @@ Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \textcol
 \appendices
 \section{\texttt{acsql} Code}
 
-Table of contents.
+\bigskip\textbf{Table of Contents:}\bigskip
+
+\noindent \hyperlink{page.1}{\texttt{LICENSE}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{README.md}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{MANIFEST.in}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{setup.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs.Makefile}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/requirements.txt}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/conf.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/database.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/index.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/ingest.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/scripts.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/utils.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{docs/source/website.rst}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/database/queries.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/ingest/ingest.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/utils/utils.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/form$\_$options.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/query$\_$form.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/404.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/500.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/archive.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/base.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/header.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/index.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 1\\
+\noindent \hyperlink{page.1}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 1\\
+
+\newpage
 
 \noindent\textbf{\texttt{LICENSE}}\lstset{style=code}\lstinputlisting{../LICENSE}
 \textbf{\texttt{README.md}}\lstset{style=code}\lstinputlisting{../README.md}
