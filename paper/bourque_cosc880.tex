@@ -146,7 +146,7 @@ Telescope (JWST), and MAST.  STScI is part of the Association of Universities fo
 \subsection{Data Structure} \label{sec1.1}
 
 The design of \texttt{acsql}, particularly the \texttt{acsql} database, is heavily dependent on the underlying data structure of ACS FITS files.
-As such, it is important for the reader to have a conceptual understanding of this data structure and thus the following sections are dedicated to
+As such, it is important for the reader to have a conceptual understanding of this data structure.  The following sections are dedicated to
 providing an overview on the FITS data format and ACS-specific intricacies.
 
 
@@ -177,7 +177,7 @@ Each extension consists of two parts: (1) an extension ``header'', which contain
 which may be a binary table or, more commonly, a multi-dimensional array of detector pixel values.
 
 The type of extension data can also vary.  The most common extension data types are (1) `science' (\texttt{SCI}), in which the data values are the measure
-the brightness of the astronomical scene, (2) `error' (\texttt{ERR}), in which the data values are the measure of the uncertainty in the pixel values of the
+of the brightness of the astronomical scene, (2) `error' (\texttt{ERR}), in which the data values are the measure of the uncertainty in the pixel values of the
 \texttt{SCI} extension, and (3) `data quality' (\texttt{DQ}), in which the data values are 16-bit flags that describe the quality of the pixel values for
 the detector (for example, they may indicate that certain pixels were affected by cosmic rays during the observation).  Typically, for a given file,
 the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension, and the 3rd extension is the \texttt{DQ} extension.
@@ -254,7 +254,7 @@ while others may contain only $\sim$40.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=3.5in]{./figures/header_example.png}
-\caption{\textit{A section of an example header, taken from the 0th extension of the file \texttt{j6mf6lhq$\_$raw.fits}.}}
+\caption{\textit{A section of an example header, taken from the 0th extension of the file \texttt{j6mf16lhq$\_$raw.fits}.}}
 \label{fig2}
 \end{figure}
 
@@ -263,15 +263,15 @@ while others may contain only $\sim$40.
 
 As discussed in section \ref{sec1.1.1}, each ACS observation may result in several FITS filetypes. Each filetype has a specific scientific application and
 the set of available filetypes for a given observation is dependent on the characteristics of the observation, the details of which are beyond the scope of this
-paper.  These details can however be ascertained from the ACS Data Handbook[9].  To provide some context, below we give a brief description of each possible
+paper.  However, these details can be ascertained from the ACS Data Handbook[9].  To provide some context, below we give a brief description of each possible
 filetype that a given observation may contain:
 
 \begin{itemize}
   \item \textbf{raw} - the raw, uncalibrated data that comes directly from HST
   \item \textbf{flt} - nominally calibrated data
-  \item \textbf{flc} - nominally calibrated data plus corrected for Charge Transfer Efficiency (CTE) deficits.
+  \item \textbf{flc} - nominally calibrated data corrected for Charge Transfer Efficiency (CTE) deficits.
   \item \textbf{drz} - geometric distortion-corrected data
-  \item \textbf{drc} - geometric distortion-corrected plus CTE corrected data
+  \item \textbf{drc} - geometric distortion-corrected and CTE corrected data
   \item \textbf{spt} - telescope telemetry data
   \item \textbf{jit} - telescope pointing data
   \item \textbf{jif} - telescope drifting data
@@ -405,13 +405,13 @@ various data collections such as HST data, high level science products, and cata
 interest to research astronomers at academic institutions, for example; an image of the location of the scientific target on the sky (`AstroView'), an interactive GUI for displaying
 results, and an option to export results to various file types.  An example query using this tool is shown in Figure 4.
 
-% Figure for MAST portal example
-\begin{figure}[!h]
+% Figure for log file
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=3.5in]{./figures/mast_portal.png}
+\subfloat{\includegraphics[width=6.5in]{./figures/mast_portal.png}}
 \caption{\textit{An example of a query to the MAST data discovery portal.}}
 \label{fig4}
-\end{figure}
+\end{figure*}
 
 Though the MAST portal has many useful features, there are some limitations to the tool from the perspective of an instrument analyst at STScI.  One such limitation is that
 the available observational metadata do not include all of the data available in the FITS headers; it is limited to a small subset of header keywords, mainly
@@ -445,8 +445,8 @@ along with useful corresponding observational metadata.\\
 \noindent\textbf{Use case 3: Determine the observational parameters for a given dataset}: The application shall allow users to determine observational parameters (i.e. FITS header keyword values) for
 a given 9-character \texttt{rootname}.\\
 
-\noindent\textbf{Use case 4: Programmatically analyze images across custom datasets}: The application shall allow users to read ACS image data into memory and perform analysis for data obtained
-in Use Case (2).
+\noindent\textbf{Use case 4: Programmatically analyze images across custom datasets}: The application shall allow users to directly read ACS image data into memory and perform analysis for
+data obtained in Use Case (2).
 
 
 % Related Work
@@ -528,7 +528,7 @@ the \texttt{numpy} (numerical Python) and \texttt{scipy} (scientific Python) pac
 Another benefit of using \texttt{PEP257} and \texttt{numpydoc} docstring conventions is that API documentation creation tools such as \texttt{sphinx}[20] or \texttt{epydoc}[21] can
 automatically convert the docstrings into other output formats such as \texttt{HTML} and \texttt{PDF}.  For this project, we use \texttt{sphinx} to convert API documentation to \texttt{HTML}
 and host the webpages online using \texttt{readthedocs}, an open-source, community supported tool for hosting and browsing documentation[22]. The output documentation as seen on
-\texttt{readthedocs} for the example function in figure \ref{fig5} is provided in Figure \ref{fig6}. The documentation for \texttt{acsql} is available at
+\texttt{readthedocs} for the example function in Figure \ref{fig5} is provided in Figure \ref{fig6}. The documentation for \texttt{acsql} is available at
 \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.
 
 % Figure for docstring convention example in readthedocs
@@ -542,7 +542,7 @@ and host the webpages online using \texttt{readthedocs}, an open-source, communi
 
 \subsection{Filesystem: Archive of ACS data} \label{sec3.3}
 
-The \texttt{acsql} filesystem is a Network File System (NFS) that stores all on-orbit ACS data on disk in an organized set of directories and subdirectories hosted at STScI.
+The \texttt{acsql} filesystem is a Network File System (NFS) that stores all publically available on-orbit ACS data on disk in an organized set of directories and subdirectories hosted at STScI.
 Figure \ref{fig7} shows an example of this directory structure.  The parent directory is the first four characters of the 9-character \texttt{rootname}, which has a one-to-one
 correspondence with an individual \texttt{PROPOSID}. The subdirectories of the parent directories are named after the full 9-character \texttt{rootname} such that each parent directory
 contains a \texttt{rootname} subdirectory for each \texttt{rootname} that were observed for the particular \texttt{PROPOSID}.  Furthermore, each \texttt{rootname} subdirectory contains
@@ -602,7 +602,7 @@ as an example.}}
 \label{fig10}
 \end{figure}
 
-Unlike the ACS data products portion of the filesystem (section \ref{sec3.3}, the JPEG and thumbnail portions of the filesystem are organized based on the
+Unlike the ACS data products portion of the filesystem (section \ref{sec3.3}), the JPEG and thumbnail portions of the filesystem are organized based on the
 four-or-five digit \texttt{PROPOSID} of the corresponding observation instead of the first four characters of the \texttt{rootname}.  This design was chosen as a means to simplify the
 design of the web application; users often wish to view data based on the 4/5-digit \texttt{PROPOSID} and less often on the details of the \texttt{rootname}.  An example of this
 structure is shown in Figure \ref{fig10}.  Note that the \texttt{thumbnail/} filesystem only contains thumbnails created from \texttt{FLT} filetypes, since the thumbnails are only
@@ -620,12 +620,12 @@ particular \texttt{rootname}, and 109 `header' tables which stores the header ke
 \texttt{wfc$\_$raw$\_$0}).  Each of these tables are described in detail below.
 
 % Figure for acsql database schema
-\begin{figure}[!h]
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=3.5in]{./figures/schema.png}
+\subfloat{\includegraphics[width=5.5in]{./figures/schema.png}}
 \caption{\textit{The relational database schema for the \texttt{acsql} database.}
 \label{fig11}}
-\end{figure}
+\end{figure*}
 
 The \texttt{master} table contains information that is particularly useful for maintaining and using the \texttt{acsql} database.  Its primary key is the first 8 characters of the
 9-character \texttt{rootname} for the particular observation (recall from section \ref{sec1.1.1} that only the first 8 characters of a \texttt{rootname} are actually unique).
@@ -792,8 +792,7 @@ entry should be inserted or updated in the \texttt{acsql} database.}}
 % Figure for log file
 \begin{figure*}[!t]
 \centering
-\subfloat{\includegraphics[width=7.0in]{./figures/log.png}%
-\label{fig_first_case}}
+\subfloat{\includegraphics[width=7.0in]{./figures/log.png}}
 \caption{\textit{An example log file for the ingestion of a single file (\texttt{j8zh21xv}).}}
 \label{fig20}
 \end{figure*}
@@ -865,20 +864,15 @@ Figure \ref{fig21} shows the \texttt{acsql} homepage.  The homepage, as well as 
 links to the database query page and the archive links page.
 
 % Figure for homepage
-\begin{figure}[!h]
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=3.5in]{./figures/homepage.png}
+\subfloat{\includegraphics[width=6.0in]{./figures/homepage.png}}
 \caption{\textit{The homepage of the \texttt{acsql} web application.}}
 \label{fig21}
-\end{figure}
-
-% Figure for database query
-\begin{figure}[!h]
-\centering
-\includegraphics[width=3.5in]{./figures/database_query_page.png}
+\subfloat{\includegraphics[width=6.0in]{./figures/database_query_page.png}}
 \caption{\textit{A portion of the database query page of the \texttt{acsql} web application.}}
 \label{fig22}
-\end{figure}
+\end{figure*}
 
 Figure \ref{fig22} shows an example of the database query page.  This page allows users to fill out a form that in turn creates a query of the \texttt{acsql} database and executes
 on hitting the `Submit' button at the bottom of the page.  Note that the form contains only a subset of the many possible database parameters; we limited the database query page to only
@@ -1188,8 +1182,8 @@ to download via the MAST archive (i.e. \textcolor{blue}{\url{https://archive.sts
 \texttt{config.yaml} file (see section \ref{sec3.10}).
 
 Currently, the filesystem consists of $\sim$1,030,000 total files. Figure \ref{fig29} shows how this breaks down by individual filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt}
-make up the majority of the files, which is not surprising considering that these filetypes exist for nearly every ACS observing mode.  On the other hand, we see a small amount of \texttt{crj} and
-\texttt{crc} files, which is also unsurprising considering that these filetypes are only triggered for specific observing modes.
+make up the majority of the files, which is expected considering that these filetypes exist for nearly every ACS observing mode.  On the other hand, we see a small amount of \texttt{crj} and
+\texttt{crc} files, which is also expected considering that these filetypes are only triggered for specific observing modes.
 
 % Figure for number of images per filetype
 \begin{figure}[!h]
@@ -1254,8 +1248,8 @@ We consider the collection of the features implemented as described in this docu
 version \texttt{v1.0} in the \texttt{acsql} GitHub repository.  It is with this release that we expect the user base to begin using the application.
 
 Though this is the official release of the application, we expect future development by the author and/or members of the ACS instrument team at STScI.  There are several possible
-features to be added to the application, namely those present in the \texttt{wfc3ql} application, discussed in chapter \ref{chap2}.  Furthermore, some or all of the \texttt{acsql} application
-components could possibly be extended to support other instruments and missions.  Some of these possible enhancements are discussed in the proceeding sections.
+features to be added to the application, namely those present in the \texttt{wfc3ql} application, as discussed in chapter \ref{chap2}.  Furthermore, some or all of the \texttt{acsql} application
+components could be extended to support other instruments and missions.  Some of these possible enhancements are discussed in the proceeding sections.
 
 
 \subsection{Possible enhancements to the \texttt{acsql} application} \label{sec5.1}
@@ -1324,7 +1318,7 @@ Telescope mission.
   who supported the creation of this project (Francesca Boffi, Norman Grogin, Elena Sabbi); members of the Operations and Engineering Division as well as the Information Technology and Services
   Division who provided valuable resources such as the database server, GitHub repository, web server, and disk space used to store project materials (Alex Yermolaev, Fausat Ogunsanya, Vera Gibbs);
   Pey-Lian Lim and Roberto Avila, who provided valuable feedback upon beta testing the web application; Sara Ogaz for assistance in developing some components of the \texttt{acsql} database as part
-  of the Towson University COSC 657 Advance Database Management project, and finally, Jules Fowler, who provided insightful comments and suggestions on this document.
+  of the Towson University COSC 657 Advance Database Management project; and finally, Jules Fowler and Sara Ogaz, who provided insightful comments and suggestions on this document.
 
 
 % Can use something like this to put references on a page
