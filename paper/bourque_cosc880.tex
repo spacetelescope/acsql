@@ -878,64 +878,49 @@ Figure \ref{fig22} shows an example of the database query page.  This page allow
 on hitting the `Submit' button at the bottom of the page.  Note that the form contains only a subset of the many possible database parameters; we limited the database query page to only
 options that we deemed to be particularly useful by the user base.  As such, we expect that this page be further expanded and/or modified in the future as more use cases become apparent.
 
-% Figure for query results table
-\begin{figure}[!h]
-\centering
-\includegraphics[width=3.5in]{./figures/database_query_results_html.png}
-\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an HTML table.}}
-\label{fig23}
-\end{figure}
-
-% Figure for query results csv
-\begin{figure}[!h]
-\centering
-\includegraphics[width=3.5in]{./figures/database_query_results_csv.png}
-\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an CSV file.}}
-\label{fig24}
-\end{figure}
-
 In this example, we use the form to find all data taken with the \texttt{WFC} detector, are of Observation Type \texttt{IMAGING}, and were observed by the Principle Investigator
 Zolt Levay\footnote{Zolt Levay is a Science Visuals Developer at STScI, and has been the PI of many programs that have acquired images for HST public releases.}.  Note that there are three
 output options: (1) an \texttt{HTML table}, which returns a webpage showing the selected `Output Columns' (in this case, the Rootname, PI last/first name, Proposal ID, Aperture, Date/Time of
 observation, and the Target Name; see Figure \ref{fig23}), (2) a CSV file downloaded to the user's machine containing a comma-separated table of the selected output columns
 (see Figure \ref{fig24}), or (3) a webpage showing the thumbnail images of all of the resulting data (see Figure \ref{fig25}).
 
-% Figure for query results thumbnails
-\begin{figure}[!t]
-\centering
-\includegraphics[width=3.5in]{./figures/database_query_results_thumbnails.png}
-\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of thumbnail images.}}
-\label{fig25}
-\end{figure}
-
-% Figure for archive links
-\begin{figure}[!t]
-\centering
-\includegraphics[width=3.5in]{./figures/archive_links.png}
-\caption{\textit{The archive links webpage of the \texttt{acsql} web application.}}
-\label{fig26}
-\end{figure}
-
 Figure \ref{fig26} shows the archive links page.  This page contains links to every proposal that contains publicly available ACS data via the 4-5 digit \texttt{PROPOSID}.  Clicking one
 of the links opens a new window to a `view proposal' webpage.  Similar to the database query results shown in Figure \ref{fig25}, the `view proposal' webpage shows
 thumbnail images of each ACS dataset available in the given proposal.  The `view proposal' pages contain several buttons and filters near the top of the page; using these will sort and/or
 filter out the thumbnail images based on the chosen parameters.  Figure \ref{fig27} shows an example of this webpage, using proposal 14039.
 
-% Figure for view proposal
-\begin{figure}[!t]
+% Figure for query results table
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=3.5in]{./figures/view_proposal.png}
+\subfloat{\includegraphics[width=5.2in]{./figures/database_query_results_html.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an HTML table.}}
+\label{fig23}
+\subfloat{\includegraphics[width=5.2in]{./figures/database_query_results_csv.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an CSV file.}}
+\label{fig24}
+\end{figure*}
+
+% Figure for query results thumbnails
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.0in]{./figures/database_query_results_thumbnails.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of thumbnail images.}}
+\label{fig25}
+\subfloat{\includegraphics[width=5.0in]{./figures/archive_links.png}}
+\caption{\textit{The archive links webpage of the \texttt{acsql} web application.}}
+\label{fig26}
+\end{figure*}
+
+% Figure for view proposal
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.0in]{./figures/view_proposal.png}}
 \caption{\textit{An example `view proposal' webpage, using proposal 14039.}}
 \label{fig27}
-\end{figure}
-
-% Figure for view image
-\begin{figure}[!t]
-\centering
-\includegraphics[width=3.5in]{./figures/view_image.png}
+\subfloat{\includegraphics[width=5.0in]{./figures/view_image.png}}
 \caption{\textit{An example `view image' webpage, using dataset \texttt{jcs718kmq}.}}
 \label{fig28}
-\end{figure}
+\end{figure*}
 
 In the `view proposal' webpages, users may click on any one of the thumbnail images to bring up the `view image' webpage for that image.  An example of this webpage is shown in
 Figure \ref{fig28}, using the dataset \texttt{jcs718kmq}.  This webpage contains the Quicklook JPEG of the image along with useful metadata of the dataset near the top of the page.  It also
@@ -1455,48 +1440,48 @@ at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2005-
 
 \bigskip\textbf{Table of Contents:}\bigskip
 
-\noindent \hyperlink{page.23}{\texttt{LICENSE}} \dotfill 23\\
-\noindent \hyperlink{page.23}{\texttt{README.md}} \dotfill 23\\
-\noindent \hyperlink{page.24}{\texttt{MANIFEST.in}} \dotfill 24\\
-\noindent \hyperlink{page.26}{\texttt{setup.py}} \dotfill 26\\
-\noindent \hyperlink{page.26}{\texttt{docs.Makefile}} \dotfill 26\\
-\noindent \hyperlink{page.26}{\texttt{docs/requirements.txt}} \dotfill 26\\
-\noindent \hyperlink{page.27}{\texttt{docs/source/conf.py}} \dotfill 27\\
-\noindent \hyperlink{page.29}{\texttt{docs/source/database.rst}} \dotfill 29\\
-\noindent \hyperlink{page.29}{\texttt{docs/source/index.rst}} \dotfill 29\\
-\noindent \hyperlink{page.30}{\texttt{docs/source/ingest.rst}} \dotfill 30\\
-\noindent \hyperlink{page.30}{\texttt{docs/source/scripts.rst}} \dotfill 30\\
-\noindent \hyperlink{page.30}{\texttt{docs/source/utils.rst}} \dotfill 30\\
-\noindent \hyperlink{page.30}{\texttt{docs/source/website.rst}} \dotfill 30\\
-\noindent \hyperlink{page.31}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 31\\
-\noindent \hyperlink{page.36}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 36\\
-\noindent \hyperlink{page.38}{\texttt{acsql/database/queries.py}} \dotfill 38\\
-\noindent \hyperlink{page.42}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 42\\
-\noindent \hyperlink{page.42}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 42\\
-\noindent \hyperlink{page.45}{\texttt{acsql/ingest/ingest.py}} \dotfill 45\\
-\noindent \hyperlink{page.49}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 49\\
-\noindent \hyperlink{page.51}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 51\\
-\noindent \hyperlink{page.52}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 52\\
-\noindent \hyperlink{page.53}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 53\\
-\noindent \hyperlink{page.56}{\texttt{acsql/utils/utils.py}} \dotfill 56\\
-\noindent \hyperlink{page.59}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 59\\
-\noindent \hyperlink{page.62}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 62\\
-\noindent \hyperlink{page.67}{\texttt{acsql/website/form$\_$options.py}} \dotfill 67\\
-\noindent \hyperlink{page.68}{\texttt{acsql/website/query$\_$form.py}} \dotfill 68\\
-\noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 72\\
-\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/404.html}} \dotfill 77\\
-\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/500.html}} \dotfill 77\\
-\noindent \hyperlink{page.77}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 77\\
-\noindent \hyperlink{page.78}{\texttt{acsql/website/templates/archive.html}} \dotfill 78\\
-\noindent \hyperlink{page.78}{\texttt{acsql/website/templates/base.html}} \dotfill 78\\
-\noindent \hyperlink{page.79}{\texttt{acsql/website/templates/database.html}} \dotfill 79\\
-\noindent \hyperlink{page.80}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 80\\
-\noindent \hyperlink{page.80}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 80\\
-\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/header.html}} \dotfill 82\\
-\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/index.html}} \dotfill 82\\
-\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 82\\
-\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 84\\
-\noindent \hyperlink{page.85}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 85\\
+\noindent \hyperlink{page.27}{\texttt{LICENSE}} \dotfill 27\\
+\noindent \hyperlink{page.27}{\texttt{README.md}} \dotfill 27\\
+\noindent \hyperlink{page.28}{\texttt{MANIFEST.in}} \dotfill 28\\
+\noindent \hyperlink{page.30}{\texttt{setup.py}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs.Makefile}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs/requirements.txt}} \dotfill 30\\
+\noindent \hyperlink{page.31}{\texttt{docs/source/conf.py}} \dotfill 31\\
+\noindent \hyperlink{page.33}{\texttt{docs/source/database.rst}} \dotfill 33\\
+\noindent \hyperlink{page.33}{\texttt{docs/source/index.rst}} \dotfill 33\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/ingest.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/scripts.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/utils.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/website.rst}} \dotfill 34\\
+\noindent \hyperlink{page.35}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 35\\
+\noindent \hyperlink{page.40}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 40\\
+\noindent \hyperlink{page.42}{\texttt{acsql/database/queries.py}} \dotfill 42\\
+\noindent \hyperlink{page.46}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 46\\
+\noindent \hyperlink{page.46}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 46\\
+\noindent \hyperlink{page.49}{\texttt{acsql/ingest/ingest.py}} \dotfill 49\\
+\noindent \hyperlink{page.53}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 53\\
+\noindent \hyperlink{page.55}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 55\\
+\noindent \hyperlink{page.56}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 56\\
+\noindent \hyperlink{page.57}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 57\\
+\noindent \hyperlink{page.60}{\texttt{acsql/utils/utils.py}} \dotfill 60\\
+\noindent \hyperlink{page.63}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 63\\
+\noindent \hyperlink{page.66}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 66\\
+\noindent \hyperlink{page.71}{\texttt{acsql/website/form$\_$options.py}} \dotfill 71\\
+\noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$form.py}} \dotfill 72\\
+\noindent \hyperlink{page.76}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 76\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/404.html}} \dotfill 81\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/500.html}} \dotfill 81\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 81\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/archive.html}} \dotfill 82\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/base.html}} \dotfill 82\\
+\noindent \hyperlink{page.83}{\texttt{acsql/website/templates/database.html}} \dotfill 83\\
+\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 84\\
+\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 84\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/header.html}} \dotfill 86\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/index.html}} \dotfill 86\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 86\\
+\noindent \hyperlink{page.88}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 88\\
+\noindent \hyperlink{page.89}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 89\\
 
 \newpage
 
