@@ -92,3 +92,9 @@ ENV/
 *.fits
 acsql/website/static/img/jpegs
 acsql/website/static/img/thumbnails
+
+# LaTeX items
+*.log
+*.aux
+*.out
+*.dat

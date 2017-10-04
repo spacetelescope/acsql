@@ -150,8 +150,4 @@ man_pages = [
 texinfo_documents = [
     (master_doc, 'acsql', 'acsql Documentation',
      author, 'acsql', 'One line description of project.',
-     'Miscellaneous'),
-]
-
-
-
+     'Miscellaneous'),]

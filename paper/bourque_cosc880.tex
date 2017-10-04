@@ -1,0 +1,1536 @@
+%% bourque_cosc880.tex
+%% Matthew Bourque
+
+\documentclass[10pt,journal,compsoc]{IEEEtran}
+
+% imports
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{ragged2e}
+\usepackage{subfig}
+
+% *** CITATION RELATED PACKAGES ***
+\ifCLASSOPTIONcompsoc
+  \usepackage[nocompress]{cite}
+\else
+  \usepackage{cite}
+\fi
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+% Colors
+\definecolor{gray}{gray}{0.85}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% listings styles
+\lstdefinestyle{code}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{magenta},
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codegreen},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+
+\begin{document}
+
+% Title
+\title{The Hubble Space Telescope Advanced Camera for Surveys Quicklook Application}
+
+
+% Authors
+\author{Matthew~Bourque\textsuperscript{1}, Sara~Ogaz\textsuperscript{1}, Alex~Viana\textsuperscript{2}, Meredith~Durbin\textsuperscript{3}, and Norman Grogin\textsuperscript{1}\\
+\begin{flushleft}
+{\scriptsize [1] Space Telescope Science Institute, Baltimore, Maryland 21218. email: bourque@stsci.edu, ogaz@stsci.edu, grogin@stsci.edu}\\
+{\scriptsize [2] Terbium Labs, Baltimore, Maryland 21201. email: alexcostaviana@gmail.com}\\
+{\scriptsize [3] Deptartment of Astronomy, The University of Washington, Box 351580, U.W. Seattle, Washington 98195. email:mdurbin@uw.edu}
+\end{flushleft}
+\thanks{Manuscript received Month DD, YYYY}}
+
+% Abstract
+\IEEEtitleabstractindextext{%
+\justify
+\begin{abstract}
+The Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS) has been acquiring thousands of astronomical images
+each year since its installation in 2002.  The ACS Quicklook Application (\texttt{acsql}) provides
+a means for users to discover and interact with these data through a database-driven web application.  The system is comprised of
+several components: (1) A $\sim$40 TB network file system, which stores all on-orbit ACS data files on disk, (2) a
+\texttt{MySQL} database, which stores observational metadata in a normalized relational form and allows users to build custom datasets
+based on observational parameters, (3) A Python/\texttt{Flask}-based web application, which allows users to view
+``Quicklook'' JPEG images of any publicly-available ACS data along with their metadata, and (4) a Python code library, which
+provides a platform on which users can build automated instrument calibration and monitoring routines.  The \texttt{acsql} application
+may be extended to support the forthcoming James Webb Space Telescope (JWST) mission, which is scheduled to launch in October 2018.
+\end{abstract}}
+
+
+% make the title area
+\maketitle
+\IEEEdisplaynontitleabstractindextext
+\IEEEpeerreviewmaketitle
+
+
+% Introduction
+\IEEEraisesectionheading{\section{Introduction} \label{chap1}}
+The Advanced Camera for Surveys (ACS) is an imaging instrument on board the Hubble Space Telescope (HST) that was
+installed in 2002 during Servicing Mission 3B (shuttle mission STS-109)[1]. It is comprised of three detectors: (1) the Wide Field Camera
+(WFC), which is designed for wide-field imaging and spectroscopy in visible to near-infrared wavelengths, (2) the High Resolution Channel,
+which is designed for high resolution near-ultraviolet to near-infrared wavelength images and coronography, and (3) the Solar Blind
+Channel (SBC), designed for far-ultraviolet imaging and spectroscopy.  ACS experienced an electronics failure in 2007 that affected
+the WFC and HRC detectors until 2009 when astronauts successfully restored the WFC detector during Servicing Mission 4 (shuttle mission
+STS-125)[2]; the HRC still remains unoperational.
+
+Despite this electronics failure, ACS has been steadily acquiring astronomical images over its 15 year on-orbit lifetime.
+Figure \ref{fig1} shows an estimate of the number of observations over time for each of the three detectors.  To date, there have been
+nearly 200,000 observations total.  Further information about the ACS instrument including its history, configuration, performance, and
+scientific capability can be found in the ACS Instrument Handbook[3].
+
+% Figure for ACS observations over time
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/num_obs.png}
+\caption{\textit{The number of observations over time for each of the three detectors on ACS.}}
+\label{fig1}
+\end{figure}
+
+ACS data, along with the data from the other HST instruments past and present (e.g. The Wide Field Camera 3 (WFC3), The Cosmic Origins
+Spectrograph (COS), etc.), are publicly available and primarily stored in the Barbara A. Mikulski Archive for Space Telescopes
+(MAST)\footnote{Named after the U.S. Senator from Maryland who has been a pivotal political driving force behind the manned servicing
+missions, the Hubble Space Telescope, and the forthcoming James Webb Space Telescope.}[4]. Through MAST, users can request and retrieve
+data for any publicly-available dataset via \texttt{ftp}, \texttt{sftp}, or DVD by mail\footnote{Not all HST data are publicly available;
+most HST data of scientific targets are considered proprietary for up to one calendar year, after which they are publicly released.}. Like is
+standard for other astronomical data, ACS data are stored using the Flexible Image Transport System (FITS) data format[5].  This data format has several
+unique characteristics, as will be discussed in section \ref{sec1.1}.
+
+The ACS Quicklook Application (hereinafter referred to as ``\texttt{acsql}") is a Python-based application for discovering, viewing, and
+querying all publicly-available ACS data.  It consists of: (1) A filesystem that stores ACS instrument data files
+and ``Quicklook" JPEGs in an organized Network File System (NFS) (hereinafter referred to as the ``\texttt{acsql} filesystem"), (2) A
+\texttt{MySQL} database that stores observational metadata of each observation (hereinafter referred to as the ``\texttt{acsql} database"),
+(3) A Python/\texttt{Flask}-based web application for interacting with the filesystem and database (hereinafter referred to as the
+``\texttt{acsql} web application"), and (4) A Python code library that contains software for connecting to the database, ingesting new data,
+logging production code execution, and building/maintaining the web application (hereinafter referred to as the ``\texttt{acsql} library"
+or ``\texttt{acsql} package").  Each component is explained in further detail in Chapter \ref{chap3}.
+
+This paper outlines the \texttt{acsql} application as part of the Towson University Computer Science Masters Program Graduate Project.  The remaining
+sections in this chapter discuss the motivation and use cases for this application, as well as details on the underlying data structure on
+which this project was built.  Chapter \ref{chap2} discusses how the \texttt{acsql} application compares to related work.
+Chapter \ref{chap3} details the implementation of each \texttt{acsql} component.  Chapter \ref{chap4} outlines the results of the projectand the
+project deliverables.  Lastly, chapters \ref{chap5} and \ref{chap6} conclude the paper with a discussion of possible extensions and modifications to
+the application.
+
+We note that the work that went into this project by the authors was accomplished on behalf of the Space Telescope Science Institute (STScI)
+located in Baltimore, Maryland.  STScI is the home institution for instrument, data, and user support of HST, the forthcoming James Webb Space
+Telescope (JWST), and MAST.  STScI is part of the Association of Universities for Research in Astronomy (AURA)[6].
+
+
+\subsection{Data Structure} \label{sec1.1}
+
+The design of \texttt{acsql}, particularly the \texttt{acsql} database, is heavily dependent on the underlying data structure of ACS FITS files.
+As such, it is important for the reader to have a conceptual understanding of this data structure.  The following sections are dedicated to
+providing an overview on the FITS data format and ACS-specific intricacies.
+
+
+\subsubsection{Filenames} \label{sec1.1.1}
+
+The data from each ACS observation is contained within a FITS data file and named in a consistent fashion:\newline
+
+\texttt{$<$rootname$>$\_$<$filetype$>$.fits}\newline
+
+\noindent Each \texttt{$<$rootname$>$} consists of nine unique alpha-numeric characters, and \texttt{$<$filetype$>$} is one of several possible
+three-character filetype options (discussed in section \ref{sec1.1.4}).  For example, one ACS observation has the filename \texttt{j6mf16lhq\_raw.fits}
+(Principle Investigator Gary Bernstein, observation date \texttt{2016-09-22}).  Each character in the 9-character \texttt{rootname} has a specific meaning,
+and is discussed in section 5.2 of the Introduction to the HST Data Handbooks[7].  The \texttt{.fits} extension at the end of the filename signifies
+that the file is of the FITS data format.
+
+The unique 9-character \texttt{rootname} is associated with an individual, distinct ACS observation. However, it should be noted that only the first
+eight characters of the 9-character \texttt{rootname} are truly unique; the last character, which identifies the source of data transmission from the
+telescope\footnote{For example, \texttt{q} = solid-state recorder, \texttt{s} = retransmitted solid-state recorder}, has several possible values.  However,
+varying values of the last character do not associate with different observations.  For this reason, as will be discussed in section \ref{sec3.5}, we adopt
+an 8-character \texttt{rootname} as a primary key for the \texttt{acsql} database tables to denote unique ACS observations.
+
+
+\subsubsection{FITS file structure} \label{sec1.1.2}
+
+Each ACS FITS file consists of several ``extensions'', each describing a particular aspect of the observation.
+Each extension consists of two parts: (1) an extension ``header'', which contain key/value pairs describing image metadata (for example,
+\texttt{DATE-OBS = '2016-09-22'} indicates that the date the particular observation was made was \texttt{2016-09-22}), and (2) the extension data,
+which may be a binary table or, more commonly, a multi-dimensional array of detector pixel values.
+
+The type of extension data can also vary.  The most common extension data types are (1) `science' (\texttt{SCI}), in which the data values are the measure
+of the brightness of the astronomical scene, (2) `error' (\texttt{ERR}), in which the data values are the measure of the uncertainty in the pixel values of the
+\texttt{SCI} extension, and (3) `data quality' (\texttt{DQ}), in which the data values are 16-bit flags that describe the quality of the pixel values for
+the detector (for example, they may indicate that certain pixels were affected by cosmic rays during the observation).  Typically, for a given file,
+the 1st extension is the \texttt{SCI} extension, the 2nd extension is the \texttt{ERR} extension, and the 3rd extension is the \texttt{DQ} extension.
+Furthermore, the 0th extension typically has no extension data and only an extension header, containing metadata that is common to all
+extensions.  This is referred to as the ``primary header'.
+
+Tables \ref{tab1} and \ref{tab2} describe the different extensions of ACS FITS files for each of the three ACS detectors.  Note that there are two sets
+of \texttt{SCI}/\texttt{ERR}/\texttt{DQ} extensions for WFC, since WFC is comprised of two separate CCD chips.
+
+% Table for WFC extenions
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.5}
+\caption{ACS/WFC FITS file extensions}
+\label{tab1}
+\centering
+\begin{tabular}{|c|l|c|c|}
+\hline
+\rowcolor{gray} Extension & \multicolumn{1}{p{2cm}|}{\centering Purpose} & \multicolumn{1}{p{1.5cm}|}{\centering Image Dimensions \\ (pixels)} & Data Type \\
+\hline
+0 & Primary header & -- & String \\
+\hline
+1 & SCI, Chip 2 & (4096, 2048) & Float \\
+\hline
+2 & ERR, Chip 2 & (4096, 2048) & Float \\
+\hline
+3 & DQ, Chip 2 & (4096, 2048) & Integer \\
+\hline
+4 & SCI, Chip 1 & (4096, 2048) & Float \\
+\hline
+5 & ERR, Chip 1 & (4096, 2048) & Float \\
+\hline
+6 & DQ, Chip 1 & (4096, 2048) & Integer \\
+\hline
+\end{tabular}
+\end{table}
+
+% Table for HRC and SBC extenions
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.5}
+\caption{ACS/HRC and ACS/SBC FITS file extensions}
+\label{tab2}
+\centering
+\begin{tabular}{|c|l|c|c|}
+\hline
+\rowcolor{gray} Extension & \multicolumn{1}{p{2cm}|}{\centering Purpose} & \multicolumn{1}{p{1.5cm}|}{\centering Image Dimensions \\ (pixels)} & Data Type \\
+\hline
+0 & Primary header & -- & String \\
+\hline
+1 & SCI & (1024, 1024) & Float \\
+\hline
+2 & ERR & (1024, 1024) & Float \\
+\hline
+3 & DQ & (1024, 1024) & Integer \\
+\hline
+\end{tabular}
+\end{table}
+
+
+Over the years there have been several tools written in various programming languages to read FITS files into memory as well as automatically convert
+their extension data into multi-dimensional array data types and their extension headers to dictionary or string data types.  For this project, the
+\texttt{astropy.io.fits} Python module is used extensively to read and interact with the data of ACS FITS files[8].
+
+
+\subsubsection{FITS file extension headers} \label{sec1.1.3}
+
+As mentioned in section \ref{sec1.1.2}, each FITS extension contains a header, which contains key/value pairs of metadata associated with the extension data.
+Such metadata may describe the astronomical observation (e.g. target name, exposure time, principle investigator name, etc.), telemetry
+of ACS instrument or HST in general at the time of observation (e.g. temperature of the ACS instrument, orientation of the telescope pointing, position of the
+telescope relative to Earth, etc.) or the FITS file itself (e.g. the number of extensions, file creation date, etc.). A subsection of an example header is shown
+in Figure \ref{fig2}.  Note that extension headers may contain a large number of keyword/value pairs; some extension headers contain upwards of 300 keywords,
+while others may contain only $\sim$40.
+
+% Figure for header example
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/header_example.png}
+\caption{\textit{A section of an example header, taken from the 0th extension of the file \texttt{j6mf16lhq$\_$raw.fits}.}}
+\label{fig2}
+\end{figure}
+
+
+\subsubsection{FITS filetypes for ACS} \label{sec1.1.4}
+
+As discussed in section \ref{sec1.1.1}, each ACS observation may result in several FITS filetypes. Each filetype has a specific scientific application and
+the set of available filetypes for a given observation is dependent on the characteristics of the observation, the details of which are beyond the scope of this
+paper.  However, these details can be ascertained from the ACS Data Handbook[9].  To provide some context, below we give a brief description of each possible
+filetype that a given observation may contain:
+
+\begin{itemize}
+  \item \textbf{raw} - the raw, uncalibrated data that comes directly from HST
+  \item \textbf{flt} - nominally calibrated data
+  \item \textbf{flc} - nominally calibrated data corrected for Charge Transfer Efficiency (CTE) deficits.
+  \item \textbf{drz} - geometric distortion-corrected data
+  \item \textbf{drc} - geometric distortion-corrected and CTE corrected data
+  \item \textbf{spt} - telescope telemetry data
+  \item \textbf{jit} - telescope pointing data
+  \item \textbf{jif} - telescope drifting data
+  \item \textbf{crj} - cosmic ray rejected data
+  \item \textbf{crc} - cosmic ray rejected plus CTE corrected data
+  \item \textbf{asn} - observation association table.
+\end{itemize}
+
+As noted earlier, a given observation may not result in the set of all possible filetypes. For example, the observation \texttt{j6mf16lhq} only results in the
+filetypes \texttt{raw}, \texttt{flt}, \texttt{jit}, \texttt{jif}, and \texttt{spt}.
+
+
+\subsection{Key Metadata} \label{sec1.2}
+
+There are several metadata key/value pairs that are particularly important for the \texttt{acsql} application, namely the web application which often
+presents these metadata to the user.  To provide some context for the remainder of this paper, these metadata are briefly described below.  Note that the
+\texttt{rootname} and \texttt{proposal$\_$type} are not metadata from extension headers, but rather are metadata explicitly added to the
+\texttt{acsql} database schema.\newline
+
+\noindent\textbf{APERTURE} - The portion of the \texttt{WFC}, \texttt{HRC}, or \texttt{SBC} detector that was used during an observation.  This can either be the
+entire detector (e.g. \texttt{WFC}, referred to as a ``full-frame image''), or a subsection of the detector (e.g. \texttt{WFC1-1K}, referred to as a ``subarray'').\\
+
+\noindent\textbf{DATE-OBS} - The date of the observation in the format \texttt{YYYY-MM-DD}, measured in Universal Time (e.g. \texttt{'2017-08-05'}).\\
+
+\noindent\textbf{DEC$\_$TARG} - The declination of the target (i.e. the angular distance the target north or south of the celestial equator) (e.g. \texttt{41.2842}).\\
+
+\noindent\textbf{DETECTOR} - The detector used for the observation.  Can either be \texttt{WFC}, \texttt{HRC}, or \texttt{SBC}.\\
+
+\noindent\textbf{EXPFLAG} - Indicates if an observation was interrupted (e.g. \texttt{INTERRUPTED}) or not (e.g. \texttt{NORMAL}).\\
+
+\noindent\textbf{EXPSTART} - The exposure start time of the observation, in units of Modified Julian Date (e.g. \texttt{52473.84839}).\\
+
+\noindent\textbf{EXPTIME} - The exposure duration of the observation, in units of seconds (e.g. \texttt{1000.0}).\\
+
+\noindent\textbf{FILTER1} - The selected element from the \texttt{ACS} filter wheel \# 1 (e.g. \texttt{F606W}).\\
+
+\noindent\textbf{FILTER2} - The selected element from the \texttt{ACS} filter wheel \# 2 (e.g. \texttt{F814W}).\\
+
+\noindent\textbf{IMAGETYP} - The type of exposure for the observation (e.g. \texttt{BIAS}, \texttt{EXT}, etc.).\\
+
+\noindent\textbf{OBSTYPE} - The type of observation, either \texttt{IMAGING}, \texttt{SPECTROSCOPIC}, \texttt{CORONOGRAPHIC}, or \texttt{INTERNAL}.\\
+
+\noindent\textbf{proposal$\_$type} - The type of proposal that the observation belongs to, such as Calibration (i.e. \texttt{CAL}) or General Observer (i.e. \texttt{GO}).\\
+
+\noindent\textbf{PROPOSID} - The 4 or 5-digit proposal number that the observation belongs to (e.g. \texttt{10695}).\\
+
+\noindent\textbf{RA$\_$TARG} - The right ascension of the target (i.e. the angular distance of the target east and west on the celestial sphere) (e.g. \texttt{49.5375}).\\
+
+\noindent\textbf{rootname} - The 8-character unique rootname of the observation (e.g. \texttt{j59l5401}).\\
+
+\noindent\textbf{SUBARRAY} - A boolean flag that indicates if the observation is a full-frame \texttt{APERTURE} (i.e. \texttt{0}) or a subarray \texttt{APERTURE} (i.e. \texttt{1}).\\
+
+\noindent\textbf{TARGNAME} - The name of the target (e.g. \texttt{M87}, \texttt{NGC-4536}, \texttt{ANDROMEDA-I}, etc.).\\
+
+\noindent\textbf{TIME-OBS} - The time of the start of the observation in the format \texttt{HH:MM:SS}, measured in Universal Time (e.g. \texttt{14:21:56}).\\
+
+
+\subsection{Motivation} \label{sec1.3}
+
+The motivation for the \texttt{acsql} application is driven by several limitations of the FITS file structure as well as limitations in the current capabilities of
+MAST from specific user perspectives. Some of these limitations are described below, along with how the \texttt{acsql} application aims to address them.  We also
+discuss the intended users of the application and their expected use cases.
+
+
+\subsubsection{Data retrieval latency} \label{sec1.3.1}
+
+Currently, users who wish to retrieve data from MAST must submit a retrieval request via the MAST online interface or an internal XML request. Once the retrieval
+request is processed (usually automatically unless it is a request of a large number of datasets), the data are either transferred to the user directly via
+Secure File Transfer Protocol (\texttt{sftp}), transferred to a ``staging area'' in which the user can log into and copy the data via File Transfer Protocol (\texttt{ftp})
+at their leisure, or sent by mail via DVD, depending on which option the user selects.  In any case, the duration between a download request and the time at which the
+user has fully retrieved the data may be significant.  In the fastest scenario of an automatically accepted request and the \texttt{sftp} option, a
+typical request can take minutes to hours to be completed. Furthermore, there are limited options available for programmatically obtaining new data; users who wish to
+retrieve the latest available data must (1) discover which datasets are new via a query to the MAST database, (2) construct a download request, (3) submit the download
+request, and (4) await or retrieve the data.  This workflow makes it non-trivial to discover and perform analysis on new data within the same software program.
+
+The \texttt{acsql} application attempts to circumnavigate this retrieval process by making the full data products instantly available via read-only access of
+the \texttt{acsql} filesystem, as well as a view of the image data (and corresponding metadata) instantly available through the \texttt{acsql} web application.
+By having all of the available data centrally located, users need not to go through this request process; data can be directly read from the storage areas on disk.
+
+
+\subsubsection{File I/O} \label{sec1.3.2}
+
+A significant limitation of the FITS file format is the amount of time required for file input/output.  With users often finding themselves analyzing hundreds to
+thousands of images, this file I/O can be quite a burden on the total processing time of such analysis.  The \texttt{acsql} application attempts to mitigate this
+processing time by storing the valuable image metadata that users often seek in a relational database.
+
+Queries to the \texttt{acsql} database prove to be much faster than opening and closing individual FITS files, and the difference in data retrieval times increases
+linearly with increasing amount of files.  Consider an example situation in which a user wishes to retrieve the date of observation (i.e. the \texttt{DATE-OBS} header
+keyword in the 0th extension of a \texttt{raw} FITS file) for one hundred files. Figure \ref{fig3} shows that the total time required to gather this information
+is $\sim$10-fold less when querying the \texttt{acsql} database than when retrieving the data directly from the FITS files, with this gap increasing linearly with
+increasing number of files at a rate of $\sim$2.5 seconds per 100 files.
+
+% Figure for IO time profile
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/fileio_time.png}
+\caption{\textit{The amount of time it takes to retrieve the \texttt{DATE-OBS} header keyword from a varying number of ACS data files via reading the FITS file using the
+\texttt{astropy.io.fits} module (red) and querying the \texttt{acsql} database (blue)}.}
+\label{fig3}
+\end{figure}
+
+In order to build the \texttt{acsql} database, each ACS FITS file must ultimately be opened in order to retrieve the header information.  However, this operation is only
+performed once and needs not to be performed by the user; once the database is built, users can retrieve data by fast database queries.
+
+
+\subsubsection{Data redundancy} \label{sec1.3.3}
+
+As will be discussed in section \ref{sec1.3.5}, the primary user base for the \texttt{acsql} application is a group of ACS instrument analysts who use ACS data on a daily
+basis.  As such, each user may require access to a varying amount of ACS data over time; some data may be useful for their work on a particular day, but not on another,
+while some data are consistently used over time.  Furthermore, instrument analysts may share the need for specific data with one or more of their colleagues.
+Consider a situation in which two instrument analyist require data from the proposal \texttt{11655}. Traditionally, for the two instrument analysts to obtain the data they
+need, they would have to submit a download request to MAST for data from \texttt{11655} and store the data in personal directories.  Unless this effort is explicitly
+coordinated amongst the two individuals, they will each likely download and store a separate copy of this data, when in reality, only one copy is needed.  This workflow leads to
+possible data redundancy.  With the ACS instrument team employing roughly a dozen instrument analysts, the scale of this data redundancy can grow quite large.
+
+Recently, MAST has mitigated this issue through what is known as the MAST public cache, which is a centrally-located, organized network file system that stores all
+publicly-available HST data and is internal to STScI.  The \texttt{acsql} filesystem is built on top of the MAST public cache to provide accessibility to all ACS data in one
+central location.  Furthermore, the \texttt{acsql} application provides the \texttt{acsql} database (for observational metadata needs) and the \texttt{acsql} web application
+(for quick data viewing).  With the combination of these three components, instrument analysts have instant access to all ACS data at any time in one centralized location; there is
+no need for coordination amongst other instrument analysts or storage of separate copies.
+
+
+\subsubsection{Data discovery} \label{sec1.3.4}
+
+As will be discussed in section \ref{sec1.3.5}, ACS instrument analysts often wish to know which datasets (i.e. rootnames) exist for various observational parameters.
+For example, one may need to analyze data that were observed between a specific time period, or observed with a specific pointing on the sky.  Conversely, an instrument analyst
+may have knowledge of specific rootnames, but wish to learn of the observational parameters associated with them.
+
+MAST has tools which allow users to discover rootnames and/or parameters for observations.  The MAST portal is a public-facing online data discovery tool for
+various data collections such as HST data, high level science products, and catalogs of astronomical source positions[10].  The MAST portal offers features that may be of particular
+interest to research astronomers at academic institutions, for example; an image of the location of the scientific target on the sky (`AstroView'), an interactive GUI for displaying
+results, and an option to export results to various file types.  An example query using this tool is shown in Figure 4.
+
+% Figure for log file
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=6.5in]{./figures/mast_portal.png}}
+\caption{\textit{An example of a query to the MAST data discovery portal.}}
+\label{fig4}
+\end{figure*}
+
+Though the MAST portal has many useful features, there are some limitations to the tool from the perspective of an instrument analyst at STScI.  One such limitation is that
+the available observational metadata do not include all of the data available in the FITS headers; it is limited to a small subset of header keywords, mainly
+from the RAW and FLT filetypes, as well as other MAST-generated metadata not found in the FITS headers (e.g. `Target Classification').  Another limitation is that the queries are
+keyed off of an `Observation ID' as opposed to a traditional 9-character \texttt{rootname}.  The Observation ID may map to one or more individual observations (and thus one or more
+individual \texttt{rootnames}), making it difficult for instrument analysts to discover which \texttt{rootnames} (and thus data files) that are associated with the observational
+metadata they seek.
+
+The \texttt{acsql} application provides an intuitive, one-to-one correspondance between the FITS header values and the \texttt{acsql} database schema.  The column names in the
+tables of the \texttt{acsql} database exactly match the names found in the FITS headers, and each extension of each ACS filetype is supported.  Furthermore, the primary key of each
+table in the database is the 9-character \texttt{rootname} that instrument analysts use in their day-to-day work, as opposed to an Observation ID.  With this configuration, it
+is straightforward to discover data via a database query using header keywords.
+
+
+\subsubsection{Use Cases} \label{sec1.3.5}
+
+The intended primary users of the \texttt{acsql} application are ACS instrument analysts that work for the ACS instrument team at STScI.  ACS instrument analysts use ACS data frequently
+in their day-to-day work, using it to help calibrate, monitor, and characterize various aspects of the ACS instrument.  On any given day, an instrument analyst may need to analyze
+data from a number of observing modes, time periods, or filetypes.  In this regard, the \texttt{acsql} application aims to limit the amount of time and effort required by the
+analysts to discover and access the data that they need to perform such work. It should be noted, though, that the \texttt{acsql} application is not necessarily limited to this user base;
+since the application contains only public data, there is potential for users external to STScI, such as scientific researchers at other academic institutions.
+
+With the nature of ACS instrument work in mind, the \texttt{acsql} application was designed to support four main use cases, each briefly described below.\\
+
+\noindent\textbf{Use case 1: Visually inspect an image from the ACS archive}:  The application shall allow users to view a `Quicklook' JPEG of any publicly-available image in the ACS archive,
+along with useful corresponding observational metadata.\\
+
+\noindent\textbf{Use case 2: Determine which datasets exist in the ACS archive for a given set of observational parameters}:  The application shall allow users to determine which
+9-character rootnames exist for a defined set of observational parameters via ACS header keywords.\\
+
+\noindent\textbf{Use case 3: Determine the observational parameters for a given dataset}: The application shall allow users to determine observational parameters (i.e. FITS header keyword values) for
+a given 9-character \texttt{rootname}.\\
+
+\noindent\textbf{Use case 4: Programmatically analyze images across custom datasets}: The application shall allow users to directly read ACS image data into memory and perform analysis for
+data obtained in Use Case (2).
+
+
+% Related Work
+\section{Related Work} \label{chap2}
+
+The main inspiration for the construction of the \texttt{acsql} application was derived from the success of a similar application for the Wide Field Camera 3 (WFC3) instrument
+(also on board HST), known as the WFC3/Quicklook (\texttt{wfc3ql}) application.  The \texttt{wfc3ql} application shares many of the core components that \texttt{acsql} does,
+including a filesystem that stores all WFC3 data on disk, a relational database that stores WFC3 FITS header information, and a web application for user interactivity with the
+system[11][12].  The \texttt{wfc3ql} application has been developed by the WFC3 team at STScI since the instrument was installed on HST in 2009 during Servicing Mission 4[2].  The genesis of
+the application was a single script that performed a download request to MAST for new data, created Quicklook JPEGs from the resulting images, and saved them to a centrally-located
+directory.  Over time, the project has evolved into the filesystem-database-web stack that more closely resembles that of the \texttt{acsql} application.
+
+Despite the similarities, it should be noted that the implementation of the \texttt{wfc3ql} infrastructure differs significantly from that of \texttt{acsql}
+(implementation details of the \texttt{acsql} components are outlined in Chapter \ref{chap3}).  For example, unlike the \texttt{acsql} filesystem, which contains only
+publicly-available data, the \texttt{wfc3ql} filesystem is essentially a duplicate of the MAST archive for WFC3, contains all data, including proprietary data which can
+only be used internally by the WFC3 team at STScI.  Since the \texttt{wfc3ql} filesystem contains proprietary data, much support is needed in the software infrastructure to restrict
+data to certain file directories, user groups, and file permissions.  Additionally, the \texttt{wfc3ql} database only supports a small subset of FITS filetypes and extensions, while
+\texttt{acsql} supports all ACS filetypes and extensions.
+
+With \texttt{wfc3ql} being continuously developed over the past eight years by a team of several developers, many features have been implemented for the application that are not currently
+implemented on \texttt{acsql}.  For example, the \texttt{wfc3ql} application supports the daily visual inspection of new WFC3 data, some data of which
+are proprietary.  Such a feature is not possible for \texttt{acsql}, as the \texttt{acsql} filesystem is built using the MAST cache of only publicly-available data (and thus the \texttt{acsql}
+application can be considered open-source and non-proprietary).  Secondly, \texttt{wfc3ql} currently contains several instrument calibration and monitoring routines built upon
+the \texttt{wfc3ql} automation platform and code library (known as \texttt{pyql}), while \texttt{acsql} has yet to implement any such routines.  A third example is that the \texttt{wfc3ql}
+web application supports the tracking of WFC3 instrument image `anomalies' (i.e. anomalous features in images that are tracked by instrument team members[13]). These features, amongst others,
+clearly serve as possible extensions to the \texttt{acsql} system; such extensions are discussed further in Chapter \ref{chap5}.
+
+
+% Methodology
+\section{Methodology and Implementation} \label{chap3}
+
+In this chapter, we discuss the methods by which we implemented the various components of the \texttt{acsql} application.  Additionally, we discuss the programming standards and
+workflows (sections \ref{sec3.1} and \ref{sec3.2}) that were employed to foster code qualities such as readability, maintainability, extensibility, etc.; we believe that this aspect
+of the project is equally important to the application and its future maintenance as its individual components.
+
+
+\subsection{Version control} \label{sec3.1}
+
+All software associated with this project (including this paper itself) is version-controlled using the \texttt{git} Version Control System (VCS)[14]. The \texttt{git} repository for the
+project is named ``\texttt{acsql}'' and is hosted on \texttt{GitHub}, a repository hosting service[15].  The repository is publicly available at
+\textcolor{blue}{\url{http://github.com/spacetelescope/acsql/}}.
+
+Several feature branches of the software were created throughout the building of the \texttt{acsql} application such that the \texttt{master} branch (which is considered the
+`production' branch) always contained operational software while the feature branches may have contained unfinished implementations.  Such feature branches include \texttt{create-database}
+(for implementation of the \texttt{acsql} database schema), \texttt{add-logging} (for implementation of system logging), \texttt{build-ingest} (for implementation of the data
+ingestion software), and \texttt{web-application} (for implementation of the \texttt{acsql} web application).  For each merge of a feature branch, a \texttt{tag} and \texttt{release}
+was created for the \texttt{master} branch, which allowed a specific version of the \texttt{master} branch to be saved in the repository.  These releases are available at
+\textcolor{blue}{\url{https://github.com/spacetelescope/acsql/releases}}.
+
+Additionally, \texttt{GitHub} allowed for issue tracking for bugs, questions, and potential enhancements to the code repository.  Current open issues of the repository
+can be found at \textcolor{blue}{\url{https://github.com/spacetelescope/acsql/issues}}.
+
+
+\subsection{Programming and Documentation Standards} \label{sec3.2}
+
+All code contained within this project was written to adhere to specific standards and conventions, namely (1) the \texttt{PEP8} Style Guide for Python code[16], (2) The
+\texttt{PEP257} Python guide for module and function docstrings [17], and (3) the \texttt{numpydocs} documentation standard [18].  More details on each of these
+standards and conventions are given below.
+
+The \texttt{PEP8} Style Guide for Python code (abbreviated for `Python Enhancement Proposal \#8`) documents Python coding conventions including variable naming, spacing,
+line length, module layout, function layout, comments, and design patterns.  Only in specific cases did we diverge from these conventions, such as exceeding the recommended 80 characters line
+length to allow for greater readability.  By following these conventions, the style of the \texttt{acsql} software is constistent across each module and reflects the style of
+industry-grade Python code.
+
+The \texttt{PEP257} guide for docstring conventions describes standards used for function and module docstrings (i.e. the API documentation found in block comments at the
+beginning of modules or immediately after function declarations).  Like \texttt{PEP8}, following these conventions ensure consistency amongst the \texttt{acsql} code documentation.
+Furthermore, the \texttt{numpydocs} documentation convention provides some details in addition to the \texttt{PEP257} conventions and is used in many Python packages including
+the \texttt{numpy} (numerical Python) and \texttt{scipy} (scientific Python) packages[19].  Figure \ref{fig5} shows an example of these conventions, taken from the
+\texttt{acsql.ingest.ingest.get$\_$proposal$\_$type} function.
+
+% Figure for docstring convention example
+\begin{figure}[!b]
+\centering
+\includegraphics[width=3.5in]{./figures/docstrings.png}
+\caption{\textit{An example of the \texttt{PEP257} and \texttt{numpydoc} docstring conventions, using the \texttt{get$\_$proposal$\_$type} function from \texttt{acsql.ingest.ingest}.}}
+\label{fig5}
+\end{figure}
+
+Another benefit of using \texttt{PEP257} and \texttt{numpydoc} docstring conventions is that API documentation creation tools such as \texttt{sphinx}[20] or \texttt{epydoc}[21] can
+automatically convert the docstrings into other output formats such as \texttt{HTML} and \texttt{PDF}.  For this project, we use \texttt{sphinx} to convert API documentation to \texttt{HTML}
+and host the webpages online using \texttt{readthedocs}, an open-source, community supported tool for hosting and browsing documentation[22]. The output documentation as seen on
+\texttt{readthedocs} for the example function in Figure \ref{fig5} is provided in Figure \ref{fig6}. The documentation for \texttt{acsql} is available at
+\textcolor{blue}{\url{http://acsql.readthedocs.io/}}.
+
+% Figure for docstring convention example in readthedocs
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/readthedocs.png}
+\caption{\textit{The \texttt{readthedocs} documentation for the \texttt{acsql} example function seen in Figure \ref{fig5}.}}
+\label{fig6}
+\end{figure}
+
+
+\subsection{Filesystem: Archive of ACS data} \label{sec3.3}
+
+The \texttt{acsql} filesystem is a Network File System (NFS) that stores all publically available on-orbit ACS data on disk in an organized set of directories and subdirectories hosted at STScI.
+Figure \ref{fig7} shows an example of this directory structure.  The parent directory is the first four characters of the 9-character \texttt{rootname}, which has a one-to-one
+correspondence with an individual \texttt{PROPOSID}. The subdirectories of the parent directories are named after the full 9-character \texttt{rootname} such that each parent directory
+contains a \texttt{rootname} subdirectory for each \texttt{rootname} that were observed for the particular \texttt{PROPOSID}.  Furthermore, each \texttt{rootname} subdirectory contains
+every available filetype (as described in Section \ref{sec1.1.4}) for the particular observation.
+
+% Figure for acsql filesystem size over time
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/filesystem_structure_listings.png}
+\caption{\textit{A representation of the directory structure within the \texttt{acsql} filesystem, using a few observations as an example.}}
+\label{fig7}
+\end{figure}
+
+Figure \ref{fig8} shows how the total size of the filesystem has evolved over the lifetime of the ACS mission; currently, the filesystem occupies $\sim${40} TB of storage space.
+Note that the file sizes across the detectors and across the various filetypes may vary depending on the nature of the particular observation (for example, full-frame observations
+result in larger file sizes than subarray observations, calibrated filetypes have larger file sizes than un-calibrated filetypes, etc.).
+
+% Figure for acsql filesystem size over time
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/filesystem_size.png}
+\caption{\textit{The size of the \texttt{acsql} filesystem as a function of observation
+date.}}
+\label{fig8}
+\end{figure}
+
+Currently, the \texttt{acsql} filesystem utilizes the MAST public cache (described in section \ref{sec1.3.3}) to store all of the ACS data.  We purposely omit details of the location
+and exact structure of the MAST cache as to not expose sensitive data that is internal to STScI.  We note, however, that it is possible for users external to STScI to reconstruct the
+\texttt{acsql} filesystem (or a chosen subset of the filesystem) by requesting the publicly-available data from MAST and organizing the files in a similar manner to that shown in Figure \ref{fig7}.
+
+
+\subsection{Filesystem: Archive of JPEGs and Thumbnails} \label{sec3.4}
+
+In addition to the ACS data products described in section \ref{sec3.3}, the \texttt{acsql} filesystem also stores `Quicklook' JPEG and thumbnail images of each
+\texttt{RAW}, \texttt{FLT}, and \texttt{FLC} filetype (when applicable) in an organized directory structure.  These images are utilized by the \texttt{acsql} web application to allow users to
+quickly and easily view ACS data without having to physically open the corresponding FITS files.
+
+The JPEG images are generated by (1) taking the two-dimensional data from the \texttt{SCI} extension(s), (2) sigma-clipping the top and bottom 1\% of the values (as to avoid large
+outlier values and enhance the scaling of the image), and (3) saving the data as a JPEG format.  The thumbnail images are created by simply resizing the corresponding
+JPEG into a 128x128 pixel image and saving the resulting image to a \texttt{.thumb} extension; the purpose of these thumbnail images are to be able to view many of them on a
+single webpage in the \texttt{acsql} web application.  An example of a JPEG image and its corresponding thumbnail is shown in Figure \ref{fig9}.
+
+% Figure for JPEG and thumbnail example
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/jpeg_and_thumbnail.png}
+\caption{\textit{An example of a JPEG image (left) and its corresponding thumbnail image using example dataset \texttt{jcs718koq}.}}
+\label{fig9}
+\end{figure}
+
+% Figure for JPEG and thumnail directory structure
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/jpeg_filesystem_listings.png}
+\caption{\textit{A representation of the directory structure for the JPEG (top) and thumbnail (bottom) portion of the \texttt{acsql} filesystem, using a few observations
+as an example.}}
+\label{fig10}
+\end{figure}
+
+Unlike the ACS data products portion of the filesystem (section \ref{sec3.3}), the JPEG and thumbnail portions of the filesystem are organized based on the
+four-or-five digit \texttt{PROPOSID} of the corresponding observation instead of the first four characters of the \texttt{rootname}.  This design was chosen as a means to simplify the
+design of the web application; users often wish to view data based on the 4/5-digit \texttt{PROPOSID} and less often on the details of the \texttt{rootname}.  An example of this
+structure is shown in Figure \ref{fig10}.  Note that the \texttt{thumbnail/} filesystem only contains thumbnails created from \texttt{FLT} filetypes, since the thumbnails are only
+intended for navigation and quick-viewing.
+
+
+\subsection{Database: Relational Schema} \label{sec3.5}
+
+Another major component of the \texttt{acsql} application is a relational database that stores all \texttt{FITS} header key/value pairs for each ACS filetype and each \texttt{FITS} file
+extension for all on-orbit ACS observations.  Such a database allows users to perform relational queries for any observational metadata based on the header keywords.
+
+To accomplish this, we implemented the relational schema shown in Figure \ref{fig11}.  The \texttt{acsql} database contains 111 tables in total: one \texttt{master} table, which contains
+basic information about each \texttt{rootname} that is important for maintaining the database, one \texttt{datasets} table which indicate which filetypes are available for a
+particular \texttt{rootname}, and 109 `header' tables which stores the header key/value pairs, one for each \texttt{detector}/\texttt{filetype}/\texttt{extension} combination (e.g.
+\texttt{wfc$\_$raw$\_$0}).  Each of these tables are described in detail below.
+
+% Figure for acsql database schema
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.5in]{./figures/schema.png}}
+\caption{\textit{The relational database schema for the \texttt{acsql} database.}
+\label{fig11}}
+\end{figure*}
+
+The \texttt{master} table contains information that is particularly useful for maintaining and using the \texttt{acsql} database.  Its primary key is the first 8 characters of the
+9-character \texttt{rootname} for the particular observation (recall from section \ref{sec1.1.1} that only the first 8 characters of a \texttt{rootname} are actually unique).
+The \texttt{path} column contains the location of the observation in the \texttt{acsql} filesystem.  The \texttt{first$\_$ingest$\_$date} and \texttt{last$\_$ingest$\_$date} contains
+the date in which the observation was first inserted into the database and the date in which the observation was most recently updated in the database, respectively. The
+\texttt{last$\_$ingest$\_$date} allows the database maintainer to determine when data in the database may become outdated and require re-ingestion.
+
+The \texttt{datasets} table lists which filetypes are available for each observation.  If a particular filetype is available for the given \texttt{rootname}, the value for the
+appropriate column in the table is the full \texttt{<rootname>$\_$<filetype>.fits} filename (for example, the \texttt{raw} column contains the value \texttt{jcs718koq$\_$raw.fits} for
+\texttt{rootname} \texttt{jcs718ko}). If a particular filetype is not available, the value of the column is \texttt{NULL}. This table allows a user to determine which header tables are
+queryable for a given \texttt{rootname}.  The \texttt{rootname} in the \texttt{datasets} table acts as both a primary key for the table as well as a foreign key that maps to the
+\texttt{rootname} of the \texttt{master} table.
+
+The remaining 109 tables were designed to be in direct correspondence with the header metadata key/value pairs found in the ACS FITS files; each column is named in the same manner as
+the header keys, with the value of that column reflecting the header value. There is one table for each \texttt{detector}, \texttt{filetype}, and \texttt{extension} combination;
+collectively, these are referred to as the `header' tables.  Like the \texttt{datasets} table, the \texttt{rootname} column serves as a primary key for the header tables as well
+as a foreign key that maps to the \texttt{rootname} of the \texttt{master} table.
+
+
+\subsection{Database: \texttt{MySQL} + \texttt{SQLAlchemy}} \label{sec3.6}
+
+The \texttt{acsql} database is stored on a \texttt{MySQL} server (\texttt{Version 5.6})[23] that is hosted at STScI.  The database schema was implemented using \texttt{SQLAlchemy}, which
+is an open-source \texttt{SQL} toolkit and Object Relational Mapper (ORM) for Python[24].  As an ORM, \texttt{SQLAlchemy} enables Python classes to be easily translated to
+\texttt{SQL}-based database tables, and vice versa.  Additionally, \texttt{SQLAlchemy} provides methods for connecting to a SQL-based database and performing typical \texttt{SQL}
+tasks such as inserts, updates, and queries.
+
+There are several key functions and classes that were used to construct the \texttt{acsql} database (all of which can be found in the \texttt{acsql.database.database$\_$interface.py}
+module, further discussed in section \ref{sec3.10}). One such function is \texttt{load$\_$connection}, shown in Figure \ref{fig12}.  This function creates three \texttt{SQLAlchemy}
+objects that are used to establish a connection with the \texttt{acsql} database: \texttt{engine}, \texttt{base}, and \texttt{session}, each described below.
+
+% Figure for load_connection in database_interface
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.3in]{./figures/load_connection.png}
+\caption{\textit{The \texttt{load$\_$connection} function, used to build a connection to the \texttt{acsql} database.}}
+\label{fig12}
+\end{figure}
+
+The \texttt{engine} object contains the Python Database API Specification (also known as \texttt{DBAPI}), which provides a low-level API for Python-specific, commonly-used
+database tasks[25].  Created from the \texttt{sqlalchemy.create$\_$engine} method, this requires a user-supplied \texttt{connection$\_$string}.  The \texttt{connection$\_$string}
+contains information about the database type (e.g. \texttt{MySQL}, the specific database dialect being used, and the user credentials (e.g. username, password, port number,
+and host server name).  In the case of the \texttt{acsql} database, this connection string takes the form of \texttt{'mysql+pymysql://username:password@host:port/} \texttt{acsql'}.
+The \texttt{connection$\_$string} is imported from a user supplied \texttt{config} file within the \texttt{acsql} library (as will be discussed in section \ref{sec3.10}).
+
+The \texttt{base} object serves as a base class for declarative class definitions (i.e. the classes that are used to define the database tables).  It is created from the
+\texttt{sqlalchemy.ext.declarative.declatative$\_$base} method.  Perhaps most importantly, the \texttt{base} object contains methods for creating and dropping the tables defined in
+the class definitions (e.g. \texttt{base.metadata.create$\_$all()} and \texttt{base.metadata.drop$\_$all()}, respectively).
+
+The \texttt{session} object provides a primary usage interface for database operations, and is created via the \texttt{sqlalchemy.sessionmaker} method, which takes as a parameter the
+\texttt{engine} object.  The methods of the \texttt{session} object are primarily used to query the database (i.e. \texttt{session.query()}) as well as commiting inserts or updates (i.e.
+\texttt{session.commit()}).
+
+% Figure for master table in database_interface
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/master_table.png}
+\caption{\textit{The class definition for constructing the \texttt{master} table via \texttt{SQLAlchemy}.}}
+\label{fig13}
+\end{figure}
+
+% Figure for datasets table in database_interface
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/datasets_table.png}
+\caption{\textit{The class definition for constructing the \texttt{datasets} table via \texttt{SQLAlchemy}.}}
+\label{fig14}
+\end{figure}
+
+The \texttt{master} and \texttt{datasets} tables were implemented via explicit class definitions in \texttt{database$\_$interface}, and are shown in Figures \ref{fig13} and \ref{fig14},
+respectively.  Each table column is defined using the \texttt{sqlalchemy.Column} object, which is a class that can be initialized with the column datatype (e.g. \texttt{String},
+\texttt{Float}, \texttt{Integer}, etc.) as well as parameters that set \texttt{SQL}-like constraints on the column values.  These include, but are not limited to,
+primary keys (e.g. the \texttt{primary$\_$key=True} parameter in the \texttt{master.rootname} column), foreign key constrains (e.g. the \texttt{ForeignKey} constraint in the
+\texttt{datasets.rootname} column), uniqueness constraints (e.g. the \texttt{unique=True} parameters in the \texttt{master.path} column), and \texttt{NULL} constraints (e.g. the
+\texttt{nullable=False} parameter in the \texttt{master.first$\_$ingest$\_$date} column).  \texttt{SQLAlchemy} determines the name of the table via the \texttt{$\_$$\_$tablename$\_$$\_$}
+attribute, and determines the name of the columns by the name of the variable used to initialize each \texttt{Column} object.
+
+% Figure for orm_factory in database_interface
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/orm_factory.png}
+\caption{\textit{The \texttt{orm$\_$factory} function, used to define class definitions for header tables.}}
+\label{fig15}
+\end{figure}
+
+Since there are 109 header tables, some of which have hundreds of columns, it is not practical to construct a class definition for each table in a similar manner to that of the
+\texttt{master} and \texttt{datasets} table.  Instead, these class definitions were implemented via the \texttt{database$\_$interface.orm$\_$factory} function, which is a factory
+function that creates and returns a class definition for each header table, based on the given \texttt{class$\_$name} that reflects the
+\texttt{detector} / \texttt{filetype} / \texttt{extension} combination (e.g. \texttt{wfc$\_$raw$\_$0}).  The \texttt{orm$\_$factory} function is shown in Figure \ref{fig15}.  Similar to the
+\texttt{Master} and \texttt{Datasets} classes, some of the columns in the \texttt{orm$\_$factory} function are explicitly defined via the \texttt{SQLAlchemy} \texttt{Column} class.
+However, the columns that correspond to header key/value pairs are defined in a separate function named \texttt{define$\_$columns}, shown in Figure \ref{fig16}.
+
+% Figure for define_columns in database_interface
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/define_columns.png}
+\caption{\textit{The \texttt{define$\_$columns} function, used to define columns used in the header tables.}}
+\label{fig16}
+\end{figure}
+
+The purpose of the \texttt{define$\_$columns} function is to define \texttt{SQLAlchemy} \texttt{Column} objects for each header keyword in the headers of the particular
+\texttt{detector} / \texttt{filetype} / \texttt{extension} combination (provided in the given \texttt{class$\_$name} parameter).  This is accomplished by reading in a text file
+(named \texttt{<class$\_$name>.txt} that contains the header keywords and their datatype (one per line) for the given \texttt{class$\_$name}. A portion of an example text file
+is shown in Figure \ref{fig17}.
+
+% Figure for table definition text file
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.8in]{./figures/table_definition.png}
+\caption{\textit{The contents of an example text file used to define the columns of a header table in the \texttt{define$\_$columns} function. The example table used here is
+the \texttt{wfc$\_$asn$\_$0} table.}}
+\label{fig17}
+\end{figure}
+
+% Figure for orm_factory calls
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1.5in]{./figures/orm_factory_calls.png}
+\caption{\textit{An example of how the \texttt{orm$\_$factory} function is called to create class definitions for the header tables.}}
+\label{fig18}
+\end{figure}
+
+Furthermore, the 109 text files used to define the header table columns are also generated in an automated fashion via the \texttt{acsql.database.make$\_$tabledefs.py} module.  This
+module uses a small set of example ACS FITS files to scrape their header contents, determine all of the header keywords and their datatypes, and write the results to a text file.
+Similarly, the \texttt{acsql.database.update$\_$tabledefs.py} module adds any new header keywords to the text files by comparing the header contents of a given FITS file to
+the existing column definition text files\footnote{New header keywords are occasionally introduced to ACS data proceeding updates to its calibration software.}.
+
+With the implementation of the \texttt{orm$\_$factory} and \texttt{define$\_$columns} function, it is trivial to create class definitions for each of the 109 header tables.  An
+example of this is shown in Figure \ref{fig18}, where several of the \texttt{WFC} header tables are defined.
+
+With the \texttt{master}, \texttt{datasets}, and each of the 109 header tables defined in the \texttt{database$\_$interface} module, creating the database tables on the \texttt{MySQL}
+server is accomplished by executing the \texttt{base.metadata.create$\_$all()} method.
+
+
+\subsection{Data ingestion software: Algorithm} \label{sec3.7}
+
+Another critical component of the \texttt{acsql} application is the modules that are used to ingest data into the \texttt{acsql} database and to create the `Quicklook' JPEGs and
+thumbnails. The ingestion algorithm is encapsulated within a collection of modules in the \texttt{acsql} package, namely the \texttt{acsql.ingest.ingest} and
+\texttt{acsql.scripts.ingest$\_$production.py} modules (further discussed in section \ref{sec3.10}).  Collectively, we refer to this collection of modules as the ``ingestion software".
+We describe the overall algorithm of the ingestion software below.
+
+1. \textbf{\textit{Identify newly available public ACS data in the filesystem:}}  This is accomplished by comparing the list of \texttt{rootnames} in the filesystem with the list
+of \texttt{rootnames} in the \texttt{master} table of the database.  Any \texttt{rootnames} that exist in the filesystem but not in the database are considered new \texttt{rootnames} to
+be ingested.
+
+2. \textbf{\textit{Loop over each \texttt{rootname} (in a parallelized manner):}}  The \texttt{ingest.py} module takes a single \texttt{rootname} as input, such that if there are multiple
+\texttt{rootnames} to be ingested, the calls to the \texttt{ingest.py} module can be parallelized over many CPUs.  The ingestion of one \texttt{rootname} does not depend on the ingestion of
+another, and there is no importance to the order in which files are ingested.  Note that steps 3 through 9 are written such that a single \texttt{rootname} is being
+ingested (i.e. inside of the loop).
+
+3. \textbf{\textit{Update the \texttt{master} table with information about the \texttt{rootname}:}} At this point, the \texttt{master} table can be updated with data pertaining to the
+\texttt{rootname}.  A generic \texttt{insert$\_$or$\_$update} function was written (available in the \texttt{acsql.utils.utils} module) to determine if an entry should be inserted (in the
+case of first-time ingestion) or updated (in the case of re-ingestion). This function uses various \texttt{SQLAlchemy} methods and the class definitions described
+in section \ref{sec3.6} to perform the \texttt{insert} or \texttt{update} operation.  The \texttt{insert$\_$or$\_$update} function is shown in Figure \ref{fig19}.
+
+% Figure for insert_or_update
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.5in]{./figures/insert_or_update.png}
+\caption{\textit{The \texttt{insert$\_$or$\_$update} function from the \texttt{acsql.utils.utils} module, used at various times during the data ingestion process to determine if an
+entry should be inserted or updated in the \texttt{acsql} database.}}
+\label{fig19}
+\end{figure}
+
+% Figure for log file
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=7.0in]{./figures/log.png}}
+\caption{\textit{An example log file for the ingestion of a single file (\texttt{j8zh21xv}).}}
+\label{fig20}
+\end{figure*}
+
+4. \textbf{\textit{Loop over the available filetypes for the given \texttt{rootname}:}} The available filetypes are determined by traversing down a level in the tree
+structure of the filesystem and identifying which files are present. Once determined, the ingestion algorithm processes each \texttt{<rootname>$\_$<filetype>.fits} file individually.
+Note that steps 5 through 9 are written such that a single filetype is being ingested (i.e. inside of the next nested loop).
+
+5. \textbf{\textit{Create a Python dictionary with metadata about the file}:}  To reduce the amount of variables passed around to functions, a data container in the form of
+a Python dictionary data type is created to hold metadata needed by the remainder of the ingestion process.  We refer to this data container as the \texttt{file$\_$dict}.  The
+\texttt{file$\_$dict} contains metadata such as the absolute path of the file in the filesystem, the filetype, the available FITS file extensions of the file, and the absolute
+paths to where the Quicklook JPEGs and thumbnails will be written.
+
+6. \textbf{\textit{For each FITS file extension, extract the header information and update the appropriate header table in the \texttt{acsql} database:}}  The header information
+is read into a Python dictionary via the \texttt{astropy.io.fits} module.  Besides some minor fixes for a few corner cases (such as converting hyphens to underscores in header keys as to avoid
+Python errors), it is rather trivial to perform an \texttt{insert} or \texttt{update} operation via the \texttt{insert$\_$or$\_$update} function (see Figure \ref{fig19}).
+
+7. \textbf{\textit{Update the \texttt{datasets} table for the given \texttt{filetype}:}} At this point, an entry in the \texttt{datasets} table is either inserted (if it is the first
+\texttt{filetype} for the \texttt{rootname} being ingested), or updated (if a \texttt{filetype} under the same \texttt{rootname} had already been ingested).
+
+8. \textbf{\textit{If the \texttt{filetype} is either \texttt{raw}, \texttt{flt}, or \texttt{flc}, then create a Quicklook JPEG image:}}  JPEGs are produced only for \texttt{raw},
+\texttt{flt}, and \texttt{flc} filetypes, since these are the filetypes that contain two-dimensional image data.  The image data are read into multidimensional \texttt{numpy} array
+data types via the \texttt{astropy.io.fits} module.  The data are then rescaled as to avoid an undesirable image stretch caused by extremely high or low-valued pixels, and saved to a
+\texttt{.jpg} format.  The JPEGs are saved to the \texttt{jpegs/} portion of the \texttt{acsql} filesystem (described in section \ref{sec3.4}).
+
+9. \textbf{\textit{If the \texttt{filetype} is \texttt{flt}, then create a Quicklook thumbnail image:}} Thumbnail images are only produced for \texttt{flt} filetypes since they
+are only meant to be viewed as a means to discover/identify the larger JPEG images via the \texttt{acsql} web application.  Thumbnails are generated simply by reading in the corresponding
+\texttt{flt} JPEG and resizing it to 128x128 pixels.  The thumbnails are saved to the \texttt{thumbnails/} portion of the \texttt{acsql} filesystem (described in section \ref{sec3.4}).\\
+
+The modules of the ingestion software are intended to be executed daily (as an automatically-spawned process) to keep the \texttt{acsql} application up-to-date on any public data as it
+becomes available.
+
+
+\subsection{Data ingestion software: \texttt{logging}} \label{sec3.8}
+
+Since the data ingestion software is intended to be executed by an automatic process and not by a human, we implemented a system to log the status of the ingestion to an output text file
+to be analyzed at a later time.  Such log files can be used to assess if there were any issues with the ingestion process, such as if a new header keyword had
+appeared (requiring an update to the appropriate header table in the database).  An example log file showing the ingestion of a single rootname (\texttt{j8zh21xv}) is provided in Figure
+\ref{fig20}.
+
+When the ingestion software executes, it creates an empty log file is created with the filename \texttt{<module$\_$name>$\_$<timestamp>.log}, where \texttt{<module$\_$name>} is the name of the
+ingestion module (in production, this is \texttt{ingest$\_$production.py}, as will be discussed in section \ref{sec3.10}), and \texttt{<timestamp>} is the current time in the format
+\texttt{YYYY-MM-DD-HH-MM}. The naming convention of the log file allows system maintainers to determine which log file corresponds to a specific ingestion run.
+
+Next, the Python \texttt{logging} module configures the format of the log statements by (1) setting the default logging \texttt{level} to \texttt{INFO} (meaning
+that, unless otherwise specified, each call to \texttt{logging} by the ingestion module will result in an \texttt{INFO} statement), (2) setting the timestamp format to
+\texttt{YYYY-MM-DD HH:MM:SS}, and (3) setting the logging message format to \texttt{<timestamp> <level>: <message>}.
+
+With the logging settings configured, any call to the \texttt{logging} module within the ingestion software results in a log statement.  For example, the command
+\texttt{logging.info('Gathering files to ingest')} results in a timestamped log message, e.g. \texttt{08/15/2017 11:05:26 INFO: Gathering files to ingest} (as shown in line 10 of Figure \ref{fig20}.)
+
+Calls to the \texttt{logging} module are strategically placed within the ingestion software to provide enough context of the status of the ingestion without cluttering the log file with
+too much detail. In most cases, logging statements only occur after a change of state to the filesystem or database (i.e. an updated database table, the creation of a JPEG or thumbnail, etc.).
+
+
+\subsection{Web Application} \label{sec3.9}
+
+
+\subsubsection{Overview}
+
+The front-end of the \texttt{acsql} application is the web application.  The web application is built using Python and \texttt{Flask}, which is a Python based web framework[26].
+Currently, the web application has two main features/modes of use: (1) viewing JPEGs and image metadata for any publicly-available ACS \texttt{raw}, \texttt{flt}, and \texttt{flc} image
+(when applicible), and (2) performing relational queries on the \texttt{acsql} database.  To illustrate these features, we show examples of some of the different webpages that make up the
+web application in Figures \ref{fig21} through \ref{fig28}, and further describe each below.
+
+Figure \ref{fig21} shows the \texttt{acsql} homepage.  The homepage, as well as all other webpages in the web application, contains a menu bar at the top containing four links:
+(1) to the database query page, (2) to the archive links page, (3) to the \texttt{acsql} code repository on GitHub, and (4) to the \texttt{readthedocs} documentation page.  Clicking the
+`ACS Quicklook' button in the menu bar allows the user to return to the homepage, regardless of which webpage they are currently viewing.  Additionally, the homepage also contains button-type
+links to the database query page and the archive links page.
+
+% Figure for homepage
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=6.0in]{./figures/homepage.png}}
+\caption{\textit{The homepage of the \texttt{acsql} web application.}}
+\label{fig21}
+\subfloat{\includegraphics[width=6.0in]{./figures/database_query_page.png}}
+\caption{\textit{A portion of the database query page of the \texttt{acsql} web application.}}
+\label{fig22}
+\end{figure*}
+
+Figure \ref{fig22} shows an example of the database query page.  This page allows users to fill out a form that in turn creates a query of the \texttt{acsql} database and executes
+on hitting the `Submit' button at the bottom of the page.  Note that the form contains only a subset of the many possible database parameters; we limited the database query page to only
+options that we deemed to be particularly useful by the user base.  As such, we expect that this page be further expanded and/or modified in the future as more use cases become apparent.
+
+In this example, we use the form to find all data taken with the \texttt{WFC} detector, are of Observation Type \texttt{IMAGING}, and were observed by the Principle Investigator
+Zolt Levay\footnote{Zolt Levay is a Science Visuals Developer at STScI, and has been the PI of many programs that have acquired images for HST public releases.}.  Note that there are three
+output options: (1) an \texttt{HTML table}, which returns a webpage showing the selected `Output Columns' (in this case, the Rootname, PI last/first name, Proposal ID, Aperture, Date/Time of
+observation, and the Target Name; see Figure \ref{fig23}), (2) a CSV file downloaded to the user's machine containing a comma-separated table of the selected output columns
+(see Figure \ref{fig24}), or (3) a webpage showing the thumbnail images of all of the resulting data (see Figure \ref{fig25}).
+
+Figure \ref{fig26} shows the archive links page.  This page contains links to every proposal that contains publicly available ACS data via the 4-5 digit \texttt{PROPOSID}.  Clicking one
+of the links opens a new window to a `view proposal' webpage.  Similar to the database query results shown in Figure \ref{fig25}, the `view proposal' webpage shows
+thumbnail images of each ACS dataset available in the given proposal.  The `view proposal' pages contain several buttons and filters near the top of the page; using these will sort and/or
+filter out the thumbnail images based on the chosen parameters.  Figure \ref{fig27} shows an example of this webpage, using proposal 14039.
+
+% Figure for query results table
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.2in]{./figures/database_query_results_html.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an HTML table.}}
+\label{fig23}
+\subfloat{\includegraphics[width=5.2in]{./figures/database_query_results_csv.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of an CSV file.}}
+\label{fig24}
+\end{figure*}
+
+% Figure for query results thumbnails
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.0in]{./figures/database_query_results_thumbnails.png}}
+\caption{\textit{The results of the database query shown in Figure \ref{fig22} in the form of thumbnail images.}}
+\label{fig25}
+\subfloat{\includegraphics[width=5.0in]{./figures/archive_links.png}}
+\caption{\textit{The archive links webpage of the \texttt{acsql} web application.}}
+\label{fig26}
+\end{figure*}
+
+% Figure for view proposal
+\begin{figure*}[!t]
+\centering
+\subfloat{\includegraphics[width=5.0in]{./figures/view_proposal.png}}
+\caption{\textit{An example `view proposal' webpage, using proposal 14039.}}
+\label{fig27}
+\subfloat{\includegraphics[width=5.0in]{./figures/view_image.png}}
+\caption{\textit{An example `view image' webpage, using dataset \texttt{jcs718kmq}.}}
+\label{fig28}
+\end{figure*}
+
+In the `view proposal' webpages, users may click on any one of the thumbnail images to bring up the `view image' webpage for that image.  An example of this webpage is shown in
+Figure \ref{fig28}, using the dataset \texttt{jcs718kmq}.  This webpage contains the Quicklook JPEG of the image along with useful metadata of the dataset near the top of the page.  It also
+contains an additional link (\texttt{proposal}) to view the other images within the particular proposal via the appropriate `view proposal' webpage, as well as links to view the corresponding
+\texttt{RAW} or \texttt{FLC} JPEG image (when applicable).
+
+
+\subsubsection{Implementation}
+
+The web application is implemented by several Python modules, namely:
+
+\begin{itemize}
+\item \texttt{acsql$\_$webapp.py}
+\item \texttt{data$\_$containers.py}
+\item \texttt{form$\_$options.py}
+\item \texttt{query$\_$form.py}
+\item \texttt{query$\_$lib.py}
+\end{itemize}
+
+\noindent as well as several subdirectories containing useful static files, style sheets, and HTML templates, namely:
+
+\begin{itemize}
+\item \texttt{static/css/*.css}
+\item \texttt{static/js/*.js}
+\item \texttt{static/img/*}
+\item \texttt{templates/*.html}
+\end{itemize}
+
+\noindent Below we further describe these modules, directories, and files, and how they relate to each other.
+
+The \texttt{acsql$\_$webapp} module is the main module for running the \texttt{acsql} web application; this module must be executed in order to serve the web application
+(either on a dedicated web server, or locally on a user's machine and accessed through the user's \texttt{localhost}).  This module uses the \texttt{Flask} web framework to receive
+incoming \texttt{HTML} requests.  It is structured such that each \texttt{acsql} webpage relates to an individual function within \texttt{acsql$\_$webapp} (for example, accessing the
+\texttt{/archive/} webpage results in the execution of the \texttt{archive} function). Each of these functions contain the appropriate Python logic and rendering of \texttt{HTML}
+templates to return the desired webpage.
+
+Much of the functionality required to gather data needed for the various \texttt{acsql} webpages (e.g. lists of images, image metadata, paths to JPEG images on disk, etc.) is imported
+into \texttt{acsql$\_$webapp} from the \texttt{data$\_$containers.py} module.  That is to say, many of the functions within the \texttt{acsql$\_$webapp} module call functions from
+the \texttt{data$\_$containers} module to gather the data that is eventually passed on to the \texttt{HTML} template.  This design choice was made in order to separate the data from the
+functionality, often regarded as a best practice in software engineering.
+
+Similarly, the \texttt{form$\_$options.py} module is a container module for storing the possible form options (e.g. apertures, filters, output column, proposal types,
+etc.) for the database query form page.  These data could have been defined within the \texttt{acsql$\_$webapp} module, but we chose to separate out these data.
+
+The \texttt{query$\_$form.py} and \texttt{query$\_$lib.py} modules are used extensively to render the database query webpage and convert a completed form into an executable query on
+the \texttt{acsql} database, respectively.  The \texttt{query$\_$form} module contains several class objects for supplying specific types of form fields (e.g. check box fields, text fields,
+multiple select fields) as well as functions to validate form entries.  Several of the form objects are extensions of components (via subclassing) provided by the \texttt{wtforms} library,
+which is a form validation and rendering library for Python web development (wtforms)[27].  The {query$\_$lib} module contains functions that parse, build, validate, and return \texttt{SQLAlchemy}
+\texttt{query} objects from the results of a submitted database query form.  These queries are then executed on the \texttt{acsql} database and results are used to render the database query
+result HTML, CSV, and/or thumbnail webpages.
+
+Like many web applications, we also store static files such as \texttt{HTML} templates, \texttt{CSS} templates, and static images in separate \texttt{static/} and \texttt{templates/} directories.
+The \texttt{static/css/} directory contains the \texttt{CSS} templates used in the \texttt{HTML} templates.  Similarly, the \texttt{static/js/} directory contains several JavaScript libraries,
+also used in the \texttt{HTML} templates. Lastly, the \texttt{templates/} directory contains the \texttt{HTML} templates used to render the various webpages of the web application.  There is one
+template for each type of webpage, as well as a template that houses \texttt{HTML} that is common to each webpage (e.g. the menu bar), named \texttt{base.html}. Aside from some minor tweaks, we use
+templates from \texttt{Bootstrap}, which is a front-end component library and open source toolkit for developing \texttt{HTML}, \texttt{CSS}, and \texttt{JS}[28].
+
+
+\subsection{\texttt{acsql} Package} \label{sec3.10}
+
+All software associated with the \texttt{acsql} project is contained within a single \texttt{git} repository (also named ``\texttt{acsql}''), which we refer to as the ``\texttt{acsql} library'',
+or ``\texttt{acsql} package''.  The package layout is shown below:
+
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+\begin{lstlisting}
+acsql/
+    LICENSE
+    README.md
+    MANIFEST.in
+    setup.py
+    paper/
+        ...
+    presentation/
+        ...
+    docs/
+        Makefile
+        requirements.rst
+        source/
+          conf.py
+          database.rst
+          index.rst
+          ingest.rst
+          scripts.rst
+          utils.rst
+          website.rst
+    acsql/
+        __init__.py
+        database/
+            __init__.py
+            database_interface.py
+            make_tabledefs.py
+            queries.py
+            reset_database.py
+            table_definitions/
+                *.txt
+            update_tabledefs.py
+        ingest/
+            __init__.py
+            ingest.py
+            make_file_dict.py
+            make_jpeg.py
+            make_thumbnail.py
+        scripts/
+            __init__.py
+            ingest_production.py
+        utils/
+            __init__.py
+            config.yaml
+            utils.py
+        website/
+            __init__.py
+            acsql_webapp.py
+            data_containers.py
+            form_options.py
+            query_form.py
+            query_lib.py
+            static/
+                css/
+                    *.css
+                img/
+                    jpegs
+                    thumbnails
+                js/
+                    *.js
+            templates/
+                *.html
+\end{lstlisting}
+
+We now provide a brief description of each package component.  For further details on each Python module within the \texttt{acsql} package, readers are encouraged to view the official API
+documentation hosted at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.\\
+
+\noindent\texttt{LICENSE}: A BSD 3-Clause license, which states that the \texttt{acsql} package is an open source software package and may be used and redistributed.\\
+
+\noindent\texttt{README.md}: A \texttt{README} file that describes how to install and use the \texttt{acsql} package.\\
+
+\noindent\texttt{MANIFEST.in}: A list of static files to be included in the tarball file when the user installs the \texttt{acsql} package.\\
+
+\noindent\texttt{setup.py}: The \texttt{acsql} package installation script.  Executing this script with \texttt{python setup.py install} installs the package into the software environment.\\
+
+\noindent\texttt{paper/}: A subdirectory which contains all materials used for the creation of this document.\\
+
+\noindent\texttt{presentation/}: A subdirectory which contains all materials used for the creation of the Towson University COSC 880 presentation.\\
+
+\noindent\texttt{docs/}: A subdirectory which contains all materials used for the creation of the \texttt{sphinx} API documentation hosted on \texttt{readthedocs} (see section \ref{sec3.2}).\\
+
+\noindent\texttt{Makefile}: A \texttt{make} script that is used to build the \texttt{sphinx} API documentation from the source reStructured Text files (mentioned below) (see section \ref{sec3.2}).\\
+
+\noindent\texttt{requirements.rst}: A list of \texttt{acsql} package dependencies, used by \texttt{readthedocs} to build a virtual machine that constructs the resulting HTML doc pages
+(see section \ref{sec3.2}).\\
+
+\noindent\texttt{source/}: A subdirectory containing all of the reStructured Text files used for building the \texttt{sphinx} API documentation, one \texttt{.rst} file per subpackage, including
+a master \texttt{index.rst} file (see section \ref{sec3.2}).\\
+
+\noindent\texttt{acsql/}: A subdirectory containing all Python code that is part of the official \texttt{acsql} library. This is the top level of the importable \texttt{acsql} package.\\
+
+\noindent\texttt{$\_$$\_$init$\_$$\_$.py}: A Python file indicating that the subdirectory is part of the overall \texttt{acsql} package.\\
+
+\noindent\texttt{database/}: The \texttt{database} subpackage, containing Python modules that pertain to the \texttt{acsql} database (see sections \ref{sec3.5} and \ref{sec3.6}).\\
+
+\noindent\texttt{database$\_$interface.py}: The Python module for constructing and connecting to the \texttt{acsql} database (see section \ref{sec3.6}).\\
+
+\noindent\texttt{make$\_$tabledefs.py}: The Python module for creating the table definition text files (see section \ref{sec3.6}).\\
+
+\noindent\texttt{queries.py}: A Python module containing several examples of queries that can be used with the \texttt{acsql} database.\\
+
+\noindent\texttt{reset$\_$database.py}: A Python module that allows the user to `reset' the \texttt{acsql} database (i.e. delete all tables, then create all tables).\\
+
+\noindent\texttt{table$\_$definitions/}: A subdirectory containing all of the \texttt{<detector>$\_$<filetype>$\_$<extension>.txt} text files, each of which contain a list of header keys along with
+their datatypes (see section \ref{sec3.6}).\\
+
+\noindent\texttt{update$\_$tabledefs.py}: A Python module that allows the user to update the \texttt{table$\_$definitions/} text files with new header keywords (see section \ref{sec3.6}).\\
+
+\noindent\texttt{ingest/}: The \texttt{ingest} subpackage, containing Python modules for ingesting new data into the \texttt{acsql} application, including database updates and the creation of
+JPEGs/thumbnails (see section \ref{sec3.7}).\\
+
+\noindent\texttt{ingest.py}: A Python module for performing the ingestion of a single file (see section \ref{sec3.7}).\\
+
+\noindent\texttt{make$\_$file$\_$dict.py}: A Python module for creating a \texttt{file$\_$dict} for an individual file (see section \ref{sec3.7}).\\
+
+\noindent\texttt{make$\_$jpeg.py}: A Python module for creating a JPEG image from an individual file (see section \ref{sec3.7}).\\
+
+\noindent\texttt{make$\_$thumbnail.py}: A Python module for creating a thumbnail image from an individual JPEG (see section \ref{sec3.7}).\\
+
+\noindent\texttt{scripts/}: The \texttt{scripts} subpackage, containing Python modules for ingesting multiple files from the \texttt{acsql} filesystem.  This also serves as storage place for possible
+future instrument calibration and monitoring routines (see section \ref{sec3.7}).\\
+
+\noindent\texttt{ingest$\_$production}: The Python module for ingesting new ACS data as it becomes publicly available, intended to be executed regularly (see section \ref{sec3.7}).\\
+
+\noindent\texttt{utils/}: The \texttt{utils} subpackage, containing Python modules that are useful for general \texttt{acsql} operations (e.g. configuring \texttt{logging}, supplying hard-coded
+instrument configurations, etc.) as well as a configuration file for storing sensitive credentials and directory locations.\\
+
+\noindent\texttt{config.yaml}: A text file containing hard-coded user-specific directory locations and \texttt{acsql} database credentials.  Specifically, it contains values for the \texttt{acsql}
+database \texttt{connection$\_$string}, as well as locations for the \texttt{filesystem}, \texttt{log$\_$dir}, \texttt{jpeg$\_$dir}, and \texttt{thumbnail$\_$dir}.  The contents of the
+\texttt{config.yaml} file can be imported via the \texttt{utils.utils.SETTINGS} dictionary.\\
+
+\noindent\texttt{utils.py}: A Python module containing various functions that are generally useful for \texttt{acsql} operations, such as configuring \texttt{logging}, determining if a database
+entry requires an \texttt{insert} or an \texttt{update}, and hard-coded Python variables that reflect instrument/system configurations.\\
+
+\noindent\texttt{website/}: The \texttt{website} subpackage, containing Python modules that are used in the construction and operations of the \texttt{acsql} web application (see section \ref{sec3.9}).\\
+
+\noindent\texttt{acsql$\_$webapp.py}: The main Python module for running the \texttt{acsql} web application, using the Python \texttt{Flask} web framework (see section \ref{sec3.9}).\\
+
+\noindent\texttt{data$\_$containers.py}: The Python module that contains various functions for returning data to be used by the \texttt{acsql} web application (see section \ref{sec3.9}).\\
+
+\noindent\texttt{form$\_$options.py}: A Python module that stores form data for the database query portion of the \texttt{acsql} web application (see section \ref{sec3.9}).\\
+
+\noindent\texttt{query$\_$form.py}: A Python module that contains class objects for building the query form for the database query portion of the \texttt{acsql} web application (see section \ref{sec3.9}).\\
+
+\noindent\texttt{query$\_$lib.py}: A Python module that contains various functions to support the querying of the \texttt{acsql} database through the \texttt{acsql} web application (see section \ref{sec3.9}).\\
+
+\noindent\texttt{static/}: A subdirectory containing static materials used by the \texttt{acsql} web application, such as \texttt{CSS} templates (i.e. \texttt{css/}), JavaScript functions
+(i.e. \texttt{js/}), and symbolic links to the JPEGs and thumbnails hosted on the web application (i.e. \texttt{img/}) (see section \ref{sec3.9}).\\
+
+\noindent\texttt{templates/}: A subdirectory containing \texttt{HTML} templates used to render the various webpages of the \texttt{acsql} web application, one for each page (see section \ref{sec3.9}).\\
+
+
+% Results
+\section{Results} \label{chap4}
+
+The results of the system implementation (described in Chapter \ref{chap3}) were several project deliverables:
+
+\begin{enumerate}
+\item Filesystem
+\item Database
+\item Web application
+\item Software package
+\item Software documentation
+\end{enumerate}
+
+
+As mentioned in section \ref{sec1.3.5}, the project deliverables will primarily be used by members of the ACS instrument team at STScI, but may also be used by users external to STScI.
+In the following subsections, we further describe each on of these deliverables.
+
+
+\subsection{Filesystem Deliverable} \label{sec4.1}
+
+As described in sections \ref{sec3.3} and \ref{sec3.4}, the \texttt{acsql} filesystem is comprised of two parts: (1) A filesystem that stores the archive of publicly-available ACS data (i.e.
+FITS files), and (2) a filesystem of Quicklook JPEGs and thumbnails.
+
+For the former, we utilized an already-existing filesystem of ACS data internal to STScI known as the ``MAST public cache''; this filesystem is organized in a similar way to that shown in
+Figure \ref{fig7}\footnote{We omit the mention of the parent directory structure and server names in this document as well as in the \texttt{acsql} code repository as to avoid exposing possible
+sensitive information.}.  Though this service is internal to STScI, it is possible for an external user to reconstruct the filesystem, as all data within the MAST public cache is publically available
+to download via the MAST archive (i.e. \textcolor{blue}{\url{https://archive.stsci.edu/}}).  The location of the filesystem is determined by the \texttt{filesystem} parameter in the user-supplied
+\texttt{config.yaml} file (see section \ref{sec3.10}).
+
+Currently, the filesystem consists of $\sim$1,030,000 total files. Figure \ref{fig29} shows how this breaks down by individual filetype.  We see that \texttt{spt}, \texttt{raw}, and \texttt{flt}
+make up the majority of the files, which is expected considering that these filetypes exist for nearly every ACS observing mode.  On the other hand, we see a small amount of \texttt{crj} and
+\texttt{crc} files, which is also expected considering that these filetypes are only triggered for specific observing modes.
+
+% Figure for number of images per filetype
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.5in]{./figures/num_files_by_filetype.png}
+\caption{\textit{The number of files in the \texttt{acsql} filesystem by filetype.}}
+\label{fig29}
+\end{figure}
+
+As for item (2), the filesystem of JPEGs and thumbnails was constructed during the ingestion of all publicly-available ACS data (via \texttt{ingest$\_$production.py}, see section \ref{sec3.9}).
+The location of the JPEG/thumbnail filesystem is determined by the \texttt{jpeg$\_$dir} and \texttt{thumbnail$\_$dir} parameters in the \texttt{config.yaml} file, respectively.
+Currently, there are $\sim$457,000 JPEGS and $\sim$185,000 corresponding thumbnail images in the filesystem\footnote{recall that thumbnail images are only generated for \texttt{flt} filetypes,
+hence the discrepency in number}.
+
+
+\subsection{Database Deliverable} \label{sec4.2}
+
+As described in sections \ref{sec3.5} and \ref{sec3.6}, the \texttt{acsql} database is a \texttt{MySQL} database that stores the header information of every public ACS dataset.  Currently,
+this database is hosted on a server that is internal to STScI.  However, external users may build their own copy of the database via the \texttt{ingest$\_$production.py} and
+\texttt{database$\_$interface} modules.  All 111 tables of \texttt{acsql} database (\texttt{master}, \texttt{datasets}, and 109 header tables) are up to date as of the time of this writing
+(September 2017).  Ideally, the database will be updated via regular executions of \texttt{ingest$\_$production.py}.
+
+Figure \ref{fig30} shows the number of records in each table of the database.  Currently, there are $\sim$4,300,000 records in total amongst the 111 tables.
+
+% Figure for number of records per table
+\begin{figure}[!h]
+\centering
+\includegraphics[width=3.6in]{./figures/database_records.png}
+\caption{\textit{The number of records in each of the \texttt{acsql} database tables.}}
+\label{fig30}
+\end{figure}
+
+
+\subsection{Web Application Deliverable} \label{sec4.3}
+
+As described in section \ref{sec3.9}, the \texttt{acsql} web application consists of a series of Python modules and static files.  Currently, the web application is not hosted on a
+dedicated web server (neither externally nor internally to STScI\footnote{At the time of this writing, work is being done to build a web server that is internal to STScI to allow ACS instrument
+team members to easily access the \texttt{acsql} web application.  We expect this web server to be operational within the next few months.}), however, users can operate the application through
+the user's \texttt{localhost}.  Detailed installation and operation instructions for the web application are provided in the official documentation (see section \ref{sec3.2}).  In short,
+users must (1) ensure that they have built (or have access to) the \texttt{acsql} filesystem and database, (2) have installed the Python package dependencies, and (3) have filled out the
+\texttt{config.yaml} file (see section \ref{sec3.10}).
+
+
+\subsection{Software Package Deliverable} \label{sec4.4}
+
+As described in section \ref{sec3.1} and \ref{sec3.10}, the \texttt{acsql} git repository serves as the software package that contains all of the software and supporting materials needed to
+operate the \texttt{acsql} application.  The software package is open-source, and is available to download directly from the GitHub repository (\textcolor{blue}{\url{http://github.com/acsql/}}).
+All future enhancements and bug fixes to the \texttt{acsql} application will occur through this version-controlled repository.
+
+
+\subsection{Software Documentation Deliverable} \label{sec4.5}
+
+As described in section \ref{sec3.2}, another deliverable for the project is the API documentation that is automatically generated via \texttt{sphinx}.  The resulting \texttt{HTML} pages are
+available through the \texttt{acsql} package, but are also hosted on \texttt{readthedocs}, available at \textcolor{blue}{\url{http://acsql.readthedocs.io/}}.  This is considered the official software
+documentation.
+
+
+% Discussion
+\section{Discussion} \label{chap5}
+
+We consider the collection of the features implemented as described in this document to be the ``official release'' or ``1.0 release'' of the \texttt{acsql} application.  This release is tagged as
+version \texttt{v1.0} in the \texttt{acsql} GitHub repository.  It is with this release that we expect the user base to begin using the application.
+
+Though this is the official release of the application, we expect future development by the author and/or members of the ACS instrument team at STScI.  There are several possible
+features to be added to the application, namely those present in the \texttt{wfc3ql} application, as discussed in chapter \ref{chap2}.  Furthermore, some or all of the \texttt{acsql} application
+components could be extended to support other instruments and missions.  Some of these possible enhancements are discussed in the proceeding sections.
+
+
+\subsection{Possible enhancements to the \texttt{acsql} application} \label{sec5.1}
+
+As mentioned in chapter \ref{chap2}, there exist several features in the \texttt{wfc3ql} application that could serve as possible enhancements to the \texttt{acsql} application.  We elaborate on five of
+these features below:
+
+1. \textbf{\textit{Including proprietary data in the \texttt{acsql} filesystem:}}  One of the main features of the \texttt{wfc3ql} application is that it allows users to view and diagnose new data
+just hours after it gets downlinked from HST.  Since most HST data is proprietary up to one year after observation, this introduces a considerable security risk, and thus this feature is only made
+possible by taking special care of file permissions within the infrastructure of the \texttt{wfc3ql} filesystem and database.  Implementing this feature in the \texttt{acsql} application would be
+advantageous from the perspective of an ACS instrument analyst who wishes to perform analysis on new data.  However, allowing for the storage and handling of proprietary data would prohibit the
+application from being open-source and publicly-available to external users; the application would have to be restricted to ACS instrument team members at STScI.
+
+2. \textbf{\textit{Building automated instrument calibration and monitoring routines:}}  The \texttt{wfc3ql} application contains several WFC3 instrument calibration and monitoring routines.  These
+routines are in the form of individual Python modules that are executed automatically by \texttt{cron} jobs on a daily, weekly, or monthly basis.  Each one of these monitors serves a specific
+instrument-related purpose, such as monitoring detector hysteresis effects[29], monitoring the dark current of the detector over time[30], and characterizing the behaviour of the instrument
+Channel Select Mechanism (CSM)[31].  Like WFC3, the ACS instrument also has various detector behaviors and characteristics that could benefit from being automatically monitored or characterized
+over time.  Currently, such efforts are made by individual ACS instrument team members through manual execution of software.  However, by using the \texttt{acsql} filesystem, database, and code library,
+it is possible to automate these tasks, saving employee time resources.
+
+3. \textbf{\textit{Adding a script execution status dashboard:}}  If there were automated instrument calibration and monitoring routines implemented into the application, it would be useful to
+be able to visualize if the exectuions of these scripts were successful or not.  The \texttt{wfc3ql} application accomplishes this with a script execution dashboard on the \texttt{wfc3ql} web application
+homepage.  Each automated routine is labeled in the dashboard along with the date/time of last execution and a status column that indicates if the execution completed successfully or not.  This helps to
+easily identify any disruptions in the routine \texttt{cron} jobs.
+
+4. \textbf{\textit{Expanding the database query form:}}  The database query form webpage on the \texttt{acsql} web application allows user to construct and execute a query to the \texttt{acsql} database
+using some of the most commonly used observational parameters (e.g. target name, filter, principle investigator name, etc.).  However, these parameters are just a small subset of the total collection
+of parameters available in the \texttt{acsql} database.  With the database containing all header keywords, it is possible to extend this query form use some more obscure (but useful) observational parameters.
+Examples of these may include telescope telemetry parameters (e.g. instrument temperature, telescope pointing, telescope latitude/longitude, etc.), engineering parameters (e.g. detector gain, detector
+readnoise, etc.), and photometric parameters (e.g. detector sensitivity, photometric zeropoints, etc.).  We expect that the database query webpage in particular will endure the most feature development
+as the usefulness of certain parameters become evident from the user base.
+
+5. \textbf{\textit{Tracking ACS image anomalies:}}  Another feature of the \texttt{wfc3ql} application is the capability to record the occurrances of image anomalies (i.e. features in anomalies that
+are unexpected or indicate a peculiar behavior of the instrument).  The user accomplishes this in the `view image' webpage by selecting a checkbox of the anomaly and hitting a `submit' button.  Then,
+a row is inserted into a separate `anomalies' table of the \texttt{wfc3ql} database that indicates that the particular observation contains the particular anomaly.  Such a feature could also be implemented
+in \texttt{acsql} by adding an \texttt{anomalies} table to the \texttt{acsql} database schema as well as the appropriate mechanisms to allow this functionality through the \texttt{acsql} web application.
+Tracking such anomalies would allows ACS instrument analysts to identify images affected by certain anomalies, as well as aid the characterization of instrument anomalies over time.
+
+
+\subsection{Possible extensions to other instruments or missions} \label{sec5.2}
+
+This type of database-driven, web-based application for interacting with instrument data is currently only implemented for the WFC3 (\texttt{wfc3ql}) and ACS (\texttt{acsql} instruments of HST.  However, the
+continued success of \texttt{wfc3ql} and potential success of \texttt{acsql} creates a strong case for implementing such a system for other instruments and missions.  As this project has been fully
+developed at STScI, which is home of the operations for the Hubble Space Telescope and the forthcoming James Webb Space Telescope (JWST), it is reasonable to consider extending this application to other imaging
+instruments on HST (e.g. The Space Telescope Imaging Spectrography; STIS) and the future imaging instruments on JWST.
+
+
+% Conclusion
+\section{Conclusion} \label{chap6}
+The \texttt{acsql} application, a web application built on top of a filesystem and database of ACS instrument data, has been released and is publicly available for use by ACS users.  The
+application provides mechanisms for users to view images and their metadata for every publicly-available ACS dataset dating back to the installation of the instrument in 2002.  While this document marks
+the version 1.0 release of this open-source application, we expect ongoing development to expand the capabilities of the \texttt{acsql} web application.  With the modularization and
+coding standards found in the \texttt{acsql} software, we hope this application can be extended and/or used in reference to support a similar application for the forthcoming James Webb Space
+Telescope mission.
+
+
+% use section* for acknowledgment
+\ifCLASSOPTIONcompsoc
+  \section*{Acknowledgments}
+\else
+  \section*{Acknowledgment}
+\fi
+  The authors would like to thank various members of the STScI staff that were extremely valuable for helping make this project come together: members of the WFC3/Quicklook team, for their years of
+  ongoing development and support of the WFC3/Quicklook application, without which there would be no inspiration to create this similar application (Varun Bajaj, Ariel Bowers, Michael Dulude,
+  Meredith Durbin, Jules Fowler, Catherine Gosmeyer, Heather Gunning, Harish Khandrika, Catherine Martlin, Abhi Rajan, Clare Shanahan, Ben Sunnquist, Alex Viana); members of the Instruments Division,
+  who supported the creation of this project (Francesca Boffi, Norman Grogin, Elena Sabbi); members of the Operations and Engineering Division as well as the Information Technology and Services
+  Division who provided valuable resources such as the database server, GitHub repository, web server, and disk space used to store project materials (Alex Yermolaev, Fausat Ogunsanya, Vera Gibbs);
+  Pey-Lian Lim and Roberto Avila, who provided valuable feedback upon beta testing the web application; Sara Ogaz for assistance in developing some components of the \texttt{acsql} database as part
+  of the Towson University COSC 657 Advance Database Management project; and finally, Jules Fowler and Sara Ogaz, who provided insightful comments and suggestions on this document.
+
+
+% Can use something like this to put references on a page
+% by themselves when using endfloat and the captionsoff option.
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+
+% Referecnes
+\begin{thebibliography}{1}
+
+\bibitem{IEEEhowto:sm3b}
+\emph{SM3B}, National Aeronautics and Space Administration, Goddard Space Flight Center,
+[Online; accessed 2017-09-16], available at \textcolor{blue}{\url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm3b.html}}.
+
+\bibitem{IEEEhowto:sm4}
+\emph{SM4}, National Aeronautics and Space Administration, Goddard Space Flight Center,
+[Online; accessed 2017-09-16], available at \textcolor{blue}{\url{https://asd.gsfc.nasa.gov/archive/hubble/missions/sm4.html}}.
+
+\bibitem{IEEEhowto:avila}
+Avila, R., et al., 2017, \emph{ACS Instrument Handbook}, Version 16.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:mast}
+\emph{The Barbara A. Mikulski Archive for Space Telescopes}, [Online; accessed 2017-07-30],
+available at \textcolor{blue}{\url{https://archive.stsci.edu/}}.
+
+\bibitem{IEEEhowto:fits}
+\emph{Definition of the Flexible Image Transport System (FITS): The FITS Standard}, 2008,
+International Astronomical Union FITS Working Group, available at
+\textcolor{blue}{\url{https://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf}}.
+
+\bibitem{IEEEhowto:stsci}
+\emph{STScI: Space Telescope Science Institute}, [Online; accessed 2017-09-16], available at \textcolor{blue}{\url{www.stsci.edu}}.
+
+\bibitem{IEEEhowto:smith}
+Smith, E., et al., 2011, \emph{Introduction to the HST Data Handbooks}, Version 8.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:lucas}
+Lucas, R. A., et al., 2016, \emph{ACS Data Handbook}, Version 8.0 (Baltimore: STScI)
+
+\bibitem{IEEEhowto:robitaille}
+Robitaille, T.P., et al., 2013, \emph{Astropy: A community Python package for astronomy},
+Astronomy \& Astrophysics, 558, A33.
+
+\bibitem{IEEEhowto:mast_portal}
+\emph{The MAST Portal}, [Online; accessed 2017-09-15], available at \textcolor{blue}{\url{https://mast.stsci.edu/}}.
+
+\bibitem{IEEEhowto:bourque_adass}
+Bourque, M., et al., 2016, \emph{The Hubble Space Telescope Wide Field Camera 3 Quicklook Project},
+Astronomical Data Analysis Software $\&$ Systems Conference Proceedings, ADASS XXVI, ASP-CS, submitted
+
+\bibitem{IEEEhowto:bourque_astroinformatics}
+Bourque, M., et al., 2016, \emph{The HST/WFC3 Quicklook Project: A User Interface to Hubble
+Space Telescope Wide Field Camera 3 Data}, Proceedings IAU Symposium No. 325, 2016, Astroinformatics.
+
+\bibitem{IEEEhowto:gosmeyer}
+Gosmeyer, C.M., and The Quicklook Team, 2017, \emph{WFC3 Anomalies Flagged by the Quicklook Team},
+WFC3 Instrument Science Report, 2017-22, available at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2017-22.pdf}}
+
+\bibitem{IEEEhowto:git}
+\emph{git}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https://git-scm.com}}.
+
+\bibitem{IEEEhowto:github}
+\emph{GitHub}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https:/github.com}}.
+
+\bibitem{IEEEhowto:vanRossum}
+van Rossum, G., 2001, \emph{PEP 8 -- Style Guide for Python Code}, Python Developer's Guide,
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0008/}}.
+
+\bibitem{IEEEhowto:goodger}
+Goodger, D., 2001, \emph{PEP 257 -- Docstring Conventions}, Python Developer's Guide,
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0257/}}.
+
+\bibitem{IEEEhowto:numpydoc}
+\emph{A Guide to NumPy/SciPy Documentation}, [Online; accessed 2017-08-05], available at
+\textcolor{blue}{\url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt}}/
+
+\bibitem{IEEEhowto:vanDerWalt}
+van der Walt, S., Colbert, C., and Varoquaux, G., 2011, \emph{The NumPy Array: A Structure for
+Efficient Numerical Computation}, Computing in Science \& Engineering, 13, 22-30.
+
+\bibitem{IEEEhowto:brandi}
+Brandi, G., et al., 2007, \emph{Sphinx: Python Documentation Generator}, available at
+\textcolor{blue}{\url{http://www.sphinx-doc.org/en/stable/}}.
+
+\bibitem{IEEEhowto:loper}
+Loper, E., 2004, \emph{Epydoc: Generating API Documentation in Python}, Proceedings of the
+Second Annual Python Conference, available at \textcolor{blue}{\url{http://epydoc.sourceforge.net/}}.
+
+\bibitem{IEEEhowto:readthedocs}
+\emph{Read the Docs}, [Online; accessed 2017-08-05], available at \textcolor{blue}{\url{https://readthedocs.org}}.
+
+\bibitem{IEEEhowto:oracle}
+\emph{MySQL 5.6 Reference Manual}, Oracle, [Online; accessed 2017-08-13], available at
+\textcolor{blue}{\url{https://dev.mysql.com/doc/refman/5.6/en/}}.
+
+\bibitem{IEEEhowto:bayer}
+Bayer, M., 2006–, \emph{SQLAlchemy: The database toolkit for Python}, [Online; accessed 2017-02-21],
+available at \textcolor{blue}{\url{http://www.sqlalchemy.org/}}.
+
+\bibitem{IEEEhowto:lemburg}
+Lemburg, M., 2017, \emph{PEP 249 -- Python Database API Specification v2.0}, Python Developer's Guide,
+available at \textcolor{blue}{\url{https://www.python.org/dev/peps/pep-0249/}}.
+
+\bibitem{IEEEhowto:ronacher}
+Ronacher, A., et al., 2010, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{http://flask.pocoo.org/}}.
+
+\bibitem{IEEEhowto:wtforms}
+\emph{wtforms}, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{https://github.com/wtforms/wtforms/}}.
+
+\bibitem{IEEEhowto:bootstrap}
+\emph{Bootstrap}, [Online; accessed 2017-09-04], available at \textcolor{blue}{\url{http://getbootstrap.com/}}.
+
+\bibitem{IEEEhowto:bourque_bowtie}
+Bourque, M. and Baggett, S., 2013, \emph{WFC3/UVIS Bowtie Monitor}, WFC3 Instrument Science Report, 2013-09,
+available at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2013-09.pdf}}
+
+\bibitem{IEEEhowto:bourque_darks}
+Bourque, M. and Baggett, S., 2016, \emph{WFC3/UVIS Dark Calibration: Monitoring Results and Improvements to Dark Reference FIles},
+WFC3 Instrument Science Report, 2016-08, available at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2016-08.pdf}}
+
+\bibitem{IEEEhowto:bushouse}
+Bushouse, H., 2005, \emph{CSM Particulate Investigation}, WFC3 Instrument Science Report, 2005-26, available
+at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2005-26.pdf}}
+
+\end{thebibliography}
+
+% Appendices
+\onecolumn
+\newpage
+\appendices
+\section{\texttt{acsql} Code}
+
+\bigskip\textbf{Table of Contents:}\bigskip
+
+\noindent \hyperlink{page.27}{\texttt{LICENSE}} \dotfill 27\\
+\noindent \hyperlink{page.27}{\texttt{README.md}} \dotfill 27\\
+\noindent \hyperlink{page.28}{\texttt{MANIFEST.in}} \dotfill 28\\
+\noindent \hyperlink{page.30}{\texttt{setup.py}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs.Makefile}} \dotfill 30\\
+\noindent \hyperlink{page.30}{\texttt{docs/requirements.txt}} \dotfill 30\\
+\noindent \hyperlink{page.31}{\texttt{docs/source/conf.py}} \dotfill 31\\
+\noindent \hyperlink{page.33}{\texttt{docs/source/database.rst}} \dotfill 33\\
+\noindent \hyperlink{page.33}{\texttt{docs/source/index.rst}} \dotfill 33\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/ingest.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/scripts.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/utils.rst}} \dotfill 34\\
+\noindent \hyperlink{page.34}{\texttt{docs/source/website.rst}} \dotfill 34\\
+\noindent \hyperlink{page.35}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 35\\
+\noindent \hyperlink{page.40}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 40\\
+\noindent \hyperlink{page.42}{\texttt{acsql/database/queries.py}} \dotfill 42\\
+\noindent \hyperlink{page.46}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 46\\
+\noindent \hyperlink{page.46}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 46\\
+\noindent \hyperlink{page.49}{\texttt{acsql/ingest/ingest.py}} \dotfill 49\\
+\noindent \hyperlink{page.53}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 53\\
+\noindent \hyperlink{page.55}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 55\\
+\noindent \hyperlink{page.56}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 56\\
+\noindent \hyperlink{page.57}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 57\\
+\noindent \hyperlink{page.60}{\texttt{acsql/utils/utils.py}} \dotfill 60\\
+\noindent \hyperlink{page.63}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 63\\
+\noindent \hyperlink{page.66}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 66\\
+\noindent \hyperlink{page.71}{\texttt{acsql/website/form$\_$options.py}} \dotfill 71\\
+\noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$form.py}} \dotfill 72\\
+\noindent \hyperlink{page.76}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 76\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/404.html}} \dotfill 81\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/500.html}} \dotfill 81\\
+\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 81\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/archive.html}} \dotfill 82\\
+\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/base.html}} \dotfill 82\\
+\noindent \hyperlink{page.83}{\texttt{acsql/website/templates/database.html}} \dotfill 83\\
+\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 84\\
+\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 84\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/header.html}} \dotfill 86\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/index.html}} \dotfill 86\\
+\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 86\\
+\noindent \hyperlink{page.88}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 88\\
+\noindent \hyperlink{page.89}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 89\\
+
+\newpage
+
+\noindent\textbf{\texttt{LICENSE}}\lstset{style=code}\lstinputlisting{../LICENSE}
+\textbf{\texttt{README.md}}\lstset{style=code}\lstinputlisting{../README.md}
+\textbf{\texttt{MANIFEST.in}}\lstset{style=code}\lstinputlisting{../MANIFEST.in}
+\textbf{\texttt{setup.py}}\lstset{style=code}\lstinputlisting[language=Python]{../setup.py}
+\textbf{\texttt{docs.Makefile}}\lstset{style=code}\lstinputlisting{../docs/Makefile}
+\textbf{\texttt{docs/requirements.txt}}\lstset{style=code}\lstinputlisting{../docs/requirements.txt}
+\newpage
+\textbf{\texttt{docs/source/conf.py}}\lstset{style=code}\lstinputlisting[language=Python]{../docs/source/conf.py}
+\textbf{\texttt{docs/source/database.rst}}\lstset{style=code}\lstinputlisting{../docs/source/database.rst}
+\textbf{\texttt{docs/source/index.rst}}\lstset{style=code}\lstinputlisting{../docs/source/index.rst}
+\newpage
+\textbf{\texttt{docs/source/ingest.rst}}\lstset{style=code}\lstinputlisting{../docs/source/ingest.rst}
+\textbf{\texttt{docs/source/scripts.rst}}\lstset{style=code}\lstinputlisting{../docs/source/scripts.rst}
+\textbf{\texttt{docs/source/utils.rst}}\lstset{style=code}\lstinputlisting{../docs/source/utils.rst}
+\textbf{\texttt{docs/source/website.rst}}\lstset{style=code}\lstinputlisting{../docs/source/website.rst}
+\textbf{\texttt{acsql/database/database$\_$interface.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/database_interface.py}
+\textbf{\texttt{acsql/database/make$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/make_tabledefs.py}
+\textbf{\texttt{acsql/database/queries.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/queries.py}
+\textbf{\texttt{acsql/database/reset$\_$database.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/reset_database.py}
+\textbf{\texttt{acsql/database/update$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/update_tabledefs.py}
+\textbf{\texttt{acsql/ingest/ingest.py}\lstset{style=code}}\lstinputlisting[language=Python]{../acsql/ingest/ingest.py}
+\newpage
+\textbf{\texttt{acsql/ingest/make$\_$file$\_$dict.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_file_dict.py}
+\textbf{\texttt{acsql/ingest/make$\_$jpeg.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_jpeg.py}
+\textbf{\texttt{acsql/ingest/make$\_$thumbnail.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_thumbnail.py}
+\textbf{\texttt{acsql/scripts/ingest$\_$production.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/scripts/ingest_production.py}
+\textbf{\texttt{acsql/utils/utils.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/utils/utils.py}
+\textbf{\texttt{acsql/website/acsql$\_$webapp.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/acsql_webapp.py}
+\textbf{\texttt{acsql/website/data$\_$containers.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/data_containers.py}
+\textbf{\texttt{acsql/website/form$\_$options.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/form_options.py}
+\textbf{\texttt{acsql/website/query$\_$form.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_form.py}
+\newpage
+\textbf{\texttt{acsql/website/query$\_$lib.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_lib.py}
+\textbf{\texttt{acsql/website/templates/404.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/404.html}
+\textbf{\texttt{acsql/website/templates/500.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/500.html}
+\textbf{\texttt{acsql/website/templates/$\_$formhelpers.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/_formhelpers.html}
+\textbf{\texttt{acsql/website/templates/archive.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/archive.html}
+\textbf{\texttt{acsql/website/templates/base.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/base.html}
+\textbf{\texttt{acsql/website/templates/database.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database.html}
+\textbf{\texttt{acsql/website/templates/database$\_$error.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_error.html}
+\textbf{\texttt{acsql/website/templates/database$\_$table.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_table.html}
+\textbf{\texttt{acsql/website/templates/header.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/header.html}
+\textbf{\texttt{acsql/website/templates/index.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/index.html}
+\textbf{\texttt{acsql/website/templates/view$\_$image.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_image.html}
+\textbf{\texttt{acsql/website/templates/view$\_$proposal.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_proposal.html}
+\textbf{\texttt{acsql/website/templates/view$\_$query$\_$results.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_query_results.html}
+
+
+\end{document}
