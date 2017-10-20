@@ -1432,105 +1432,105 @@ at \textcolor{blue}{\url{http://www.stsci.edu/hst/wfc3/documents/ISRs/WFC3-2005-
 
 \end{thebibliography}
 
-% Appendices
-\onecolumn
-\newpage
-\appendices
-\section{\texttt{acsql} Code}
+% % Appendices
+% \onecolumn
+% \newpage
+% \appendices
+% \section{\texttt{acsql} Code}
 
-\bigskip\textbf{Table of Contents:}\bigskip
+% \bigskip\textbf{Table of Contents:}\bigskip
 
-\noindent \hyperlink{page.27}{\texttt{LICENSE}} \dotfill 27\\
-\noindent \hyperlink{page.27}{\texttt{README.md}} \dotfill 27\\
-\noindent \hyperlink{page.28}{\texttt{MANIFEST.in}} \dotfill 28\\
-\noindent \hyperlink{page.30}{\texttt{setup.py}} \dotfill 30\\
-\noindent \hyperlink{page.30}{\texttt{docs.Makefile}} \dotfill 30\\
-\noindent \hyperlink{page.30}{\texttt{docs/requirements.txt}} \dotfill 30\\
-\noindent \hyperlink{page.31}{\texttt{docs/source/conf.py}} \dotfill 31\\
-\noindent \hyperlink{page.33}{\texttt{docs/source/database.rst}} \dotfill 33\\
-\noindent \hyperlink{page.33}{\texttt{docs/source/index.rst}} \dotfill 33\\
-\noindent \hyperlink{page.34}{\texttt{docs/source/ingest.rst}} \dotfill 34\\
-\noindent \hyperlink{page.34}{\texttt{docs/source/scripts.rst}} \dotfill 34\\
-\noindent \hyperlink{page.34}{\texttt{docs/source/utils.rst}} \dotfill 34\\
-\noindent \hyperlink{page.34}{\texttt{docs/source/website.rst}} \dotfill 34\\
-\noindent \hyperlink{page.35}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 35\\
-\noindent \hyperlink{page.40}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 40\\
-\noindent \hyperlink{page.42}{\texttt{acsql/database/queries.py}} \dotfill 42\\
-\noindent \hyperlink{page.46}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 46\\
-\noindent \hyperlink{page.46}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 46\\
-\noindent \hyperlink{page.49}{\texttt{acsql/ingest/ingest.py}} \dotfill 49\\
-\noindent \hyperlink{page.53}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 53\\
-\noindent \hyperlink{page.55}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 55\\
-\noindent \hyperlink{page.56}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 56\\
-\noindent \hyperlink{page.57}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 57\\
-\noindent \hyperlink{page.60}{\texttt{acsql/utils/utils.py}} \dotfill 60\\
-\noindent \hyperlink{page.63}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 63\\
-\noindent \hyperlink{page.66}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 66\\
-\noindent \hyperlink{page.71}{\texttt{acsql/website/form$\_$options.py}} \dotfill 71\\
-\noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$form.py}} \dotfill 72\\
-\noindent \hyperlink{page.76}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 76\\
-\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/404.html}} \dotfill 81\\
-\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/500.html}} \dotfill 81\\
-\noindent \hyperlink{page.81}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 81\\
-\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/archive.html}} \dotfill 82\\
-\noindent \hyperlink{page.82}{\texttt{acsql/website/templates/base.html}} \dotfill 82\\
-\noindent \hyperlink{page.83}{\texttt{acsql/website/templates/database.html}} \dotfill 83\\
-\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 84\\
-\noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 84\\
-\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/header.html}} \dotfill 86\\
-\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/index.html}} \dotfill 86\\
-\noindent \hyperlink{page.86}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 86\\
-\noindent \hyperlink{page.88}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 88\\
-\noindent \hyperlink{page.89}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 89\\
+% \noindent \hyperlink{page.27}{\texttt{LICENSE}} \dotfill 27\\
+% \noindent \hyperlink{page.27}{\texttt{README.md}} \dotfill 27\\
+% \noindent \hyperlink{page.28}{\texttt{MANIFEST.in}} \dotfill 28\\
+% \noindent \hyperlink{page.30}{\texttt{setup.py}} \dotfill 30\\
+% \noindent \hyperlink{page.30}{\texttt{docs.Makefile}} \dotfill 30\\
+% \noindent \hyperlink{page.30}{\texttt{docs/requirements.txt}} \dotfill 30\\
+% \noindent \hyperlink{page.31}{\texttt{docs/source/conf.py}} \dotfill 31\\
+% \noindent \hyperlink{page.33}{\texttt{docs/source/database.rst}} \dotfill 33\\
+% \noindent \hyperlink{page.33}{\texttt{docs/source/index.rst}} \dotfill 33\\
+% \noindent \hyperlink{page.34}{\texttt{docs/source/ingest.rst}} \dotfill 34\\
+% \noindent \hyperlink{page.34}{\texttt{docs/source/scripts.rst}} \dotfill 34\\
+% \noindent \hyperlink{page.34}{\texttt{docs/source/utils.rst}} \dotfill 34\\
+% \noindent \hyperlink{page.34}{\texttt{docs/source/website.rst}} \dotfill 34\\
+% \noindent \hyperlink{page.35}{\texttt{acsql/database/database$\_$interface.py}} \dotfill 35\\
+% \noindent \hyperlink{page.40}{\texttt{acsql/database/make$\_$tabledefs.py}} \dotfill 40\\
+% \noindent \hyperlink{page.42}{\texttt{acsql/database/queries.py}} \dotfill 42\\
+% \noindent \hyperlink{page.46}{\texttt{acsql/database/reset$\_$database.py}} \dotfill 46\\
+% \noindent \hyperlink{page.46}{\texttt{acsql/database/update$\_$tabledefs.py}} \dotfill 46\\
+% \noindent \hyperlink{page.49}{\texttt{acsql/ingest/ingest.py}} \dotfill 49\\
+% \noindent \hyperlink{page.53}{\texttt{acsql/ingest/make$\_$file$\_$dict.py}} \dotfill 53\\
+% \noindent \hyperlink{page.55}{\texttt{acsql/ingest/make$\_$jpeg.py}} \dotfill 55\\
+% \noindent \hyperlink{page.56}{\texttt{acsql/ingest/make$\_$thumbnail.py}} \dotfill 56\\
+% \noindent \hyperlink{page.57}{\texttt{acsql/scripts/ingest$\_$production.py}} \dotfill 57\\
+% \noindent \hyperlink{page.60}{\texttt{acsql/utils/utils.py}} \dotfill 60\\
+% \noindent \hyperlink{page.63}{\texttt{acsql/website/acsql$\_$webapp.py}} \dotfill 63\\
+% \noindent \hyperlink{page.66}{\texttt{acsql/website/data$\_$containers.py}} \dotfill 66\\
+% \noindent \hyperlink{page.71}{\texttt{acsql/website/form$\_$options.py}} \dotfill 71\\
+% \noindent \hyperlink{page.72}{\texttt{acsql/website/query$\_$form.py}} \dotfill 72\\
+% \noindent \hyperlink{page.76}{\texttt{acsql/website/query$\_$lib.py}} \dotfill 76\\
+% \noindent \hyperlink{page.81}{\texttt{acsql/website/templates/404.html}} \dotfill 81\\
+% \noindent \hyperlink{page.81}{\texttt{acsql/website/templates/500.html}} \dotfill 81\\
+% \noindent \hyperlink{page.81}{\texttt{acsql/website/templates/$\_$formhelpers.html}} \dotfill 81\\
+% \noindent \hyperlink{page.82}{\texttt{acsql/website/templates/archive.html}} \dotfill 82\\
+% \noindent \hyperlink{page.82}{\texttt{acsql/website/templates/base.html}} \dotfill 82\\
+% \noindent \hyperlink{page.83}{\texttt{acsql/website/templates/database.html}} \dotfill 83\\
+% \noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$error.html}} \dotfill 84\\
+% \noindent \hyperlink{page.84}{\texttt{acsql/website/templates/database$\_$table.html}} \dotfill 84\\
+% \noindent \hyperlink{page.86}{\texttt{acsql/website/templates/header.html}} \dotfill 86\\
+% \noindent \hyperlink{page.86}{\texttt{acsql/website/templates/index.html}} \dotfill 86\\
+% \noindent \hyperlink{page.86}{\texttt{acsql/website/templates/view$\_$image.html}} \dotfill 86\\
+% \noindent \hyperlink{page.88}{\texttt{acsql/website/templates/view$\_$proposal.html}} \dotfill 88\\
+% \noindent \hyperlink{page.89}{\texttt{acsql/website/templates/view$\_$query$\_$results.html}} \dotfill 89\\
 
-\newpage
+% \newpage
 
-\noindent\textbf{\texttt{LICENSE}}\lstset{style=code}\lstinputlisting{../LICENSE}
-\textbf{\texttt{README.md}}\lstset{style=code}\lstinputlisting{../README.md}
-\textbf{\texttt{MANIFEST.in}}\lstset{style=code}\lstinputlisting{../MANIFEST.in}
-\textbf{\texttt{setup.py}}\lstset{style=code}\lstinputlisting[language=Python]{../setup.py}
-\textbf{\texttt{docs.Makefile}}\lstset{style=code}\lstinputlisting{../docs/Makefile}
-\textbf{\texttt{docs/requirements.txt}}\lstset{style=code}\lstinputlisting{../docs/requirements.txt}
-\newpage
-\textbf{\texttt{docs/source/conf.py}}\lstset{style=code}\lstinputlisting[language=Python]{../docs/source/conf.py}
-\textbf{\texttt{docs/source/database.rst}}\lstset{style=code}\lstinputlisting{../docs/source/database.rst}
-\textbf{\texttt{docs/source/index.rst}}\lstset{style=code}\lstinputlisting{../docs/source/index.rst}
-\newpage
-\textbf{\texttt{docs/source/ingest.rst}}\lstset{style=code}\lstinputlisting{../docs/source/ingest.rst}
-\textbf{\texttt{docs/source/scripts.rst}}\lstset{style=code}\lstinputlisting{../docs/source/scripts.rst}
-\textbf{\texttt{docs/source/utils.rst}}\lstset{style=code}\lstinputlisting{../docs/source/utils.rst}
-\textbf{\texttt{docs/source/website.rst}}\lstset{style=code}\lstinputlisting{../docs/source/website.rst}
-\textbf{\texttt{acsql/database/database$\_$interface.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/database_interface.py}
-\textbf{\texttt{acsql/database/make$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/make_tabledefs.py}
-\textbf{\texttt{acsql/database/queries.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/queries.py}
-\textbf{\texttt{acsql/database/reset$\_$database.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/reset_database.py}
-\textbf{\texttt{acsql/database/update$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/update_tabledefs.py}
-\textbf{\texttt{acsql/ingest/ingest.py}\lstset{style=code}}\lstinputlisting[language=Python]{../acsql/ingest/ingest.py}
-\newpage
-\textbf{\texttt{acsql/ingest/make$\_$file$\_$dict.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_file_dict.py}
-\textbf{\texttt{acsql/ingest/make$\_$jpeg.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_jpeg.py}
-\textbf{\texttt{acsql/ingest/make$\_$thumbnail.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_thumbnail.py}
-\textbf{\texttt{acsql/scripts/ingest$\_$production.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/scripts/ingest_production.py}
-\textbf{\texttt{acsql/utils/utils.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/utils/utils.py}
-\textbf{\texttt{acsql/website/acsql$\_$webapp.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/acsql_webapp.py}
-\textbf{\texttt{acsql/website/data$\_$containers.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/data_containers.py}
-\textbf{\texttt{acsql/website/form$\_$options.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/form_options.py}
-\textbf{\texttt{acsql/website/query$\_$form.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_form.py}
-\newpage
-\textbf{\texttt{acsql/website/query$\_$lib.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_lib.py}
-\textbf{\texttt{acsql/website/templates/404.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/404.html}
-\textbf{\texttt{acsql/website/templates/500.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/500.html}
-\textbf{\texttt{acsql/website/templates/$\_$formhelpers.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/_formhelpers.html}
-\textbf{\texttt{acsql/website/templates/archive.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/archive.html}
-\textbf{\texttt{acsql/website/templates/base.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/base.html}
-\textbf{\texttt{acsql/website/templates/database.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database.html}
-\textbf{\texttt{acsql/website/templates/database$\_$error.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_error.html}
-\textbf{\texttt{acsql/website/templates/database$\_$table.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_table.html}
-\textbf{\texttt{acsql/website/templates/header.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/header.html}
-\textbf{\texttt{acsql/website/templates/index.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/index.html}
-\textbf{\texttt{acsql/website/templates/view$\_$image.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_image.html}
-\textbf{\texttt{acsql/website/templates/view$\_$proposal.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_proposal.html}
-\textbf{\texttt{acsql/website/templates/view$\_$query$\_$results.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_query_results.html}
+% \noindent\textbf{\texttt{LICENSE}}\lstset{style=code}\lstinputlisting{../LICENSE}
+% \textbf{\texttt{README.md}}\lstset{style=code}\lstinputlisting{../README.md}
+% \textbf{\texttt{MANIFEST.in}}\lstset{style=code}\lstinputlisting{../MANIFEST.in}
+% \textbf{\texttt{setup.py}}\lstset{style=code}\lstinputlisting[language=Python]{../setup.py}
+% \textbf{\texttt{docs.Makefile}}\lstset{style=code}\lstinputlisting{../docs/Makefile}
+% \textbf{\texttt{docs/requirements.txt}}\lstset{style=code}\lstinputlisting{../docs/requirements.txt}
+% \newpage
+% \textbf{\texttt{docs/source/conf.py}}\lstset{style=code}\lstinputlisting[language=Python]{../docs/source/conf.py}
+% \textbf{\texttt{docs/source/database.rst}}\lstset{style=code}\lstinputlisting{../docs/source/database.rst}
+% \textbf{\texttt{docs/source/index.rst}}\lstset{style=code}\lstinputlisting{../docs/source/index.rst}
+% \newpage
+% \textbf{\texttt{docs/source/ingest.rst}}\lstset{style=code}\lstinputlisting{../docs/source/ingest.rst}
+% \textbf{\texttt{docs/source/scripts.rst}}\lstset{style=code}\lstinputlisting{../docs/source/scripts.rst}
+% \textbf{\texttt{docs/source/utils.rst}}\lstset{style=code}\lstinputlisting{../docs/source/utils.rst}
+% \textbf{\texttt{docs/source/website.rst}}\lstset{style=code}\lstinputlisting{../docs/source/website.rst}
+% \textbf{\texttt{acsql/database/database$\_$interface.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/database_interface.py}
+% \textbf{\texttt{acsql/database/make$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/make_tabledefs.py}
+% \textbf{\texttt{acsql/database/queries.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/queries.py}
+% \textbf{\texttt{acsql/database/reset$\_$database.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/reset_database.py}
+% \textbf{\texttt{acsql/database/update$\_$tabledefs.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/database/update_tabledefs.py}
+% \textbf{\texttt{acsql/ingest/ingest.py}\lstset{style=code}}\lstinputlisting[language=Python]{../acsql/ingest/ingest.py}
+% \newpage
+% \textbf{\texttt{acsql/ingest/make$\_$file$\_$dict.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_file_dict.py}
+% \textbf{\texttt{acsql/ingest/make$\_$jpeg.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_jpeg.py}
+% \textbf{\texttt{acsql/ingest/make$\_$thumbnail.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/ingest/make_thumbnail.py}
+% \textbf{\texttt{acsql/scripts/ingest$\_$production.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/scripts/ingest_production.py}
+% \textbf{\texttt{acsql/utils/utils.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/utils/utils.py}
+% \textbf{\texttt{acsql/website/acsql$\_$webapp.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/acsql_webapp.py}
+% \textbf{\texttt{acsql/website/data$\_$containers.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/data_containers.py}
+% \textbf{\texttt{acsql/website/form$\_$options.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/form_options.py}
+% \textbf{\texttt{acsql/website/query$\_$form.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_form.py}
+% \newpage
+% \textbf{\texttt{acsql/website/query$\_$lib.py}}\lstset{style=code}\lstinputlisting[language=Python]{../acsql/website/query_lib.py}
+% \textbf{\texttt{acsql/website/templates/404.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/404.html}
+% \textbf{\texttt{acsql/website/templates/500.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/500.html}
+% \textbf{\texttt{acsql/website/templates/$\_$formhelpers.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/_formhelpers.html}
+% \textbf{\texttt{acsql/website/templates/archive.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/archive.html}
+% \textbf{\texttt{acsql/website/templates/base.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/base.html}
+% \textbf{\texttt{acsql/website/templates/database.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database.html}
+% \textbf{\texttt{acsql/website/templates/database$\_$error.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_error.html}
+% \textbf{\texttt{acsql/website/templates/database$\_$table.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/database_table.html}
+% \textbf{\texttt{acsql/website/templates/header.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/header.html}
+% \textbf{\texttt{acsql/website/templates/index.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/index.html}
+% \textbf{\texttt{acsql/website/templates/view$\_$image.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_image.html}
+% \textbf{\texttt{acsql/website/templates/view$\_$proposal.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_proposal.html}
+% \textbf{\texttt{acsql/website/templates/view$\_$query$\_$results.html}}\lstset{style=code}\lstinputlisting[language=HTML]{../acsql/website/templates/view_query_results.html}
 
 
 \end{document}
