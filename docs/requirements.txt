@@ -7,4 +7,4 @@ pyyaml
 sqlalchemy
 wtforms
 wtforms_components
--e git://github.com/spacetelescope/stak.git#egg=stak
+-e git://github.com/spacetelescope/stak-notebooks.git#egg=stak-notebooks
