@@ -28,6 +28,7 @@ Dependencies
 """
 
 from datetime import date
+from copy import deepcopy
 import glob
 import logging
 import os
@@ -44,6 +45,7 @@ from acsql.ingest.make_file_dict import get_metadata_from_test_files
 from acsql.ingest.make_file_dict import make_file_dict
 from acsql.ingest.make_jpeg import make_jpeg
 from acsql.ingest.make_thumbnail import make_thumbnail
+from acsql.utils import utils
 from acsql.utils.utils import insert_or_update
 from acsql.utils.utils import SETTINGS
 from acsql.utils.utils import TABLE_DEFS
@@ -144,6 +146,28 @@ def update_datasets_table(file_dict):
         .format(file_dict['rootname'], file_dict['filetype']))
 
 
+def update_drizzle_table(root, drizzles):
+    """
+    Insert/update an entry for a particular file and its drizzle iteration
+    keywords. The drizzles are built up during update_header_table.
+    
+    Parameters
+    ----------
+    root : string
+        The rootname of the file that the drizzle keywords were extracted from.
+    drizzles : list
+        List of dictionaries, each containing values for the 17 drizzle info
+        keywords in a single drizzle iteration (if present).
+    """
+    for drizzle_dict in drizzles:
+        drizzle_dict['rootname'] = root
+        try:
+            insert_or_update('drizzle_data', drizzle_dict)
+        except VerifyError as e:
+            logging.warning('\tUnable to insert {} into drizzle_data: {}'.format(
+                root, table, e))
+
+
 def update_header_table(file_dict, ext):
     """Insert/update an entry for the file in the appropriate header
     table (e.g. ``wfc_raw_0``).
@@ -164,6 +188,7 @@ def update_header_table(file_dict, ext):
     valid_extnames = ['PRIMARY', 'SCI', 'ERR', 'DQ', 'UDL', 'jit', 'jif',
                       'ASN', 'WHT', 'CTX']
     ext_exists = True
+    drizzle_exp = getattr(utils, 'DRIZZLE_EXP')
     try:
         header = fits.getheader(file_dict['filename'], ext)
         if ext == 0:
@@ -184,6 +209,13 @@ def update_header_table(file_dict, ext):
         exclude_list = ['HISTORY', 'COMMENT', 'ROOTNAME', 'FILENAME', '']
         input_dict = {'rootname': file_dict['rootname'],
                       'filename': file_dict['basename']}
+        drizzle_elements = {'drizzle_index': 0, 'coef': None, 'data': None,
+                            'dexp': None, 'fval': None, 'geom': None, 
+                            'iscl': None, 'kern': None, 'mask': None, 
+                            'ouco': None, 'ouda': None, 'ouun': None,
+                            'ouwe': None, 'pixf': None, 'scal': None,
+                            'ver': None, 'wkey': None, 'wtsc': None}
+        drizzle_dict = []
 
         try:
             for key, value in header.items():
@@ -193,14 +225,31 @@ def update_header_table(file_dict, ext):
                 if '-' in key:
                     key = key.replace('-', '_')
 
+                match = drizzle_exp.match(key)
+
                 if key in exclude_list or value == "":
                     continue
+                elif match is not None:
+                    index = int(match.group(1))
+                    indices = [x['drizzle_index'] for x in drizzle_dict]
+                    if index not in indices:
+                        drizzle_dict.append(deepcopy(drizzle_elements))
+                        drizzle_element = drizzle_dict[-1]
+                        drizzle_element['drizzle_index'] = index
+                    else:
+                        idx = indices.index(index)
+                        drizzle_element = drizzle_dict[idx]
+                    drizzle_key = key[4:].lower()
+                    drizzle_element[key] = value
                 elif key not in TABLE_DEFS[table.lower()]:
                     logging.warning('{}: {} not in {}'\
                         .format(file_dict['full_rootname'], key, table))
                     continue
 
                 input_dict[key.lower()] = value
+            
+            if len(drizzle_dict) > 0:
+                update_drizzle_table(input_dict['rootname'], drizzle_dict)
 
             insert_or_update(table, input_dict)
             logging.info('{}: Updated {} table.'.format(file_dict['rootname'],

@@ -59,6 +59,7 @@ from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy import Integer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import String
+from sqlalchemy import Text
 from sqlalchemy import Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import Float
@@ -96,7 +97,7 @@ def define_columns(data_dict, class_name):
         elif keyword[1] == 'Integer':
             data_dict[keyword[0].lower()] = Column(Integer())
         elif keyword[1] == 'String':
-            data_dict[keyword[0].lower()] = Column(String(50))
+            data_dict[keyword[0].lower()] = Column(Text(50))
         elif keyword[1] == 'Float':
             data_dict[keyword[0].lower()] = Column(Float(precision=32))
         elif keyword[1] == 'Decimal':
@@ -134,11 +135,11 @@ def get_special_column(keyword):
     """
 
     if keyword in ['RULEFILE', 'PROPTTL1', 'TARDESCR', 'QUALCOM2']:
-        return Column(String(500))
+        return Column(Text(500))
     elif keyword in ['FWERROR', 'FW2ERROR']:
-        return Column(String(100))
+        return Column(Text(100))
     else:
-        return Column(String(50))
+        return Column(Text(50))
 
 
 def load_connection(connection_string):
@@ -167,8 +168,12 @@ def load_connection(connection_string):
     engine : engine object
         Provides a source of database connectivity and behavior.
     """
-
-    engine = create_engine(connection_string, echo=False, pool_timeout=100000)
+    if 'sqlite' in connection_string:
+        engine = create_engine(connection_string, echo=False)
+    elif 'mysql' in connection_string:
+        engine = create_engine(connection_string, echo=False, pool_timeout=100000)
+    else:
+        engine = create_engine(connection_string, echo=False, pool_timeout=100000)
     base = declarative_base(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -221,6 +226,35 @@ class Master(base):
                                 'GTO/COS', 'NASA', 'SM3/ACS', 'SM3/ERO',
                                 'SM4/ACS', 'SM4/COS', 'SM4/ERO', 'SNAP'),
                            nullable=True)
+
+
+class Drizzle(base):
+    """ORM for the drizzle data table."""
+    def __init__(self, data_dict):
+        self.__dict__.update(data_dict)
+    
+    __tablename__ = 'drizzle_data'
+    rootname = Column(String(8), ForeignKey('master.rootname'),
+                      primary_key=True, index=True, nullable=False)
+    drizzle_index = Column(Integer, primary_key=True, index=True, 
+                           nullable=False)
+    coef = Column(String(50), nullable=True)
+    data = Column(String(50), nullable=True)
+    dexp = Column(Float(precision=32), nullable=True)
+    fval = Column(String(50), nullable=True)
+    geom = Column(String(50), nullable=True)
+    iscl = Column(Float(precision=32), nullable=True)
+    kern = Column(String(50), nullable=True)
+    mask = Column(String(50), nullable=True)
+    ouco = Column(String(50), nullable=True)
+    ouda = Column(String(50), nullable=True)
+    ouun = Column(String(50), nullable=True)
+    ouwe = Column(String(50), nullable=True)
+    pixf = Column(Float(precision=32), nullable=True)
+    scal = Column(Float(precision=32), nullable=True)
+    ver = Column(String(50), nullable=True)
+    wkey = Column(String(50), nullable=True)
+    wtsc = Column(Integer(), nullable=True)
 
 
 class Datasets(base):

@@ -1,6 +1,6 @@
-connection_string : 'mysql+pymysql://username:password@host:12345/database'
-filesystem : ''
-log_dir : ''
-jpeg_dir : ''
-thumbnail_dir : ''
+connection_string : 'mysql+pymysql://york@localhost/qlTest'
+filesystem : '/Users/york/Data/ACSQL/'
+log_dir : '/Users/york/Projects/acsql/test_run_dir/logs/'
+jpeg_dir : '/Users/york/Projects/acsql/test_run_dir/jpegs/'
+thumbnail_dir : '/Users/york/Projects/acsql/test_run_dir/thumbnails/'
 ncores : 1

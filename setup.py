@@ -10,7 +10,7 @@ setup(
     keywords = ['astronomy'],
     classifiers = ['Programming Language :: Python'],
     packages = find_packages(),
-    install_requires = [],
+    install_requires = ["pyaml", "pillow", "ccdproc"],
     version = 0.0,
     include_package_data=True
     )

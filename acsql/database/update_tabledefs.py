@@ -53,7 +53,7 @@ import argparse
 import os
 
 import numpy as np
-#from stak import Hselect
+from ccdproc import ImageFileCollection
 
 from acsql.utils.utils import SETTINGS
 
@@ -130,8 +130,9 @@ def update_tabledefs(logfile):
 
         # Use hselect to determine data type
         try:
+            hsel = ImageFileCollection(filenames=test_file, keywords=keyword, ext=int(table[-1]))
             hsel = Hselect(test_file, keyword, extension=(int(table[-1]),))
-            dtype = hsel.table[keyword].dtype
+            dtype = hsel.summary[keyword].dtype
         except:
             print('Cannot determine datatype for {}. Defaulting to String'
                   .format(keyword))

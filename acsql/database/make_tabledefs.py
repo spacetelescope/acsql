@@ -34,10 +34,11 @@ import glob
 import os
 
 import numpy as np
-#from stak import Hselect
 
 from acsql.utils import utils
-from acsql.utils.utils import SETTINGS
+from acsql.utils.utils import get_files_with_ftype
+from acsql.utils.utils import filter_files_by_size
+from acsql.utils.utils import build_keyword_list
 
 
 def make_tabledefs(detector):
@@ -54,41 +55,50 @@ def make_tabledefs(detector):
     """
 
     file_exts = getattr(utils, '{}_FILE_EXTS'.format(detector.upper()))
+    foreign_keys = getattr(utils, 'FOREIGN_KEY_HEADER_KEYWORDS')
+    skippable_keys = getattr(utils, 'SKIPPABLE_HEADER_KEYWORDS')
+    drizzle_exp = getattr(utils, 'DRIZZLE_EXP')
+    local_dir = os.path.realpath(os.path.dirname(__file__))
+    table_def_dir = os.path.join(local_dir, 'table_definitions')
+    file_dir = getattr(utils, "SETTINGS")['filesystem']
 
     for ftype in file_exts:
-
-        all_files = glob.glob('table_definitions/test_files/test_{}_{}*.fits'\
-            .format(detector, ftype))
+        
+        all_files = get_files_with_ftype(ftype)
 
         for ext in file_exts[ftype]:
+        
+            all_files = filter_files_by_size(all_files, ext)
 
-            filename = 'table_definitions/{}_{}_{}.txt'.format(detector,
-                ftype, ext)
-            hsel = Hselect(all_files, '*', extension=(ext,))
+            filename = '{}_{}_{}.txt'.format(detector, ftype, ext)
+            key_list = build_keyword_list(all_files, ext)
 
             print('Making file {}'.format(filename))
-            with open(filename, 'w') as f:
-                for col in hsel.table.itercols():
-                    column_name = col.name
-                    if column_name in ['ROOTNAME', 'Filename', 'FILENAME', 'Ext']:
+            with open(os.path.join(table_def_dir, filename), 'w') as f:
+                for keyword,keytype in key_list:
+                    if keyword in foreign_keys:
                         continue
-                    elif col.dtype in [np.dtype('S68'), np.dtype('S80')]:
+                    elif keyword in skippable_keys:
+                        continue
+                    elif drizzle_exp.match(keyword) is not None:
+                        continue
+                    elif keytype == str:
                         ptype = 'String'
-                    elif col.dtype in [np.int64]:
+                    elif keytype == int:
                         ptype = 'Integer'
-                    elif col.dtype in [bool]:
+                    elif keytype == bool:
                         ptype = 'Bool'
-                    elif col.dtype in [np.float64]:
+                    elif keytype == float:
                         ptype = 'Float'
                     else:
-                        print('Could not find type match: {}:{}'.format(
-                            column_name, col.dtype))
+                        error_str = 'Could not find type match: {}:{}'
+                        print(error_str.format(keyword, keytype))
 
                     # If the column has a hyphen, switch it to underscore
-                    if '-' in column_name:
-                        column_name = column_name.replace('-', '_')
+                    if '-' in keyword:
+                        keyword = keyword.replace('-', '_')
 
-                    f.write('{}, {}\n'.format(column_name, ptype))
+                    f.write('{}, {}\n'.format(keyword, ptype))
 
 
 if __name__ == '__main__':
